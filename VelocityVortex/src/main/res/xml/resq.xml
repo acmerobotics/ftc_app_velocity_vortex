@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<!--
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+UTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<Robot type="FirstInspires-FTC-template" name="RES-Q">
+    <DeviceInterfaceModule name="dim" serialNumber="AI02RLOW">
+        <TouchSensor name="touch" port="0" />
+    </DeviceInterfaceModule>
+    <MotorController name="arm" serialNumber="AL00XPYM">
+        <Motor name="step" port="1" />
+    </MotorController>
+    <MotorController name="winch" serialNumber="AL00VKFT">
+        <Motor name="winch1" port="1" />
+        <Motor name="winch2" port="2" />
+    </MotorController>
+    <ServoController name="servo" serialNumber="AI02RKXM">
+        <Servo name="rightpuncher" port="1" />
+        <Servo name="bucket" port="2" />
+        <Servo name="flipper" port="3" />
+        <Servo name="leftpuncher" port="6" />
+    </ServoController>
+    <MotorController name="left" serialNumber="AH00QHU3">
+        <Motor name="left1" port="1" />
+        <Motor name="left2" port="2" />
+    </MotorController>
+    <MotorController name="right" serialNumber="AL00VV8X">
+        <Motor name="right1" port="1" />
+        <Motor name="right2" port="2" />
+    </MotorController>
+</Robot>
