@@ -1,3 +1,6 @@
 include ':FtcRobotController'
+include ':VisionLib'
+include ':CameraTest'
 include ':RES-Q'
 include ':VelocityVortex'
+include ':OpenCV'
