@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.SeekBar;
 
@@ -21,16 +22,26 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-public class CameraActivity extends Activity implements CvCameraViewListener2, SeekBar.OnSeekBarChangeListener {
+public class CameraActivity extends Activity implements CvCameraViewListener2 {
     private static final String TAG = "OCVSample::Activity";
 
     private CameraBridgeViewBase mOpenCvCameraView;
     private boolean              mIsJavaCamera = true;
     private MenuItem             mItemSwitchCamera = null;
 
-    private SeekBar seekBar;
+    private SeekBar[] seekBars;
 
-    private int threshold;
+    private PictureType pictureType;
+
+    public enum PictureType {
+        NORMAL,
+        DEBUG,
+        EDGES;
+        public PictureType next() {
+            PictureType[] types = PictureType.values();
+            return types[(this.ordinal() + 1) % types.length];
+        }
+    }
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -62,15 +73,24 @@ public class CameraActivity extends Activity implements CvCameraViewListener2, S
 
         setContentView(R.layout.camera_surface_view);
 
-        seekBar = (SeekBar) findViewById(R.id.seekBar);
-        seekBar.setOnSeekBarChangeListener(this);
-        threshold = seekBar.getProgress();
+        seekBars = new SeekBar[3];
+        seekBars[0] = (SeekBar) findViewById(R.id.adaptiveThreshold);
+        seekBars[1] = (SeekBar) findViewById(R.id.upperThreshold);
+        seekBars[2] = (SeekBar) findViewById(R.id.lowerThreshold);
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.activity_java_surface_view);
 
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
 
         mOpenCvCameraView.setCvCameraViewListener(this);
+
+        pictureType = PictureType.NORMAL;
+        findViewById(R.id.cameraLayout).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pictureType = pictureType.next();
+            }
+        });
     }
 
     @Override
@@ -107,13 +127,23 @@ public class CameraActivity extends Activity implements CvCameraViewListener2, S
     }
 
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
+        int adaptiveThreshold = seekBars[0].getProgress();
+        adaptiveThreshold *= 2;
+        adaptiveThreshold += 1;
+
+        int upperThreshold = seekBars[1].getProgress();
+        int lowerThreshold = seekBars[2].getProgress();
+        if (lowerThreshold > upperThreshold) {
+            lowerThreshold = upperThreshold;
+            seekBars[2].setProgress(lowerThreshold);
+        }
 //        Mat rgba = inputFrame.rgba();
         Mat gray = inputFrame.gray();
         Mat color = inputFrame.rgba();
         Mat output = new Mat();
 
-        Imgproc.adaptiveThreshold(gray, output, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 71, 15);
-//        Imgproc.threshold(gray, output, threshold, 70, Imgproc.THRESH_BINARY);
+        Imgproc.adaptiveThreshold(gray, output, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, adaptiveThreshold, 15);
+//        Imgproc.threshold(gray, output, threshold, 255, Imgproc.THRESH_BINARY);
 
 //        Imgproc.Canny(output, output, threshold / 2, threshold);
 //         Imgproc.resize(gray, smaller, smaller.size());
@@ -122,39 +152,61 @@ public class CameraActivity extends Activity implements CvCameraViewListener2, S
         Imgproc.GaussianBlur(output, output, new Size(9, 9), 2, 2);
 
         Mat circles = new Mat();
-        Imgproc.HoughCircles(output, circles, Imgproc.CV_HOUGH_GRADIENT, 1, output.width() / 8, 2 * threshold, threshold, 0, 30);
+        Imgproc.HoughCircles(output, circles, Imgproc.CV_HOUGH_GRADIENT, 1, 50, upperThreshold, lowerThreshold, 0, 30);
 
-//        Imgproc.cvtColor(output, output, Imgproc.COLOR_GRAY2BGR);
-
-        Imgproc.putText(color, Integer.toString(threshold), new Point(10, 60), Core.FONT_HERSHEY_PLAIN, 2, new Scalar(255, 0, 0), 2);
-
-        Point pt = new Point();
-        int radius;
-
-        for (int i = 0; i < circles.cols() && i < 2; i++) {
-            double[] vCircle = circles.get(0, i);
-            if (vCircle == null) break;
-            pt.x = Math.round(vCircle[0]);
-            pt.y = Math.round(vCircle[1]);
-            radius = (int) Math.round(vCircle[2]);
-            Imgproc.circle(color, pt, radius, new Scalar(0, 255, 0), 3);
+        switch (pictureType) {
+            case NORMAL:
+                output = color;
+                break;
+            case EDGES:
+                Imgproc.Canny(output, output, upperThreshold / 2, upperThreshold);
+                // fall through
+            case DEBUG:
+                Imgproc.cvtColor(output, output, Imgproc.COLOR_GRAY2BGR);
+                break;
         }
 
-        return color;
-    }
+        // debug text
+        Imgproc.putText(output, pictureType.toString(), new Point(10, 60), Core.FONT_HERSHEY_PLAIN, 2, new Scalar(255, 0, 0), 2);
+        Imgproc.putText(output, "L: " + Integer.toString(lowerThreshold), new Point(10, 100), Core.FONT_HERSHEY_PLAIN, 2, new Scalar(255, 0, 0), 2);
+        Imgproc.putText(output, "U: " + Integer.toString(upperThreshold), new Point(10, 125), Core.FONT_HERSHEY_PLAIN, 2, new Scalar(255, 0, 0), 2);
+        Imgproc.putText(output, "A: " + Integer.toString(adaptiveThreshold), new Point(10, 150), Core.FONT_HERSHEY_PLAIN, 2, new Scalar(255, 0, 0), 2);
 
-    @Override
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        threshold = progress;
-    }
+        int numCircles = circles.cols();
 
-    @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {
+        Circle button1, button2;
 
-    }
+//        int bestError = Integer.MAX_VALUE, error;
+//        Circle[] bestPair = new Circle[]{null, null};
+//
+//        for (int i = 0; i < numCircles; i++) {
+//            button1 = Circle.fromDoubleArray(circles.get(0, i));
+//            for (int j = i + 1; j < numCircles; j++) {
+//                button2 = Circle.fromDoubleArray(circles.get(0, j));
+//                error = (int) Math.pow(button1.radius - button2.radius, 2);
+//                if (error < bestError) {
+//                    bestPair[0] = button1;
+//                    bestPair[1] = button2;
+//                    bestError = error;
+//                }
+//            }
+//        }
+//
+//        if (bestError > 2) {
+//            Imgproc.putText(output, "NO BUTTONS", new Point(10, 90), Core.FONT_HERSHEY_PLAIN, 2, new Scalar(255, 0, 0), 2);
+//        } else {
+//            for (int i = 0; i < 2; i++) {
+//                Circle button = bestPair[i];
+//                Imgproc.circle(output, button.pt, button.radius, new Scalar(0, 255, 0), 3);
+//                Imgproc.putText(output, Integer.toString(button.radius), new Point(button.pt.x + (3 * button.radius) / 2, button.pt.y), Core.FONT_HERSHEY_PLAIN, 2, new Scalar(0, 255, 0), 2);
+//            }
+//        }
 
-    @Override
-    public void onStopTrackingTouch(SeekBar seekBar) {
+        for (int i = 0; i < numCircles; i++) {
+            Circle button = Circle.fromDoubleArray(circles.get(0, i));
+            Imgproc.circle(output, button.pt, button.radius, new Scalar(0, 255, 0), 3);
+        }
 
+        return output;
     }
 }
