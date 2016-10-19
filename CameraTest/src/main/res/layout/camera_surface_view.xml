@@ -10,33 +10,7 @@
         android:layout_height="fill_parent"
         android:visibility="gone"
         android:id="@+id/activity_java_surface_view"
-        opencv:show_fps="true"
+        opencv:show_fps="false"
         opencv:camera_id="any" />
-
-    <SeekBar
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:id="@+id/adaptiveThreshold"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentStart="true"
-        android:progress="15"
-        android:max="50" />
-
-    <SeekBar
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/adaptiveThreshold"
-        android:id="@+id/upperThreshold"
-        android:progress="200"
-        android:max="255" />
-
-    <SeekBar
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/upperThreshold"
-        android:id="@+id/lowerThreshold"
-        android:progress="100"
-        android:max="255" />
 
 </RelativeLayout>

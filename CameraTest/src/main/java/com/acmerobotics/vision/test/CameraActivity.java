@@ -5,9 +5,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.SurfaceView;
-import android.view.View;
 import android.view.WindowManager;
-import android.widget.SeekBar;
+
+import com.acmerobotics.library.vision.Beacon;
+import com.acmerobotics.library.vision.BeaconAnalyzer;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -22,26 +23,16 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 public class CameraActivity extends Activity implements CvCameraViewListener2 {
     private static final String TAG = "OCVSample::Activity";
 
     private CameraBridgeViewBase mOpenCvCameraView;
     private boolean              mIsJavaCamera = true;
     private MenuItem             mItemSwitchCamera = null;
-
-    private SeekBar[] seekBars;
-
-    private PictureType pictureType;
-
-    public enum PictureType {
-        NORMAL,
-        DEBUG,
-        EDGES;
-        public PictureType next() {
-            PictureType[] types = PictureType.values();
-            return types[(this.ordinal() + 1) % types.length];
-        }
-    }
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -73,24 +64,11 @@ public class CameraActivity extends Activity implements CvCameraViewListener2 {
 
         setContentView(R.layout.camera_surface_view);
 
-        seekBars = new SeekBar[3];
-        seekBars[0] = (SeekBar) findViewById(R.id.adaptiveThreshold);
-        seekBars[1] = (SeekBar) findViewById(R.id.upperThreshold);
-        seekBars[2] = (SeekBar) findViewById(R.id.lowerThreshold);
-
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.activity_java_surface_view);
 
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
 
         mOpenCvCameraView.setCvCameraViewListener(this);
-
-        pictureType = PictureType.NORMAL;
-        findViewById(R.id.cameraLayout).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pictureType = pictureType.next();
-            }
-        });
     }
 
     @Override
@@ -127,86 +105,52 @@ public class CameraActivity extends Activity implements CvCameraViewListener2 {
     }
 
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
-        int adaptiveThreshold = seekBars[0].getProgress();
-        adaptiveThreshold *= 2;
-        adaptiveThreshold += 1;
+        Mat image = inputFrame.rgba();
+        int width = image.width(), height = image.height();
 
-        int upperThreshold = seekBars[1].getProgress();
-        int lowerThreshold = seekBars[2].getProgress();
-        if (lowerThreshold > upperThreshold) {
-            lowerThreshold = upperThreshold;
-            seekBars[2].setProgress(lowerThreshold);
-        }
-//        Mat rgba = inputFrame.rgba();
-        Mat gray = inputFrame.gray();
-        Mat color = inputFrame.rgba();
-        Mat output = new Mat();
+        Imgproc.cvtColor(image, image, Imgproc.COLOR_RGB2BGR);
 
-        Imgproc.adaptiveThreshold(gray, output, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, adaptiveThreshold, 15);
-//        Imgproc.threshold(gray, output, threshold, 255, Imgproc.THRESH_BINARY);
+        Imgproc.resize(image, image, new Size(480, (480 * height) / width));
 
-//        Imgproc.Canny(output, output, threshold / 2, threshold);
-//         Imgproc.resize(gray, smaller, smaller.size());
-//         Imgproc.pyrDown(rgba, rgba);
+        List<Beacon> beacons = BeaconAnalyzer.analyzeImage(image);
 
-        Imgproc.GaussianBlur(output, output, new Size(9, 9), 2, 2);
-
-        Mat circles = new Mat();
-        Imgproc.HoughCircles(output, circles, Imgproc.CV_HOUGH_GRADIENT, 1, 50, upperThreshold, lowerThreshold, 0, 30);
-
-        switch (pictureType) {
-            case NORMAL:
-                output = color;
-                break;
-            case EDGES:
-                Imgproc.Canny(output, output, upperThreshold / 2, upperThreshold);
-                // fall through
-            case DEBUG:
-                Imgproc.cvtColor(output, output, Imgproc.COLOR_GRAY2BGR);
-                break;
+        for (Beacon beacon : beacons) {
+            beacon.draw(image);
         }
 
-        // debug text
-        Imgproc.putText(output, pictureType.toString(), new Point(10, 60), Core.FONT_HERSHEY_PLAIN, 2, new Scalar(255, 0, 0), 2);
-        Imgproc.putText(output, "L: " + Integer.toString(lowerThreshold), new Point(10, 100), Core.FONT_HERSHEY_PLAIN, 2, new Scalar(255, 0, 0), 2);
-        Imgproc.putText(output, "U: " + Integer.toString(upperThreshold), new Point(10, 125), Core.FONT_HERSHEY_PLAIN, 2, new Scalar(255, 0, 0), 2);
-        Imgproc.putText(output, "A: " + Integer.toString(adaptiveThreshold), new Point(10, 150), Core.FONT_HERSHEY_PLAIN, 2, new Scalar(255, 0, 0), 2);
+        Imgproc.resize(image, image, new Size(width, height));
 
-        int numCircles = circles.cols();
+        Collections.sort(beacons, new Comparator<Beacon>() {
 
-        Circle button1, button2;
+            @Override
+            public int compare(Beacon o1, Beacon o2) {
+                Size s1 = o1.getBounds().size;
+                Size s2 = o2.getBounds().size;
+                double area1 = s1.width * s1.height;
+                double area2 = s2.width * s2.height;
+                return (area1 > area2) ? -1 : 1;
+            }
 
-//        int bestError = Integer.MAX_VALUE, error;
-//        Circle[] bestPair = new Circle[]{null, null};
-//
-//        for (int i = 0; i < numCircles; i++) {
-//            button1 = Circle.fromDoubleArray(circles.get(0, i));
-//            for (int j = i + 1; j < numCircles; j++) {
-//                button2 = Circle.fromDoubleArray(circles.get(0, j));
-//                error = (int) Math.pow(button1.radius - button2.radius, 2);
-//                if (error < bestError) {
-//                    bestPair[0] = button1;
-//                    bestPair[1] = button2;
-//                    bestError = error;
-//                }
-//            }
-//        }
-//
-//        if (bestError > 2) {
-//            Imgproc.putText(output, "NO BUTTONS", new Point(10, 90), Core.FONT_HERSHEY_PLAIN, 2, new Scalar(255, 0, 0), 2);
-//        } else {
-//            for (int i = 0; i < 2; i++) {
-//                Circle button = bestPair[i];
-//                Imgproc.circle(output, button.pt, button.radius, new Scalar(0, 255, 0), 3);
-//                Imgproc.putText(output, Integer.toString(button.radius), new Point(button.pt.x + (3 * button.radius) / 2, button.pt.y), Core.FONT_HERSHEY_PLAIN, 2, new Scalar(0, 255, 0), 2);
-//            }
-//        }
+        });
 
-        for (int i = 0; i < numCircles; i++) {
-            Circle button = Circle.fromDoubleArray(circles.get(0, i));
-            Imgproc.circle(output, button.pt, button.radius, new Scalar(0, 255, 0), 3);
+        int y = 0;
+        for (Beacon result : beacons) {
+            int score = result.score();
+
+            String description = "";
+            description += score + " " + result.getScoreString() + "  ";
+            description += (result.getLeftRegion().getColor() == Beacon.BeaconColor.RED ? "R" : "B") + ",";
+            description += result.getRightRegion().getColor() == Beacon.BeaconColor.RED ? "R" : "B";
+
+            double textWidth = Imgproc.getTextSize(description, Core.FONT_HERSHEY_SIMPLEX, 1, 2, null).width;
+            Imgproc.rectangle(image, new Point(0, y), new Point(textWidth + 20, y + 30), new Scalar(255, 255, 255), -1);
+            Imgproc.putText(image, description, new Point(10, y + 25), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 0, 0), 2);
+
+            y += 30;
         }
 
-        return output;
+        Imgproc.cvtColor(image, image, Imgproc.COLOR_BGR2RGB);
+
+        return image;
     }
 }
