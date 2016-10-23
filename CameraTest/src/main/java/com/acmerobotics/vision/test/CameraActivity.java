@@ -1,26 +1,26 @@
 package com.acmerobotics.vision.test;
 
 import android.app.Activity;
+import android.hardware.Camera;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 
 import com.acmerobotics.library.vision.Beacon;
 import com.acmerobotics.library.vision.BeaconAnalyzer;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
+import com.acmerobotics.library.vision.ImageOverlay;
 
 import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -32,9 +32,19 @@ import java.util.List;
 public class CameraActivity extends Activity implements CvCameraViewListener2 {
     private static final String TAG = "OCVSample::Activity";
 
-    private CameraBridgeViewBase mOpenCvCameraView;
+    private NativeJavaCameraView mOpenCvCameraView;
     private boolean mIsJavaCamera = true;
     private MenuItem mItemSwitchCamera = null;
+
+    private Camera camera = null;
+
+    private List<String> wbOptions;
+    private int wbIndex;
+
+    private List<String> sceneOptions;
+    private int sceneIndex;
+
+    private Mat lastImage;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -52,15 +62,6 @@ public class CameraActivity extends Activity implements CvCameraViewListener2 {
             }
         }
     };
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    private GoogleApiClient client;
-
-    public CameraActivity() {
-        Log.i(TAG, "Instantiated new " + this.getClass());
-    }
 
     /**
      * Called when the activity is first created.
@@ -73,14 +74,27 @@ public class CameraActivity extends Activity implements CvCameraViewListener2 {
 
         setContentView(R.layout.camera_surface_view);
 
-        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.activity_java_surface_view);
+        mOpenCvCameraView = (NativeJavaCameraView) findViewById(R.id.activity_java_surface_view);
+
+        Button wbButton = (Button) findViewById(R.id.wbButton);
+        wbButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CameraActivity.this.nextCameraWhiteBalance();
+            }
+        });
+
+        Button sceneButton = (Button) findViewById(R.id.sceneButton);
+        sceneButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CameraActivity.this.nextCameraScene();
+            }
+        });
 
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
 
         mOpenCvCameraView.setCvCameraViewListener(this);
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     @Override
@@ -95,7 +109,7 @@ public class CameraActivity extends Activity implements CvCameraViewListener2 {
         super.onResume();
         if (!OpenCVLoader.initDebug()) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0, this, mLoaderCallback);
         } else {
             Log.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
@@ -108,7 +122,34 @@ public class CameraActivity extends Activity implements CvCameraViewListener2 {
             mOpenCvCameraView.disableView();
     }
 
+    public void nextCameraWhiteBalance() {
+        Camera.Parameters params = camera.getParameters();
+        wbIndex = (wbIndex + 1) % wbOptions.size();
+        params.setWhiteBalance(wbOptions.get(wbIndex));
+        camera.setParameters(params);
+    }
+
+    public void nextCameraScene() {
+        Camera.Parameters params = camera.getParameters();
+        sceneIndex = (sceneIndex + 1) % sceneOptions.size();
+        params.setSceneMode(sceneOptions.get(sceneIndex));
+        camera.setParameters(params);
+    }
+
     public void onCameraViewStarted(int width, int height) {
+        camera = mOpenCvCameraView.getCamera();
+
+        Camera.Parameters params = camera.getParameters();
+        params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+        camera.setParameters(params);
+
+        wbIndex = -1;
+        wbOptions = params.getSupportedWhiteBalance();
+        nextCameraWhiteBalance();
+
+        sceneOptions = params.getSupportedSceneModes();
+        sceneIndex = -1;
+        nextCameraScene();
     }
 
     public void onCameraViewStopped() {
@@ -116,6 +157,9 @@ public class CameraActivity extends Activity implements CvCameraViewListener2 {
 
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
         Mat image = inputFrame.rgba();
+
+        this.lastImage = image;
+
         int width = image.width(), height = image.height();
 
         Imgproc.cvtColor(image, image, Imgproc.COLOR_RGB2BGR);
@@ -130,6 +174,9 @@ public class CameraActivity extends Activity implements CvCameraViewListener2 {
 
         Imgproc.resize(image, image, new Size(width, height));
 
+        ImageOverlay overlay = new ImageOverlay(image, 30);
+        overlay.setBackgroundColor(new Scalar(0, 0, 0));
+
         Collections.sort(beacons, new Comparator<Beacon>() {
 
             @Override
@@ -143,7 +190,6 @@ public class CameraActivity extends Activity implements CvCameraViewListener2 {
 
         });
 
-        int y = 0;
         for (Beacon result : beacons) {
             int score = result.score();
 
@@ -152,12 +198,10 @@ public class CameraActivity extends Activity implements CvCameraViewListener2 {
             description += (result.getLeftRegion().getColor() == Beacon.BeaconColor.RED ? "R" : "B") + ",";
             description += result.getRightRegion().getColor() == Beacon.BeaconColor.RED ? "R" : "B";
 
-            double textWidth = Imgproc.getTextSize(description, Core.FONT_HERSHEY_SIMPLEX, 1, 2, null).width;
-            Imgproc.rectangle(image, new Point(0, y), new Point(textWidth + 20, y + 30), new Scalar(255, 255, 255), -1);
-            Imgproc.putText(image, description, new Point(10, y + 25), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 0, 0), 2);
-
-            y += 30;
+            overlay.drawText(description, ImageOverlay.ImageRegion.TOP_LEFT, Core.FONT_HERSHEY_SIMPLEX, 0.15, new Scalar(255, 255, 255), 6);
         }
+        overlay.drawText("Scene: " + sceneOptions.get(sceneIndex).toString(), ImageOverlay.ImageRegion.BOTTOM_LEFT, Core.FONT_HERSHEY_SIMPLEX, 0.15, new Scalar(255, 255, 255), 6);
+        overlay.drawText("WB: " + wbOptions.get(wbIndex).toString(), ImageOverlay.ImageRegion.BOTTOM_LEFT, Core.FONT_HERSHEY_SIMPLEX, 0.15, new Scalar(255, 255, 255), 6);
 
         Imgproc.cvtColor(image, image, Imgproc.COLOR_BGR2RGB);
 

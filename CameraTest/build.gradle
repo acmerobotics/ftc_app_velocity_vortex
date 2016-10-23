@@ -25,6 +25,6 @@ android {
 dependencies {
     compile project(':OpenCV')
     compile project(':VisionLib')
+    
     compile 'com.android.support:appcompat-v7:24.2.1'
-    compile 'com.google.android.gms:play-services-appindexing:8.4.0'
 }

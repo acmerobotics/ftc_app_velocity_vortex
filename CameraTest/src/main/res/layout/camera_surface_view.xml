@@ -5,12 +5,33 @@
     android:layout_height="match_parent"
     android:id="@+id/cameraLayout" >
 
-    <org.opencv.android.JavaCameraView
+    <com.acmerobotics.vision.test.NativeJavaCameraView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:visibility="gone"
         android:id="@+id/activity_java_surface_view"
         opencv:show_fps="false"
         opencv:camera_id="any" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_alignParentRight="true">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/wbButton"
+            android:text="Switch WB"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/sceneButton"
+            android:text="Switch Scene"/>
+
+    </LinearLayout>
+
 
 </RelativeLayout>
