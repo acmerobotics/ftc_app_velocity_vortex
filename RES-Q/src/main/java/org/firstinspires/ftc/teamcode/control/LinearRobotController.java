@@ -25,12 +25,6 @@ public class LinearRobotController extends LinearOpMode implements Controller {
     }
 
     @Override
-    public void waitForStart() throws InterruptedException {
-        super.waitForStart();
-        this.loop();
-    }
-
-    @Override
     public void runOpMode() throws InterruptedException {
         robotController.init();
     }
