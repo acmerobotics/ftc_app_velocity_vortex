@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:id="@+id/cameraLayout" >
 
-    <com.acmerobotics.vision.test.NativeJavaCameraView
+    <com.acmerobotics.velocityvortex.vision.NativeJavaCameraView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:visibility="gone"
