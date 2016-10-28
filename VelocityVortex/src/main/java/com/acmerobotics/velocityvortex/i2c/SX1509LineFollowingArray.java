@@ -1,5 +1,7 @@
 package com.acmerobotics.velocityvortex.i2c;
 
+import android.util.Log;
+
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchDevice;
@@ -11,6 +13,8 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynchDevice;
  *     this Arduino library</a>
  */
 public class SX1509LineFollowingArray extends I2cDeviceSynchDevice<I2cDeviceSynch> {
+
+	private static final String TAG = "LineFollowingArray";
 
 	public static final I2cAddr I2CADDR_DEFAULT = I2cAddr.create7bit(0x3E);
 
@@ -178,9 +182,11 @@ public class SX1509LineFollowingArray extends I2cDeviceSynchDevice<I2cDeviceSync
 	}
 
 	private int readWord(int ireg) {
+		Log.i(TAG, "Reading word at 0x" + Integer.toHexString(ireg));
 		byte[] result = this.deviceClient.read(ireg, 2);
 		int msb = ((int)result[0] & 0xFF) << 8;
 		int lsb = (int)result[1] & 0xFF;
+		Log.i(TAG, "Read: " + result[0] + ":" + result[1]);
 		return msb | lsb;
 	}
 
@@ -190,19 +196,28 @@ public class SX1509LineFollowingArray extends I2cDeviceSynchDevice<I2cDeviceSync
 
 	@Override
 	protected boolean doInitialize() {
+		this.deviceClient.engage();
+
+		this.deviceClient.setI2cAddr(parameters.i2cAddr);
+
 		reset();
+
+		delay(100);
 
 		// Communication test: read two registers with different
 		// default values to verify communication
 		int testRegisters = readWord(Registers.REG_INTERRUPT_MASK_A);
+		Log.i(TAG, Integer.toHexString(testRegisters));
 		// This should always be 0xFF00
 		if (testRegisters == 0xFF00) {
+			Log.i(TAG, "Connection successful");
 			// Success; configure the device
 			this.deviceClient.write8(Registers.REG_DIR_A, 0xFF);
 			this.deviceClient.write8(Registers.REG_DIR_B, 0xFC);
 			this.deviceClient.write8(Registers.REG_DATA_B, 0x01);
 			return true;
 		} else {
+			Log.i(TAG, "Connection unsuccessful");
 			return false;
 		}
 	}
@@ -212,6 +227,9 @@ public class SX1509LineFollowingArray extends I2cDeviceSynchDevice<I2cDeviceSync
      */
 	protected void reset() {
 		this.deviceClient.write8(Registers.REG_RESET, 0x12);
+
+		this.deviceClient.waitForWriteCompletions();
+
 		this.deviceClient.write8(Registers.REG_RESET, 0x34);
 	}
 
@@ -293,6 +311,8 @@ public class SX1509LineFollowingArray extends I2cDeviceSynchDevice<I2cDeviceSync
 		} else {
 			this.deviceClient.write8(Registers.REG_DATA_B, 0x00); // make sure both IR and indicators are on
 		}
+
+		this.deviceClient.waitForWriteCompletions();
 
 		lastBarRawValue = readByte(Registers.REG_DATA_A); // peel the data off port A
 		if (this.parameters.invertBits) {
