@@ -182,11 +182,9 @@ public class SX1509LineFollowingArray extends I2cDeviceSynchDevice<I2cDeviceSync
 	}
 
 	private int readWord(int ireg) {
-		Log.i(TAG, "Reading word at 0x" + Integer.toHexString(ireg));
 		byte[] result = this.deviceClient.read(ireg, 2);
 		int msb = ((int)result[0] & 0xFF) << 8;
 		int lsb = (int)result[1] & 0xFF;
-		Log.i(TAG, "Read: " + result[0] + ":" + result[1]);
 		return msb | lsb;
 	}
 
@@ -198,11 +196,9 @@ public class SX1509LineFollowingArray extends I2cDeviceSynchDevice<I2cDeviceSync
 	protected boolean doInitialize() {
 		this.deviceClient.engage();
 
-		this.deviceClient.setI2cAddr(parameters.i2cAddr);
+		this.deviceClient.setI2cAddress(parameters.i2cAddr);
 
 		reset();
-
-		delay(100);
 
 		// Communication test: read two registers with different
 		// default values to verify communication
@@ -215,6 +211,9 @@ public class SX1509LineFollowingArray extends I2cDeviceSynchDevice<I2cDeviceSync
 			this.deviceClient.write8(Registers.REG_DIR_A, 0xFF);
 			this.deviceClient.write8(Registers.REG_DIR_B, 0xFC);
 			this.deviceClient.write8(Registers.REG_DATA_B, 0x01);
+
+			this.deviceClient.waitForWriteCompletions();
+
 			return true;
 		} else {
 			Log.i(TAG, "Connection unsuccessful");
@@ -231,6 +230,8 @@ public class SX1509LineFollowingArray extends I2cDeviceSynchDevice<I2cDeviceSync
 		this.deviceClient.waitForWriteCompletions();
 
 		this.deviceClient.write8(Registers.REG_RESET, 0x34);
+
+		this.deviceClient.waitForWriteCompletions();
 	}
 
     /**
@@ -321,6 +322,7 @@ public class SX1509LineFollowingArray extends I2cDeviceSynchDevice<I2cDeviceSync
 
 		if (this.parameters.barStrobe) {
 			this.deviceClient.write8(Registers.REG_DATA_B, 0x03); // turn off IR and feedback when done
+			this.deviceClient.waitForWriteCompletions();
 		}
 	}
 
