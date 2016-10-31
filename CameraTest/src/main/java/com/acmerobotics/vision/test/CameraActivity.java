@@ -187,10 +187,10 @@ public class CameraActivity extends Activity implements FastCameraView.FrameList
         });
 
         for (Beacon result : beacons) {
-            int score = result.score();
+            int score = result.getScore().getNumericScore();
 
             String description = "";
-            description += score + " " + result.getScoreString() + "  ";
+            description += score + " " + result.getScore().toString() + "  ";
             description += (result.getLeftRegion().getColor() == Beacon.BeaconColor.RED ? "R" : "B") + ",";
             description += result.getRightRegion().getColor() == Beacon.BeaconColor.RED ? "R" : "B";
 
