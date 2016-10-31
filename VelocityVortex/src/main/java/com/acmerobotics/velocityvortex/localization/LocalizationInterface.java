@@ -3,13 +3,13 @@ package com.acmerobotics.velocityvortex.localization;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 
 /**
- * Base class for interfaces to different localization methods, used by {@see Localizer}
+ * Base class for interfaces to different localization methods, used by {@link Localizer}
  * Created by kelly on 10/23/2016.
  */
 public abstract class LocalizationInterface {
 
     /**
-     * Priority of LocalizationInterface, used for determining which takes precedent in case of contradiction</p>
+     * Priority of LocalizationInterface, used for determining which takes precedent in case of contradiction<p>
      */
     public int priority;
 
