@@ -8,25 +8,12 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
  * This class contains a concept line following array opmode with
  * a basic PID loop suitable for line following.
  */
-@Autonomous(name="Concept Line Following Array PID", group="concept")
+@Autonomous(name = "Concept Line Following Array PID", group = "concept")
 public class ConceptLineFollowingArrayPID extends OpMode {
-
-    /**
-     * This class contains the three constants necessary for the PID loop
-     */
-    public class PIDConstants {
-        /** proportional (P) constant */
-        public double p = 0.0;
-        /** integral (I) constant */
-        public double i = 0.0;
-        /** derivative (D) constant */
-        public double d = 0.0;
-    }
 
     private PIDConstants pid;
     private int sum, lastError;
     private double lastTime;
-
     private SX1509LineFollowingArray lineFollowingArray;
 
     @Override
@@ -66,5 +53,18 @@ public class ConceptLineFollowingArrayPID extends OpMode {
 
         lastTime = time;
         lastError = error;
+    }
+
+    /**
+     * This class contains the three constants necessary for the PID loop. Should
+     * we use {@link com.qualcomm.robotcore.util.DifferentialControlLoopCoefficients} instead?
+     */
+    public class PIDConstants {
+        /** proportional (P) constant */
+        public double p = 0.0;
+        /** integral (I) constant */
+        public double i = 0.0;
+        /** derivative (D) constant */
+        public double d = 0.0;
     }
 }
