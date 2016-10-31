@@ -1,6 +1,9 @@
 package com.acmerobotics.vision.test;
 
 import android.app.Activity;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,16 +15,11 @@ import android.widget.Button;
 
 import com.acmerobotics.library.vision.Beacon;
 import com.acmerobotics.library.vision.BeaconAnalyzer;
-import com.acmerobotics.library.vision.ImageOverlay;
 
 import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
-import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
@@ -29,12 +27,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class CameraActivity extends Activity implements CvCameraViewListener2 {
+public class CameraActivity extends Activity implements FastCameraView.FrameListener {
     private static final String TAG = "OCVSample::Activity";
 
-    private NativeJavaCameraView mOpenCvCameraView;
+    private FastCameraView mCameraView;
     private boolean mIsJavaCamera = true;
     private MenuItem mItemSwitchCamera = null;
+
+    List<Beacon> beacons;
 
     private Camera camera = null;
 
@@ -44,15 +44,13 @@ public class CameraActivity extends Activity implements CvCameraViewListener2 {
     private List<String> sceneOptions;
     private int sceneIndex;
 
-    private Mat lastImage;
-
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS: {
                     Log.i(TAG, "OpenCV loaded successfully");
-                    mOpenCvCameraView.enableView();
+                    mCameraView.start();
                 }
                 break;
                 default: {
@@ -74,7 +72,12 @@ public class CameraActivity extends Activity implements CvCameraViewListener2 {
 
         setContentView(R.layout.camera_surface_view);
 
-        mOpenCvCameraView = (NativeJavaCameraView) findViewById(R.id.activity_java_surface_view);
+        mCameraView = (FastCameraView) findViewById(R.id.activity_java_surface_view);
+
+        FastCameraView.Parameters params = mCameraView.getParameters();
+        params.maxPreviewWidth = 640;
+        params.maxPreviewHeight = 640;
+        params.previewScale = FastCameraView.PreviewScale.SCALE_TO_FIT;
 
         Button wbButton = (Button) findViewById(R.id.wbButton);
         wbButton.setOnClickListener(new View.OnClickListener() {
@@ -92,16 +95,16 @@ public class CameraActivity extends Activity implements CvCameraViewListener2 {
             }
         });
 
-        mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
+        mCameraView.setVisibility(SurfaceView.VISIBLE);
 
-        mOpenCvCameraView.setCvCameraViewListener(this);
+        mCameraView.setFrameListener(CameraActivity.this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (mOpenCvCameraView != null)
-            mOpenCvCameraView.disableView();
+
+        mCameraView.stop();
     }
 
     @Override
@@ -118,8 +121,6 @@ public class CameraActivity extends Activity implements CvCameraViewListener2 {
 
     public void onDestroy() {
         super.onDestroy();
-        if (mOpenCvCameraView != null)
-            mOpenCvCameraView.disableView();
     }
 
     public void nextCameraWhiteBalance() {
@@ -137,11 +138,9 @@ public class CameraActivity extends Activity implements CvCameraViewListener2 {
     }
 
     public void onCameraViewStarted(int width, int height) {
-        camera = mOpenCvCameraView.getCamera();
+        camera = mCameraView.getCamera();
 
         Camera.Parameters params = camera.getParameters();
-        params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-        camera.setParameters(params);
 
         wbIndex = -1;
         wbOptions = params.getSupportedWhiteBalance();
@@ -155,27 +154,24 @@ public class CameraActivity extends Activity implements CvCameraViewListener2 {
     public void onCameraViewStopped() {
     }
 
-    public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
-        Mat image = inputFrame.rgba();
-
-        this.lastImage = image;
-
-        int width = image.width(), height = image.height();
-
+    public void onCameraFrame(Mat image) {
         Imgproc.cvtColor(image, image, Imgproc.COLOR_RGB2BGR);
 
-        Imgproc.resize(image, image, new Size(480, (480 * height) / width));
-
-        List<Beacon> beacons = BeaconAnalyzer.analyzeImage(image);
+        beacons = BeaconAnalyzer.analyzeImage(image);
 
         for (Beacon beacon : beacons) {
             beacon.draw(image);
         }
 
-        Imgproc.resize(image, image, new Size(width, height));
+        Imgproc.cvtColor(image, image, Imgproc.COLOR_BGR2RGB);
+    }
 
-        ImageOverlay overlay = new ImageOverlay(image, 30);
-        overlay.setBackgroundColor(new Scalar(0, 0, 0));
+    @Override
+    public void onDrawFrame(Canvas canvas) {
+        Paint paint = new Paint();
+        paint.setColor(Color.WHITE);
+
+        CanvasOverlay overlay = new CanvasOverlay(canvas, 30);
 
         Collections.sort(beacons, new Comparator<Beacon>() {
 
@@ -198,14 +194,10 @@ public class CameraActivity extends Activity implements CvCameraViewListener2 {
             description += (result.getLeftRegion().getColor() == Beacon.BeaconColor.RED ? "R" : "B") + ",";
             description += result.getRightRegion().getColor() == Beacon.BeaconColor.RED ? "R" : "B";
 
-            overlay.drawText(description, ImageOverlay.ImageRegion.TOP_LEFT, Core.FONT_HERSHEY_SIMPLEX, 0.15, new Scalar(255, 255, 255), 6);
+            overlay.drawText(description, CanvasOverlay.ImageRegion.TOP_LEFT, 0.15, paint);
         }
-        overlay.drawText("Scene: " + sceneOptions.get(sceneIndex).toString(), ImageOverlay.ImageRegion.BOTTOM_LEFT, Core.FONT_HERSHEY_SIMPLEX, 0.15, new Scalar(255, 255, 255), 6);
-        overlay.drawText("WB: " + wbOptions.get(wbIndex).toString(), ImageOverlay.ImageRegion.BOTTOM_LEFT, Core.FONT_HERSHEY_SIMPLEX, 0.15, new Scalar(255, 255, 255), 6);
-
-        Imgproc.cvtColor(image, image, Imgproc.COLOR_BGR2RGB);
-
-        return image;
+        overlay.drawText("Scene: " + sceneOptions.get(sceneIndex).toString(), CanvasOverlay.ImageRegion.BOTTOM_LEFT, 0.15, paint);
+        overlay.drawText("WB: " + wbOptions.get(wbIndex).toString(), CanvasOverlay.ImageRegion.BOTTOM_LEFT, 0.15, paint);
     }
 
 }
