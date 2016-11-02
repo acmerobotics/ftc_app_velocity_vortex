@@ -14,7 +14,7 @@ public class Localizer {
 
     private VuforiaInterface vuforia;
 
-    public VuforiaLocalizer.CloseableFrame getFrame () {
+    public Mat getFrame () {
         return vuforia.getFrame();
     }
 }

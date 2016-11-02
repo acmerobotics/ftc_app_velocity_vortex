@@ -21,7 +21,7 @@ public abstract class LocalizationInterface {
     /**
      * location of robot at last update, null if unknown
      */
-    private RobotLocation location;
+    protected RobotLocation location;
 
     /**
      * Create LocalizationInterface with the robot at a specified position

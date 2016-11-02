@@ -14,14 +14,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 public class RobotLocation {
 
-    public float x, y, heading;
+    public float x, y;
+    private float heading;
 
     public static final RobotLocation ORIGIN = new RobotLocation(0, 0, 0);
 
     public RobotLocation(float x, float y, float heading) {
         this.x = x;
         this.y = y;
-        this.heading = heading;
+        this.heading = degreeify(heading);
     }
 
     public static RobotLocation matrixToLocation (OpenGLMatrix matrix) {
@@ -44,5 +45,17 @@ public class RobotLocation {
                         /* First, in the fixed (field) coordinate system, we rotate 90deg in X, then 90 in Z */
                         AxesReference.EXTRINSIC, AxesOrder.XZX,
                         AngleUnit.DEGREES, -90, location.heading, 0));
+    }
+
+    public float getHeading () {
+        return heading;
+    }
+
+    public void setHeading (float heading) {
+        this.heading = degreeify(heading);
+    }
+
+    public float degreeify(float f) {
+        return Math.abs (f % 360);
     }
 }

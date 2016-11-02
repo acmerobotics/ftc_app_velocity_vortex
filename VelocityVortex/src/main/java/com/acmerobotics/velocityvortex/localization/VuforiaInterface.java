@@ -1,7 +1,6 @@
 package com.acmerobotics.velocityvortex.localization;
 
-import com.vuforia.Frame;
-import com.vuforia.Trackable;
+import com.vuforia.Image;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
@@ -9,10 +8,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-import org.firstinspires.ftc.robotcore.internal.VuforiaLocalizerImpl;
 import org.firstinspires.ftc.teamcode.R;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
 
 import java.util.ArrayList;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Handles all vuforia opperations
@@ -24,18 +28,53 @@ public class VuforiaInterface extends LocalizationInterface{
     private VuforiaLocalizer vuforia;
     private ArrayList<VuforiaTrackable> allTrackables;
 
+    private BlockingQueue<VuforiaLocalizer.CloseableFrame> frameQueue;
+
     public VuforiaInterface (String name, int priority) {
         super(name, priority);
         init();
     }
 
-    public VuforiaLocalizer.CloseableFrame getFrame () {
-        return new VuforiaLocalizer.CloseableFrame(new Frame());
+    public Mat getFrame () {
+        VuforiaLocalizer.CloseableFrame frame;
+        Mat mt = null;
+        try {
+            frame = frameQueue.poll(0l, TimeUnit.SECONDS);
+        } catch (InterruptedException ie) {
+            frame = null;
+        }
+        if (frame != null && frame.getNumImages() >= 1 ) {
+            Image img = frame.getImage(0);
+            short[]  pixelsShort = img.getPixels().asShortBuffer().array();
+            double [] pixelsDouble = new double[pixelsShort.length];
+            for (int i = 0; i < pixelsShort.length; i++) {
+                pixelsDouble[i] = (double) pixelsShort[i];
+            }
+            Scalar pixels = new Scalar(pixelsDouble);
+           // mt = new Mat(img.getHeight(), img.getWidth(), CvType.CV_16UC1, img.getPixels().asShortBuffer().array().);
+
+        }
+        return null;
     }
 
     @Override
     public void update() {
 
+
+
+        for (VuforiaTrackable trackable : allTrackables) {
+            /**
+             * getUpdatedRobotLocation() will return null if no new information is available since
+             * the last time that call was made, or if the trackable is not currently visible.
+             * getRobotLocation() will return null if the trackable is not currently visible.
+             */
+            OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
+            if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()){
+                if (robotLocationTransform != null) {
+                    location = RobotLocation.matrixToLocation(robotLocationTransform);
+                }
+            }
+        }
     }
 
     public void init() {
@@ -71,5 +110,6 @@ public class VuforiaInterface extends LocalizationInterface{
         ((VuforiaTrackableDefaultListener)gearsTarget.getListener()).setPhoneInformation(RobotLocation.ORIGIN.toMatrix(), parameters.cameraDirection);
 
         images.activate();
+        frameQueue = vuforia.getFrameQueue();
     }
 }

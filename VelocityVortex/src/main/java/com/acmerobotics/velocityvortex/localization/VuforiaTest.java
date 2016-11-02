@@ -2,6 +2,7 @@ package com.acmerobotics.velocityvortex.localization;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.vuforia.Image;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
@@ -13,8 +14,11 @@ import org.firstinspires.ftc.teamcode.R;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
+ *
  * Created by kelly on 10/18/2016.
  */
 
@@ -26,6 +30,7 @@ public class VuforiaTest extends OpMode{
     OpenGLMatrix lastLocation = null;
     VuforiaLocalizer vuforia;
     List<VuforiaTrackable> allTrackables;
+    BlockingQueue<VuforiaLocalizer.CloseableFrame> queue;
 
     @Override
     public void init() {
@@ -68,10 +73,29 @@ public class VuforiaTest extends OpMode{
         telemetry.update();
 
         images.activate();
+        vuforia.setFrameQueueCapacity(10);
+        queue = vuforia.getFrameQueue();
     }
 
     @Override
     public void loop() {
+
+        telemetry.addData("size", queue.remainingCapacity());
+
+
+        VuforiaLocalizer.CloseableFrame frame;
+        telemetry.addData("frames", queue.size());
+        if (queue.isEmpty()) {
+            telemetry.addData("frames", "empty");
+        } else {
+
+            try {
+                frame = queue.remove();
+            } catch (Exception ie) {}
+
+        }
+
+
         for (VuforiaTrackable trackable : allTrackables) {
             /**
              * getUpdatedRobotLocation() will return null if no new information is available since
