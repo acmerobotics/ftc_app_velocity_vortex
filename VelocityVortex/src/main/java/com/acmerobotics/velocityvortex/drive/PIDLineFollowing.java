@@ -1,5 +1,6 @@
-package com.acmerobotics.velocityvortex.i2c;
+package com.acmerobotics.velocityvortex.drive;
 
+import com.acmerobotics.velocityvortex.i2c.SX1509LineFollowingArray;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
@@ -8,13 +9,14 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
  * This class contains a concept line following array opmode with
  * a basic PID loop suitable for line following.
  */
-@Autonomous(name = "Concept Line Following Array PID", group = "concept")
-public class ConceptLineFollowingArrayPID extends OpMode {
+@Autonomous(name = "PID Line Following")
+public class PIDLineFollowing extends OpMode {
 
     private PIDConstants pid;
     private int sum, lastError;
     private double lastTime;
     private SX1509LineFollowingArray lineFollowingArray;
+    private Drive drive;
 
     @Override
     public void init() {
@@ -24,6 +26,10 @@ public class ConceptLineFollowingArrayPID extends OpMode {
         pid = new PIDConstants();
         // set the pid constants to actual values
         // YOUR CODE HERE
+        pid.p = 0.025;
+        pid.i = 1;
+
+        drive = new Drive(hardwareMap);
     }
 
     @Override
@@ -47,9 +53,15 @@ public class ConceptLineFollowingArrayPID extends OpMode {
             double deriv = (error - lastError) / dt;
             update = pid.p * error + pid.i * sum + pid.d * deriv;
         }
+        telemetry.addData("error", error);
+        telemetry.addData("update", update);
 
         // use the update value (e.g. set the driver motors)
         // YOUR CODE HERE
+        double baseSpeed = -0.25;
+        update = -update;
+        drive.setMotorPowers(baseSpeed + update, baseSpeed - update);
+        drive.updateMotors();
 
         lastTime = time;
         lastError = error;
