@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">RobotLib</string>
+    <string name="files_directory">ACME</string>
+</resources>

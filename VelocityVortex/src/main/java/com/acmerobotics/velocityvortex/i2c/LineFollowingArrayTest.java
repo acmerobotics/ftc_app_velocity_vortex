@@ -10,12 +10,12 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 @Autonomous(name = "Line Following Array Test")
 public class LineFollowingArrayTest extends OpMode {
 
-    SX1509LineFollowingArray lineFollowerArray;
+    SparkFunLineFollowingArray lineFollowerArray;
 
     @Override
     public void init() {
         I2cDeviceSynch i2cDevice = hardwareMap.i2cDeviceSynch.get("lineArray");
-        lineFollowerArray = new SX1509LineFollowingArray(i2cDevice);
+        lineFollowerArray = new SparkFunLineFollowingArray(i2cDevice);
     }
 
     @Override

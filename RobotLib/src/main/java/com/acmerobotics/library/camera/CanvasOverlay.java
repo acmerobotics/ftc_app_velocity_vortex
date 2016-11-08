@@ -1,10 +1,9 @@
-package com.acmerobotics.vision.test;
+package com.acmerobotics.library.camera;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.support.annotation.NonNull;
 
 public class CanvasOverlay {
 
@@ -36,7 +35,7 @@ public class CanvasOverlay {
 		this(canvas, 10);
 	}
 	
-	public void drawText(String text, ImageRegion region, double height, @NonNull Paint paint) {
+	public void drawText(String text, ImageRegion region, double height, Paint paint) {
 		float textSize = (float) (height * this.height - 2 * padding);
 		paint.setTextSize(textSize);
 		float textWidth = paint.measureText(text);

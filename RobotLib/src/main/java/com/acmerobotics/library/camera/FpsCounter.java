@@ -1,4 +1,4 @@
-package com.acmerobotics.velocityvortex.vision;
+package com.acmerobotics.library.camera;
 
 import android.util.Log;
 
@@ -11,30 +11,30 @@ public class FpsCounter {
     private static final int    STEP              = 20;
     private static final DecimalFormat FPS_FORMAT = new DecimalFormat("0.00");
 
-    private int                 mFramesCouner;
-    private double              mFrequency;
-    private double              mFps;
-    private long                mprevFrameTime;
-    private String              mStrfps;
-    boolean                     mIsInitialized = false;
+    private int mFramesCounter;
+    private double mFrequency;
+    private double mFps;
+    private long mPrevFrameTime;
+    private String mStrfps;
+    private boolean mIsInitialized = false;
 
     public void init() {
-        mFramesCouner = 0;
+        mFramesCounter = 0;
         mFrequency = Core.getTickFrequency();
-        mprevFrameTime = Core.getTickCount();
+        mPrevFrameTime = Core.getTickCount();
         mStrfps = "";
+        mIsInitialized = true;
     }
 
     public void measure() {
         if (!mIsInitialized) {
             init();
-            mIsInitialized = true;
         } else {
-            mFramesCouner++;
-            if (mFramesCouner % STEP == 0) {
+            mFramesCounter++;
+            if (mFramesCounter % STEP == 0) {
                 long time = Core.getTickCount();
-                mFps = STEP * mFrequency / (time - mprevFrameTime);
-                mprevFrameTime = time;
+                mFps = STEP * mFrequency / (time - mPrevFrameTime);
+                mPrevFrameTime = time;
                 Log.i(TAG, mStrfps);
             }
         }

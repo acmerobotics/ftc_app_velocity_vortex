@@ -3,14 +3,14 @@ package com.acmerobotics.velocityvortex.drive;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name="Arcade Drive")
+@TeleOp(name="Arcade DifferentialDrive")
 public class ArcadeDrive extends OpMode {
 
-    private Drive drive;
+    private DifferentialDrive drive;
 
     @Override
     public void init() {
-        drive = new Drive(hardwareMap);
+        drive = new DifferentialDrive(hardwareMap);
     }
 
     @Override

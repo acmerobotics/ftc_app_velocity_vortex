@@ -1,9 +1,12 @@
 package com.acmerobotics.velocityvortex.drive;
 
-import com.acmerobotics.velocityvortex.i2c.SX1509LineFollowingArray;
+import com.acmerobotics.velocityvortex.file.CSVFile;
+import com.acmerobotics.velocityvortex.i2c.SparkFunLineFollowingArray;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
+
+import java.util.Date;
 
 /**
  * This class contains a concept line following array opmode with
@@ -13,17 +16,31 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 public class PIDLineFollowing extends OpMode {
 
     private PIDController controller;
-    private SX1509LineFollowingArray lineFollowingArray;
-    private Drive drive;
+    private SparkFunLineFollowingArray lineFollowingArray;
+    private DifferentialDrive drive;
+    private CSVFile csvFile;
+    private PIDData data;
+
+    public class PIDData {
+        public long timestamp;
+        public double error;
+        public double update;
+    }
 
     @Override
     public void init() {
+        data = new PIDData();
+
+        Date date = new Date();
+
+        csvFile = new CSVFile("pid. " + date + ".csv", PIDData.class);
+
         I2cDeviceSynch i2cDevice = hardwareMap.i2cDeviceSynch.get("lineArray");
-        lineFollowingArray = new SX1509LineFollowingArray(i2cDevice);
+        lineFollowingArray = new SparkFunLineFollowingArray(i2cDevice);
 
-        controller = new PIDController(new PIDController.PIDCoefficients(0.025, 1, 0));
+        controller = new PIDController(new PIDController.PIDCoefficients(0.025, 0.005, 0));
 
-        drive = new Drive(hardwareMap);
+        drive = new DifferentialDrive(hardwareMap);
     }
 
     @Override
@@ -42,5 +59,16 @@ public class PIDLineFollowing extends OpMode {
         update = -update;
         drive.setMotorPowers(baseSpeed + update, baseSpeed - update);
         drive.updateMotors();
+
+        data.error = error;
+        data.update = update;
+        data.timestamp = System.nanoTime();
+
+        csvFile.write(data);
+    }
+
+    @Override
+    public void stop() {
+        csvFile.close();
     }
 }

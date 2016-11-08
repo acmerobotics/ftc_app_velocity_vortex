@@ -1,9 +1,12 @@
-package com.acmerobotics.vision.test;
+package com.acmerobotics.library.camera;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ImageFormat;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
@@ -13,6 +16,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import org.opencv.android.Utils;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
@@ -29,6 +33,14 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
     private static final int MAGIC_TEXTURE_ID = 10;
 
     private static final String TAG = "FastCameraView";
+
+    public enum Orientation {
+        AUTO,
+        LANDSCAPE,
+        PORTRAIT,
+        REVERSE_LANDSCAPE,
+        REVERSE_PORTRAIT
+    }
 
     public enum PreviewType {
         RGBA,
@@ -47,22 +59,25 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
         public PreviewScale previewScale = PreviewScale.CENTER;
         public int maxPreviewWidth = Integer.MAX_VALUE;
         public int maxPreviewHeight = Integer.MAX_VALUE;
+        public Orientation orientation = Orientation.AUTO;
     }
 
     private Parameters parameters;
 
     private Bitmap mCacheBitmap;
     private FrameListener mListener;
-    private boolean mSurfaceExist;
+    private boolean mSurfaceReady;
+    private boolean mCameraInitialized;
     private boolean mShouldInitialize;
+    private boolean mVisible;
+
+    private Orientation mOrientation;
 
     protected int mFrameWidth;
     protected int mFrameHeight;
     protected int mSurfaceWidth;
     protected int mSurfaceHeight;
     protected int mCameraId;
-
-    private boolean mReady;
 
     private byte mBuffer[];
     private Mat[] mCameraFrames;
@@ -71,25 +86,30 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
     private Thread mThread;
     private boolean mStopThread;
 
+    private Context mContext;
+
     protected Camera mCamera;
     private SurfaceTexture mSurfaceTexture;
 
     public FastCameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        initialize();
+        initialize(context);
     }
 
     public FastCameraView(Context context) {
         super(context);
 
-        initialize();
+        initialize(context);
     }
 
-    public void initialize() {
+    public void initialize(Context context) {
+        mContext = context;
         parameters = new Parameters();
-        mReady = false;
+        mSurfaceReady = false;
+        mCameraInitialized = false;
         mShouldInitialize = false;
+        mVisible = true;
         getHolder().addCallback(this);
     }
 
@@ -101,54 +121,25 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
         return this.parameters;
     }
 
-    /**
-     * Sets the camera index
-     * @param cameraIndex new camera index
-     */
-    public void setCameraIndex(int cameraIndex) {
-        this.mCameraId = cameraIndex;
+    public void hide() {
+        mVisible = false;
     }
 
-    public interface FrameListener {
-        /**
-         * This method is invoked when camera preview has started. After this method is invoked
-         * the frames will start to be delivered to client via the onCameraFrame() callback.
-         * @param width -  the width of the frames that will be delivered
-         * @param height - the height of the frames that will be delivered
-         */
-        public void onCameraViewStarted(int width, int height);
-
-        /**
-         * This method is invoked when camera preview has been stopped for some reason.
-         * No frames will be delivered via onCameraFrame() callback after this method is called.
-         */
-        public void onCameraViewStopped();
-
-        /**
-         * This method is invoked when delivery of the frame needs to be done. The incoming image
-         * may be modified and the modified result will appear on the preview.
-         */
-        public void onCameraFrame(Mat inputFrame);
-
-        public void onDrawFrame(Canvas canvas);
-    };
+    public void show() {
+        mVisible = true;
+    }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Log.i(TAG, "surfaceChanged");
         mSurfaceWidth = width;
         mSurfaceHeight = height;
-        mSurfaceExist = true;
-        if (mReady) {
-            if (mSurfaceExist) {
+        mSurfaceReady = true;
+        if (mShouldInitialize) {
+            if (mCameraInitialized) {
                 disconnectCamera();
-                connectCamera(width, height);
             }
-        } else {
-            mReady = true;
-            if (mShouldInitialize) {
-                connectCamera(width, height);
-            }
+            mCameraInitialized = connectCamera(width, height);
         }
     }
 
@@ -161,17 +152,20 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
     public void surfaceDestroyed(SurfaceHolder holder) {
         Log.i(TAG, "surfaceDestroyed");
         disconnectCamera();
-        mSurfaceExist = false;
+        mSurfaceReady = false;
         if (mListener != null) {
             mListener.onCameraViewStopped();
         }
     }
 
     public void start() {
-        if (mReady) {
-            connectCamera(mSurfaceWidth, mSurfaceHeight);
-        }
         mShouldInitialize = true;
+        if (!mCameraInitialized && mSurfaceReady) {
+            Log.i(TAG, "Starting the camera view");
+            mCameraInitialized = connectCamera(mSurfaceWidth, mSurfaceHeight);
+        } else {
+            Log.i(TAG, "Queueing start");
+        }
     }
 
     /**
@@ -183,9 +177,36 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
         mListener = listener;
     }
 
+    protected void rotateFrame(Mat frame) {
+        Mat rotated;
+        switch(mOrientation) {
+            case LANDSCAPE:
+                // do nothing
+                break;
+            case REVERSE_LANDSCAPE:
+                Core.flip(frame, frame, 0);
+                break;
+            case PORTRAIT:
+                rotated = frame.t();
+                Core.flip(rotated, rotated, 1);
+                rotated.copyTo(frame);
+                rotated.release();
+                break;
+            case REVERSE_PORTRAIT:
+                rotated = frame.t();
+                Core.flip(rotated, rotated, -1);
+                rotated.copyTo(frame);
+                rotated.release();
+                break;
+        }
+    }
+
     protected void drawFrame(Mat frame) {
         Utils.matToBitmap(frame, mCacheBitmap);
         Canvas canvas = getHolder().lockCanvas();
+        Paint black = new Paint();
+        black.setColor(Color.BLACK);
+        canvas.drawRect(new Rect(0, 0, canvas.getWidth(), canvas.getHeight()), black);
         if (canvas != null) {
             int offX, offY;
             switch (this.parameters.previewScale) {
@@ -216,7 +237,7 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
                 case STRETCH:
                     canvas.drawBitmap(mCacheBitmap,
                             new Rect(0, 0, mFrameWidth, mFrameHeight),
-                            new Rect(0, 0, mSurfaceWidth, mSurfaceHeight), null);
+                            new Rect(0, 0, canvas.getWidth(), canvas.getHeight()), null);
                     break;
                 default:
                     throw new RuntimeException("Unsupported preview scale: " + this.getParameters().previewScale);
@@ -232,6 +253,16 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
         Log.d(TAG, "Initialize java camera");
         boolean result = true;
         synchronized (this) {
+            mOrientation = parameters.orientation;
+            if (mOrientation == Orientation.AUTO) {
+                if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    mOrientation = Orientation.PORTRAIT;
+                } else {
+                    mOrientation = Orientation.LANDSCAPE;
+                }
+            }
+
+            mCameraId = parameters.cameraId;
             mCamera = Camera.open(mCameraId);
 
             /* Now set camera parameters */
@@ -278,6 +309,11 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
                     mCameraFrames[1] = new Mat(mFrameHeight + (mFrameHeight/2), mFrameWidth, CvType.CV_8UC1);
                     mDrawFrame = new Mat();
 
+                    if (mOrientation == Orientation.PORTRAIT || mOrientation == Orientation.REVERSE_PORTRAIT) {
+                        int temp = mFrameWidth;
+                        mFrameWidth = mFrameHeight;
+                        mFrameHeight = temp;
+                    }
                     mCacheBitmap = Bitmap.createBitmap(mFrameWidth, mFrameHeight, Bitmap.Config.ARGB_8888);
 
                     mSurfaceTexture = new SurfaceTexture(MAGIC_TEXTURE_ID);
@@ -435,8 +471,9 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
                                 default:
                                     throw new RuntimeException("Unsupported preview type: " + parameters.previewType);
                             }
+                            rotateFrame(mDrawFrame);
                             mListener.onCameraFrame(mDrawFrame);
-                            drawFrame(mDrawFrame);
+                            if (mVisible) drawFrame(mDrawFrame);
                             mCameraFrameReady = false;
                         }
                     }

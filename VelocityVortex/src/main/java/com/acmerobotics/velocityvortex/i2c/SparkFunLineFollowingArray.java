@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynchDevice;
  * <a href="https://github.com/sparkfun/SparkFun_Line_Follower_Array_Arduino_Library">
  * this Arduino library</a>
  */
-public class SX1509LineFollowingArray extends I2cDeviceSynchDevice<I2cDeviceSynch> {
+public class SparkFunLineFollowingArray extends I2cDeviceSynchDevice<I2cDeviceSynch> {
 
     public static final I2cAddr I2CADDR_DEFAULT = I2cAddr.create7bit(0x3E);
     private static final String TAG = "LineFollowingArray";
@@ -25,7 +25,7 @@ public class SX1509LineFollowingArray extends I2cDeviceSynchDevice<I2cDeviceSync
      *
      * @param deviceClient
      */
-    public SX1509LineFollowingArray(I2cDeviceSynch deviceClient) {
+    public SparkFunLineFollowingArray(I2cDeviceSynch deviceClient) {
         super(deviceClient, true);
 
         this.parameters = new Parameters();

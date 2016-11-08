@@ -9,12 +9,12 @@ import com.qualcomm.robotcore.util.Range;
  * This class controls the basic drive functionality of a four
  * wheel differential drive system.
  */
-public class Drive {
+public class DifferentialDrive {
 
     private double leftPower, rightPower;
     private DcMotor left1, left2, right1, right2;
 
-    public Drive(HardwareMap hardwareMap) {
+    public DifferentialDrive(HardwareMap hardwareMap) {
         left1 = hardwareMap.dcMotor.get("left1");
         left2 = hardwareMap.dcMotor.get("left2");
         right1 = hardwareMap.dcMotor.get("right1");

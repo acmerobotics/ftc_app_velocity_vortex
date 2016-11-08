@@ -7,8 +7,7 @@ public class PIDController {
 
     private PIDCoefficients coeff;
 
-    private int sum, lastError;
-    private long lastTime;
+    private double sum, lastError, lastTime;
 
     /**
      * This class contains the necessary parameters to configure
@@ -49,18 +48,22 @@ public class PIDController {
     public double loop(double error) {
         // do the PID update
         double time = System.nanoTime() / Math.pow(10, 9);
+        double update = 0;
         if (lastTime == 0) {
             // special handling for first iteration
             sum = 0;
-            return 0;
         } else {
             double dt = time - lastTime;
             // sum computed using trapezoidal rule
             sum += (error + lastError) * dt / 2.0;
             double deriv = (error - lastError) / dt;
-            return coeff.p * error + coeff.i * sum + coeff.d * deriv;
+            update = coeff.p * error + coeff.i * sum + coeff.d * deriv;
         }
 
+        lastError = error;
+        lastTime = time;
+
+        return update;
     }
 
 }

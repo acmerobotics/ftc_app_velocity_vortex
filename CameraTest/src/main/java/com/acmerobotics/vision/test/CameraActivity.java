@@ -13,6 +13,10 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 
+import com.acmerobotics.library.camera.CanvasOverlay;
+import com.acmerobotics.library.camera.FastCameraView;
+import com.acmerobotics.library.camera.FpsCounter;
+import com.acmerobotics.library.camera.FrameListener;
 import com.acmerobotics.library.vision.Beacon;
 import com.acmerobotics.library.vision.BeaconAnalyzer;
 
@@ -23,18 +27,20 @@ import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class CameraActivity extends Activity implements FastCameraView.FrameListener {
+public class CameraActivity extends Activity implements FrameListener {
     private static final String TAG = "OCVSample::Activity";
 
     private FastCameraView mCameraView;
     private boolean mIsJavaCamera = true;
     private MenuItem mItemSwitchCamera = null;
 
-    List<Beacon> beacons;
+    private List<Beacon> beacons;
+    private FpsCounter fpsCounter;
 
     private Camera camera = null;
 
@@ -77,6 +83,7 @@ public class CameraActivity extends Activity implements FastCameraView.FrameList
         FastCameraView.Parameters params = mCameraView.getParameters();
         params.maxPreviewWidth = 640;
         params.maxPreviewHeight = 640;
+        params.orientation = FastCameraView.Orientation.AUTO;
         params.previewScale = FastCameraView.PreviewScale.SCALE_TO_FIT;
 
         Button wbButton = (Button) findViewById(R.id.wbButton);
@@ -138,6 +145,10 @@ public class CameraActivity extends Activity implements FastCameraView.FrameList
     }
 
     public void onCameraViewStarted(int width, int height) {
+        fpsCounter = new FpsCounter();
+
+        beacons = new ArrayList<>();
+
         camera = mCameraView.getCamera();
 
         Camera.Parameters params = camera.getParameters();
@@ -155,9 +166,12 @@ public class CameraActivity extends Activity implements FastCameraView.FrameList
     }
 
     public void onCameraFrame(Mat image) {
+        fpsCounter.measure();
+
         Imgproc.cvtColor(image, image, Imgproc.COLOR_RGB2BGR);
 
-        beacons = BeaconAnalyzer.analyzeImage(image);
+        beacons.clear();
+        BeaconAnalyzer.analyzeImage(image, beacons);
 
         for (Beacon beacon : beacons) {
             beacon.draw(image);
@@ -171,7 +185,7 @@ public class CameraActivity extends Activity implements FastCameraView.FrameList
         Paint paint = new Paint();
         paint.setColor(Color.WHITE);
 
-        CanvasOverlay overlay = new CanvasOverlay(canvas, 30);
+        CanvasOverlay overlay = new CanvasOverlay(canvas, 15);
 
         Collections.sort(beacons, new Comparator<Beacon>() {
 
@@ -194,10 +208,11 @@ public class CameraActivity extends Activity implements FastCameraView.FrameList
             description += (result.getLeftRegion().getColor() == Beacon.BeaconColor.RED ? "R" : "B") + ",";
             description += result.getRightRegion().getColor() == Beacon.BeaconColor.RED ? "R" : "B";
 
-            overlay.drawText(description, CanvasOverlay.ImageRegion.TOP_LEFT, 0.15, paint);
+            overlay.drawText(description, CanvasOverlay.ImageRegion.TOP_LEFT, 0.1, paint);
         }
-        overlay.drawText("Scene: " + sceneOptions.get(sceneIndex).toString(), CanvasOverlay.ImageRegion.BOTTOM_LEFT, 0.15, paint);
-        overlay.drawText("WB: " + wbOptions.get(wbIndex).toString(), CanvasOverlay.ImageRegion.BOTTOM_LEFT, 0.15, paint);
+        overlay.drawText("Scene: " + sceneOptions.get(sceneIndex).toString(), CanvasOverlay.ImageRegion.BOTTOM_LEFT, 0.1, paint);
+        overlay.drawText("WB: " + wbOptions.get(wbIndex).toString(), CanvasOverlay.ImageRegion.BOTTOM_LEFT, 0.1, paint);
+        overlay.drawText("FPS: " + (Math.round(100 * fpsCounter.fps()) / 100.0), CanvasOverlay.ImageRegion.BOTTOM_RIGHT, 0.1, paint);
     }
 
 }

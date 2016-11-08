@@ -1,4 +1,4 @@
-include ':FtcRobotController'
+include ':FtcRobotController', ':RobotLib'
 include ':VisionLib'
 include ':CameraTest'
 include ':RES-Q'
