@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 public class VuforiaInterface extends LocalizationInterface{
 
     private VuforiaLocalizer vuforia;
+    private OpenGLMatrix locationTransform = RobotLocation.ORIGIN.toMatrix();
     private ArrayList<VuforiaTrackable> allTrackables;
 
     private BlockingQueue<VuforiaLocalizer.CloseableFrame> frameQueue;
@@ -39,28 +40,25 @@ public class VuforiaInterface extends LocalizationInterface{
         VuforiaLocalizer.CloseableFrame frame;
         Mat mt = null;
         try {
-            frame = frameQueue.poll(0l, TimeUnit.SECONDS);
-        } catch (InterruptedException ie) {
-            frame = null;
+            frame = frameQueue.remove();
+        } catch (Exception e) {
+            return null;
         }
-        if (frame != null && frame.getNumImages() >= 1 ) {
+        if (frame.getNumImages() >= 1 ) {
             Image img = frame.getImage(0);
-            short[]  pixelsShort = img.getPixels().asShortBuffer().array();
-            double [] pixelsDouble = new double[pixelsShort.length];
-            for (int i = 0; i < pixelsShort.length; i++) {
-                pixelsDouble[i] = (double) pixelsShort[i];
-            }
-            Scalar pixels = new Scalar(pixelsDouble);
-           // mt = new Mat(img.getHeight(), img.getWidth(), CvType.CV_16UC1, img.getPixels().asShortBuffer().array().);
+            Scalar pixels = new Scalar(img.getPixels().asDoubleBuffer().array());
+            mt = new Mat(img.getHeight(), img.getWidth(), CvType.CV_16UC1, pixels);
 
         }
         return null;
     }
 
+    public OpenGLMatrix getLocationTransform () {
+        return locationTransform;
+    }
+
     @Override
     public void update() {
-
-
 
         for (VuforiaTrackable trackable : allTrackables) {
             /**
@@ -72,26 +70,29 @@ public class VuforiaInterface extends LocalizationInterface{
             if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()){
                 if (robotLocationTransform != null) {
                     location = RobotLocation.matrixToLocation(robotLocationTransform);
+                    locationTransform = robotLocationTransform;
                 }
+                return;
             }
         }
+        location = null;
     }
 
-    public void init() {
+    private void init() {
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
         parameters.vuforiaLicenseKey = "AaNzdGn/////AAAAGVCiwQaxg01ft7Lw8kYMP3aE00RU5hyTkE1CNeaYi16CBF0EC/LWi50VYsSMdJITYz6jBTmG6UGJNaNXhzk1zVIggfVmGyEZFL5doU6eVaLdgLyVmJx6jLgNzSafXSLnisXnlS+YJlCaOh1pwk08tWM8Oz+Au7drZ4BkO8j1uluIkwiewRu5zDZGlbNliFfYeCRqslBEZCGxiuH/idcsD7Q055Bwj+f++zuG3x4YlIGJCHrTpVjJUWEIbdJzJVgukc/vVOz21UNpY6WoAwH5MSeh4/U6lYwMZTQb4icfk0o1EiBdOPJKHsxyVF9l00r+6Mmdf6NJcFTFLoucvPjngWisD2T/sjbtq9N+hHnKRpbK";
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
         this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
 
-        VuforiaTrackables images = this.vuforia.loadTrackablesFromAsset("targetImages");
+        VuforiaTrackables images = this.vuforia.loadTrackablesFromAsset("velocityVortex");
+        VuforiaTrackable wheelsTarget = images.get(2);
+        wheelsTarget.setName("wheelsTarget");
+
         VuforiaTrackable toolsTarget = images.get(0);
-        toolsTarget.setName("ToolsTarget");
+        toolsTarget.setName("toolsTarget");
 
         VuforiaTrackable legoesTarget = images.get(1);
-        legoesTarget.setName("LegoesTarget");
-
-        VuforiaTrackable wheelsTarget = images.get(2);
-        wheelsTarget.setName("WheelsTarget");
+        legoesTarget.setName("legoesTarget");
 
         VuforiaTrackable gearsTarget = images.get(3);
         gearsTarget.setName("GearsTarget");

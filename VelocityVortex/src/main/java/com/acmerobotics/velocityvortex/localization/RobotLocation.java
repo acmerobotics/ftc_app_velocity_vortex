@@ -7,6 +7,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
+import java.text.MessageFormat;
+
 /**
  * Stores positions in 2D with an orientation
  * Created by kelly on 10/23/2016.
@@ -22,14 +24,18 @@ public class RobotLocation {
     public RobotLocation(float x, float y, float heading) {
         this.x = x;
         this.y = y;
-        this.heading = degreeify(heading);
+        this.heading = heading;
+    }
+
+    public RobotLocation(OpenGLMatrix matrix) {
+        matrixToLocation(matrix);
     }
 
     public static RobotLocation matrixToLocation (OpenGLMatrix matrix) {
         VectorF translation = matrix.getTranslation();
         Orientation orientation = Orientation.getOrientation(matrix, AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
-        float x = translation.get(1);
-        float y = translation.get(2);
+        float x = translation.get(0);
+        float y = translation.get(1);
         float heading = orientation.thirdAngle;
         return new RobotLocation(x, y, heading);
     }
@@ -55,7 +61,11 @@ public class RobotLocation {
         this.heading = degreeify(heading);
     }
 
+    public String asString () {
+        return MessageFormat.format("({0}, {1}) {2}", x, y, heading);
+    }
+
     public float degreeify(float f) {
-        return Math.abs (f % 360);
+        return (f % 180);
     }
 }
