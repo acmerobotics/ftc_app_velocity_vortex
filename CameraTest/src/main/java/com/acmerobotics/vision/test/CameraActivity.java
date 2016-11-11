@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
@@ -33,11 +32,10 @@ import java.util.Comparator;
 import java.util.List;
 
 public class CameraActivity extends Activity implements FrameListener {
-    private static final String TAG = "OCVSample::Activity";
+
+    private static final String TAG = "CameraActivity";
 
     private FastCameraView mCameraView;
-    private boolean mIsJavaCamera = true;
-    private MenuItem mItemSwitchCamera = null;
 
     private List<Beacon> beacons;
     private FpsCounter fpsCounter;

@@ -1,6 +1,11 @@
 package com.acmerobotics.velocityvortex.localization;
 
+import com.qualcomm.robotcore.util.RobotLog;
+import com.vuforia.CameraDevice;
 import com.vuforia.Image;
+import com.vuforia.PIXEL_FORMAT;
+import com.vuforia.VideoMode;
+import com.vuforia.Vuforia;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
@@ -11,12 +16,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.teamcode.R;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Handles all vuforia opperations
@@ -28,6 +32,9 @@ public class VuforiaInterface extends LocalizationInterface{
     private VuforiaLocalizer vuforia;
     private OpenGLMatrix locationTransform = RobotLocation.ORIGIN.toMatrix();
     private ArrayList<VuforiaTrackable> allTrackables;
+    private Mat internal;
+    private byte[] imgData;
+    private int frameWidth, frameHeight;
 
     private BlockingQueue<VuforiaLocalizer.CloseableFrame> frameQueue;
 
@@ -36,21 +43,41 @@ public class VuforiaInterface extends LocalizationInterface{
         init();
     }
 
-    public Mat getFrame () {
-        VuforiaLocalizer.CloseableFrame frame;
-        Mat mt = null;
-        try {
-            frame = frameQueue.remove();
-        } catch (Exception e) {
-            return null;
-        }
-        if (frame.getNumImages() >= 1 ) {
-            Image img = frame.getImage(0);
-            Scalar pixels = new Scalar(img.getPixels().asDoubleBuffer().array());
-            mt = new Mat(img.getHeight(), img.getWidth(), CvType.CV_16UC1, pixels);
+    public int getFrameWidth() {
+        return frameWidth;
+    }
 
+    public int getFrameHeight() {
+        return frameHeight;
+    }
+
+    public void getFrame(Mat mat) {
+        VuforiaLocalizer.CloseableFrame frame;
+        if (frameQueue.isEmpty()) return;
+        try {
+            frame = frameQueue.take();
+        } catch (Exception e) {
+            RobotLog.e("Problem getting the frame");
+            return;
         }
-        return null;
+        for (int i = 0; i < frame.getNumImages(); i++) {
+            Image img = frame.getImage(i);
+            if (img.getFormat() == PIXEL_FORMAT.RGB565) {
+//                if (mat.type() != CvType.CV_8UC3 || mat.width() != img.getWidth() || mat.height() != img.getHeight()) {
+//                    throw new RuntimeException("Invalid Mat: should be of type CV_8UC3 with " + img.getHeight() + " rows and " + img.getWidth() + " cols");
+//                }
+                ByteBuffer byteBuffer = img.getPixels();
+                if (imgData == null || imgData.length != byteBuffer.capacity()) {
+                    imgData = new byte[byteBuffer.capacity()];
+                }
+                if (internal == null || internal.width() != img.getWidth() || internal.height() != img.getHeight()) {
+                    internal = new Mat(img.getHeight(), img.getWidth(), CvType.CV_8UC2);
+                }
+                byteBuffer.get(imgData);
+                internal.put(0, 0, imgData);
+                Imgproc.cvtColor(internal, mat, Imgproc.COLOR_BGR5652BGR);
+            }
+        }
     }
 
     public OpenGLMatrix getLocationTransform () {
@@ -110,7 +137,14 @@ public class VuforiaInterface extends LocalizationInterface{
         ((VuforiaTrackableDefaultListener)wheelsTarget.getListener()).setPhoneInformation(RobotLocation.ORIGIN.toMatrix(), parameters.cameraDirection);
         ((VuforiaTrackableDefaultListener)gearsTarget.getListener()).setPhoneInformation(RobotLocation.ORIGIN.toMatrix(), parameters.cameraDirection);
 
+        CameraDevice cameraDevice = CameraDevice.getInstance();
+        VideoMode videoMode = cameraDevice.getVideoMode(CameraDevice.MODE.MODE_DEFAULT);
+        frameWidth = videoMode.getWidth();
+        frameHeight = videoMode.getHeight();
+
         images.activate();
+        Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
+        vuforia.setFrameQueueCapacity(1);
         frameQueue = vuforia.getFrameQueue();
     }
 }
