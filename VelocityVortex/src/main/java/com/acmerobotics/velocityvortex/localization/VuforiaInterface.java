@@ -51,14 +51,14 @@ public class VuforiaInterface extends LocalizationInterface{
         return frameHeight;
     }
 
-    public void getFrame(Mat mat) {
+    public boolean getFrame(Mat mat) {
         VuforiaLocalizer.CloseableFrame frame;
-        if (frameQueue.isEmpty()) return;
+        if (frameQueue.isEmpty()) return false;
         try {
             frame = frameQueue.take();
         } catch (Exception e) {
             RobotLog.e("Problem getting the frame");
-            return;
+            return false;
         }
         for (int i = 0; i < frame.getNumImages(); i++) {
             Image img = frame.getImage(i);
@@ -76,8 +76,13 @@ public class VuforiaInterface extends LocalizationInterface{
                 byteBuffer.get(imgData);
                 internal.put(0, 0, imgData);
                 Imgproc.cvtColor(internal, mat, Imgproc.COLOR_BGR5652BGR);
+
+                frame.close();
+
+                return true;
             }
         }
+        return false;
     }
 
     public OpenGLMatrix getLocationTransform () {

@@ -383,10 +383,6 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
         Log.d(TAG, "Disconnecting from camera");
         try {
             mStopThread = true;
-            Log.d(TAG, "Notify thread");
-            synchronized (this) {
-                this.notify();
-            }
             Log.d(TAG, "Waiting for thread");
             if (mThread != null)
                 mThread.join();
@@ -415,7 +411,6 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
                 mFrameIndex= 1 - mFrameIndex;
                 mCameraFrameReady = true;
             }
-            this.notify();
         }
         if (mCamera != null)
             mCamera.addCallbackBuffer(mBuffer);
@@ -479,9 +474,7 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
                     }
                 } else {
                     try {
-                        synchronized (FastCameraView.this) {
-                            FastCameraView.this.wait();
-                        }
+                        Thread.sleep(1);
                     } catch (InterruptedException e) {
                         // do nothing
                     }

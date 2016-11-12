@@ -4,13 +4,12 @@ import android.app.Activity;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.hardware.Camera;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.ToggleButton;
 
 import com.acmerobotics.library.camera.CanvasOverlay;
 import com.acmerobotics.library.camera.FastCameraView;
@@ -30,23 +29,33 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
+@SuppressWarnings("deprecation")
 public class CameraActivity extends Activity implements FrameListener {
 
     private static final String TAG = "CameraActivity";
 
-    private FastCameraView mCameraView;
+    private FastCameraView cameraView;
 
     private List<Beacon> beacons;
     private FpsCounter fpsCounter;
 
-    private Camera camera = null;
+    private int intermediateIndex = 0;
+    private String intermediateKey;
 
-    private List<String> wbOptions;
-    private int wbIndex;
+    private final Comparator<Beacon> beaconSizeComparator = new Comparator<Beacon>() {
 
-    private List<String> sceneOptions;
-    private int sceneIndex;
+        @Override
+        public int compare(Beacon o1, Beacon o2) {
+            Size s1 = o1.getBounds().size;
+            Size s2 = o2.getBounds().size;
+            double area1 = s1.width * s1.height;
+            double area2 = s2.width * s2.height;
+            return (area1 > area2) ? -1 : 1;
+        }
+
+    };
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -54,7 +63,7 @@ public class CameraActivity extends Activity implements FrameListener {
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS: {
                     Log.i(TAG, "OpenCV loaded successfully");
-                    mCameraView.start();
+                    cameraView.start();
                 }
                 break;
                 default: {
@@ -62,6 +71,13 @@ public class CameraActivity extends Activity implements FrameListener {
                 }
                 break;
             }
+        }
+    };
+
+    private View.OnClickListener cameraViewClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            intermediateIndex++;
         }
     };
 
@@ -74,42 +90,43 @@ public class CameraActivity extends Activity implements FrameListener {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        setContentView(R.layout.camera_surface_view);
+        setContentView(R.layout.activity_camera);
 
-        mCameraView = (FastCameraView) findViewById(R.id.activity_java_surface_view);
+        cameraView = (FastCameraView) findViewById(R.id.fastCameraView);
 
-        FastCameraView.Parameters params = mCameraView.getParameters();
+        fpsCounter = new FpsCounter();
+
+        BeaconAnalyzer.DEBUG = false;
+
+        beacons = new ArrayList<>();
+
+        FastCameraView.Parameters params = cameraView.getParameters();
         params.maxPreviewWidth = 640;
         params.maxPreviewHeight = 640;
         params.orientation = FastCameraView.Orientation.AUTO;
         params.previewScale = FastCameraView.PreviewScale.SCALE_TO_FIT;
 
-        Button wbButton = (Button) findViewById(R.id.wbButton);
-        wbButton.setOnClickListener(new View.OnClickListener() {
+        cameraView.setFrameListener(CameraActivity.this);
+
+        ToggleButton debugToggle = (ToggleButton) findViewById(R.id.debugToggle);
+        debugToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
-                CameraActivity.this.nextCameraWhiteBalance();
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                BeaconAnalyzer.DEBUG = isChecked;
+                if (isChecked) {
+                    cameraView.setOnClickListener(cameraViewClickListener);
+                } else {
+                    cameraView.setOnClickListener(null);
+                }
             }
         });
-
-        Button sceneButton = (Button) findViewById(R.id.sceneButton);
-        sceneButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                CameraActivity.this.nextCameraScene();
-            }
-        });
-
-        mCameraView.setVisibility(SurfaceView.VISIBLE);
-
-        mCameraView.setFrameListener(CameraActivity.this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
-        mCameraView.stop();
+        cameraView.stop();
     }
 
     @Override
@@ -128,36 +145,8 @@ public class CameraActivity extends Activity implements FrameListener {
         super.onDestroy();
     }
 
-    public void nextCameraWhiteBalance() {
-        Camera.Parameters params = camera.getParameters();
-        wbIndex = (wbIndex + 1) % wbOptions.size();
-        params.setWhiteBalance(wbOptions.get(wbIndex));
-        camera.setParameters(params);
-    }
-
-    public void nextCameraScene() {
-        Camera.Parameters params = camera.getParameters();
-        sceneIndex = (sceneIndex + 1) % sceneOptions.size();
-        params.setSceneMode(sceneOptions.get(sceneIndex));
-        camera.setParameters(params);
-    }
-
     public void onCameraViewStarted(int width, int height) {
-        fpsCounter = new FpsCounter();
-
-        beacons = new ArrayList<>();
-
-        camera = mCameraView.getCamera();
-
-        Camera.Parameters params = camera.getParameters();
-
-        wbIndex = -1;
-        wbOptions = params.getSupportedWhiteBalance();
-        nextCameraWhiteBalance();
-
-        sceneOptions = params.getSupportedSceneModes();
-        sceneIndex = -1;
-        nextCameraScene();
+        fpsCounter.init();
     }
 
     public void onCameraViewStopped() {
@@ -171,11 +160,22 @@ public class CameraActivity extends Activity implements FrameListener {
         beacons.clear();
         BeaconAnalyzer.analyzeImage(image, beacons);
 
-        for (Beacon beacon : beacons) {
-            beacon.draw(image);
-        }
+        if (BeaconAnalyzer.DEBUG) {
+            Map<String, Mat> intermediates = BeaconAnalyzer.getIntermediates();
+            String[] modes = new String[intermediates.keySet().size()];
+            intermediates.keySet().toArray(modes);
+            intermediateKey = modes[intermediateIndex % modes.length];
+            intermediates.get(intermediateKey).copyTo(image);
 
-        Imgproc.cvtColor(image, image, Imgproc.COLOR_BGR2RGB);
+            if (image.channels() == 3) {
+                Imgproc.cvtColor(image, image, Imgproc.COLOR_BGR2RGB);
+            }
+        } else {
+            for (Beacon beacon : beacons) {
+                beacon.draw(image);
+            }
+            Imgproc.cvtColor(image, image, Imgproc.COLOR_BGR2RGB);
+        }
     }
 
     @Override
@@ -185,32 +185,14 @@ public class CameraActivity extends Activity implements FrameListener {
 
         CanvasOverlay overlay = new CanvasOverlay(canvas, 15);
 
-        Collections.sort(beacons, new Comparator<Beacon>() {
-
-            @Override
-            public int compare(Beacon o1, Beacon o2) {
-                Size s1 = o1.getBounds().size;
-                Size s2 = o2.getBounds().size;
-                double area1 = s1.width * s1.height;
-                double area2 = s2.width * s2.height;
-                return (area1 > area2) ? -1 : 1;
-            }
-
-        });
+        Collections.sort(beacons, beaconSizeComparator);
 
         for (Beacon result : beacons) {
-            int score = result.getScore().getNumericScore();
-
-            String description = "";
-            description += score + " " + result.getScore().toString() + "  ";
-            description += (result.getLeftRegion().getColor() == Beacon.BeaconColor.RED ? "R" : "B") + ",";
-            description += result.getRightRegion().getColor() == Beacon.BeaconColor.RED ? "R" : "B";
-
-            overlay.drawText(description, CanvasOverlay.ImageRegion.TOP_LEFT, 0.1, paint);
+            Beacon.Score score = result.getScore();
+            overlay.drawText(score.getNumericScore() + " " + score.toString(), CanvasOverlay.ImageRegion.TOP_LEFT, 0.1, paint);
         }
-        overlay.drawText("Scene: " + sceneOptions.get(sceneIndex).toString(), CanvasOverlay.ImageRegion.BOTTOM_LEFT, 0.1, paint);
-        overlay.drawText("WB: " + wbOptions.get(wbIndex).toString(), CanvasOverlay.ImageRegion.BOTTOM_LEFT, 0.1, paint);
-        overlay.drawText("FPS: " + (Math.round(100 * fpsCounter.fps()) / 100.0), CanvasOverlay.ImageRegion.BOTTOM_RIGHT, 0.1, paint);
+        overlay.drawText((Math.round(100 * fpsCounter.fps()) / 100.0) + " FPS", CanvasOverlay.ImageRegion.BOTTOM_LEFT, 0.1, paint);
+        if (BeaconAnalyzer.DEBUG) overlay.drawText(intermediateKey, CanvasOverlay.ImageRegion.BOTTOM_RIGHT, 0.1, paint);
     }
 
 }

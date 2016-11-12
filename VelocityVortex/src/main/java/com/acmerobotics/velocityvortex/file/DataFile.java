@@ -23,7 +23,7 @@ public class DataFile implements AutoCloseable {
     }
 
     protected void openFile(String filename) {
-        File dir = new File(Environment.getExternalStorageDirectory(), "ACME");
+        File dir = getStorageDir();
         this.file = new File(dir, filename);
         try {
             this.reader = new BufferedReader(new FileReader(file));
@@ -31,6 +31,10 @@ public class DataFile implements AutoCloseable {
         } catch (IOException e) {
             Log.e(TAG, "IO error while trying to open data file " + file.getPath() + "\n" + e.getMessage());
         }
+    }
+
+    public static File getStorageDir() {
+        return new File(Environment.getExternalStorageDirectory(), "ACME");
     }
 
     public BufferedReader getReader() {
