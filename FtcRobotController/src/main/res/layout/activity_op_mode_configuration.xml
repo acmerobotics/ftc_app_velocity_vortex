@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/configuration_screen"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="16dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="16dp"
+    android:orientation="vertical"
+    tools:context="org.firstinspires.ftc.robotcontroller.internal.OpModeConfigurationActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/opmode_configuration_title"
+        android:padding="16dp"
+        android:textSize="24sp"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/pref_item_height">
+
+        <TextView
+            android:text="@string/alliance_color_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/pref_item_margin"
+            android:gravity="center_vertical"
+            android:textSize="@dimen/pref_text_size"
+            android:id="@+id/alliance_color_text_view"
+            android:layout_weight="1"/>
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/alliance_color_spinner"
+            android:layout_margin="@dimen/pref_item_margin"
+            android:gravity="center_vertical"
+            android:layout_weight="1"
+            android:entries="@array/alliance_colors"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/pref_item_height">
+
+            <TextView
+                android:text="Delay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/delay_text_view"
+                android:layout_margin="@dimen/pref_item_margin"
+                android:layout_weight="1"
+                android:textSize="@dimen/pref_text_size"
+                android:gravity="center_vertical"/>
+
+            <TextView
+                android:text="Delay Value"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/delay_value_text_view"
+                android:layout_margin="@dimen/pref_item_margin"
+                android:gravity="center_vertical"
+                android:textSize="@dimen/pref_text_size"
+                android:layout_weight="1"/>
+        </LinearLayout>
+
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:id="@+id/delay_seek_bar"
+            android:layout_margin="@dimen/pref_item_margin"
+            android:max="30"
+            android:progress="0"/>
+    </LinearLayout>
+
+</LinearLayout>

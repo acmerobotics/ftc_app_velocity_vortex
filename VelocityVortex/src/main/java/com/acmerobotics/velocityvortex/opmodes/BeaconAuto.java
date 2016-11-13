@@ -1,5 +1,6 @@
 package com.acmerobotics.velocityvortex.opmodes;
 
+import com.acmerobotics.library.configuration.OpModeConfiguration;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
 import com.acmerobotics.velocityvortex.localization.VuforiaInterface;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -24,14 +25,23 @@ public class BeaconAuto extends OpMode {
     private VuforiaInterface vuforia;
     private MecanumDrive mecanumDrive;
     private State currentState;
+    private OpModeConfiguration configuration;
 
     @Override
     public void init() {
+        configuration = new OpModeConfiguration(hardwareMap.appContext);
+
         vuforia = new VuforiaInterface("vuforia", 0);
 
         mecanumDrive = new MecanumDrive(hardwareMap);
 
         currentState = State.BEGIN;
+    }
+
+    @Override
+    public void init_loop() {
+        telemetry.addData("alliance_color", configuration.getAllianceColor());
+        telemetry.addData("delay", configuration.getDelay());
     }
 
     @Override
