@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.robotcontroller.internal;
+package com.acmerobotics.library.configuration;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -8,8 +8,7 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.acmerobotics.library.configuration.OpModeConfiguration;
-import com.qualcomm.ftcrobotcontroller.R;
+import com.acmerobotics.library.R;
 
 public class OpModeConfigurationActivity extends Activity {
 
@@ -18,7 +17,7 @@ public class OpModeConfigurationActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_op_mode_configuration);
+        setContentView(R.layout.activity_opmode_configuration);
 
         configuration = new OpModeConfiguration(this);
 

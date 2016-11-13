@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">RobotLib</string>
     <string name="files_directory">ACME</string>
+    <string name="opmode_configuration_title">OpMode Configuration</string>
+    <string name="alliance_color_text">Alliance Color</string>
+    <string name="delay_text">Delay</string>
 </resources>
