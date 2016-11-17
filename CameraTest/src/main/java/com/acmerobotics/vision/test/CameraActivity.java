@@ -14,25 +14,23 @@ import android.widget.ToggleButton;
 import com.acmerobotics.library.camera.CanvasOverlay;
 import com.acmerobotics.library.camera.FastCameraView;
 import com.acmerobotics.library.camera.FpsCounter;
-import com.acmerobotics.library.camera.FrameListener;
 import com.acmerobotics.library.vision.Beacon;
 import com.acmerobotics.library.vision.BeaconAnalyzer;
+import com.acmerobotics.library.vision.BeaconAreaComparator;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
-import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("deprecation")
-public class CameraActivity extends Activity implements FrameListener {
+public class CameraActivity extends Activity implements FastCameraView.CameraViewListener {
 
     private static final String TAG = "CameraActivity";
 
@@ -44,18 +42,7 @@ public class CameraActivity extends Activity implements FrameListener {
     private int intermediateIndex = 0;
     private String intermediateKey;
 
-    private final Comparator<Beacon> beaconSizeComparator = new Comparator<Beacon>() {
-
-        @Override
-        public int compare(Beacon o1, Beacon o2) {
-            Size s1 = o1.getBounds().size;
-            Size s2 = o2.getBounds().size;
-            double area1 = s1.width * s1.height;
-            double area2 = s2.width * s2.height;
-            return (area1 > area2) ? -1 : 1;
-        }
-
-    };
+    private final BeaconAreaComparator beaconSizeComparator = new BeaconAreaComparator();
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -106,7 +93,7 @@ public class CameraActivity extends Activity implements FrameListener {
         params.orientation = FastCameraView.Orientation.AUTO;
         params.previewScale = FastCameraView.PreviewScale.SCALE_TO_FIT;
 
-        cameraView.setFrameListener(CameraActivity.this);
+        cameraView.setCameraViewListener(CameraActivity.this);
 
         ToggleButton debugToggle = (ToggleButton) findViewById(R.id.debugToggle);
         debugToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -152,7 +139,7 @@ public class CameraActivity extends Activity implements FrameListener {
     public void onCameraViewStopped() {
     }
 
-    public void onCameraFrame(Mat image) {
+    public void onFrame(Mat image) {
         fpsCounter.measure();
 
         Imgproc.cvtColor(image, image, Imgproc.COLOR_RGB2BGR);

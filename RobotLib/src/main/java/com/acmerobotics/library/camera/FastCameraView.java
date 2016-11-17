@@ -65,7 +65,7 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
     private Parameters parameters;
 
     private Bitmap mCacheBitmap;
-    private FrameListener mListener;
+    private CameraViewListener mListener;
     private boolean mSurfaceReady;
     private boolean mCameraInitialized;
     private boolean mShouldInitialize;
@@ -173,7 +173,7 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
      * @param listener
      */
 
-    public void setFrameListener(FrameListener listener) {
+    public void setCameraViewListener(CameraViewListener listener) {
         mListener = listener;
     }
 
@@ -467,7 +467,7 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
                                     throw new RuntimeException("Unsupported preview type: " + parameters.previewType);
                             }
                             rotateFrame(mDrawFrame);
-                            mListener.onCameraFrame(mDrawFrame);
+                            mListener.onFrame(mDrawFrame);
                             if (mVisible) drawFrame(mDrawFrame);
                             mCameraFrameReady = false;
                         }
@@ -483,4 +483,21 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
         }
     }
 
+    public static interface CameraViewListener extends OpenCVFrameListener {
+        /**
+         * This method is invoked when camera preview has started. After this method is invoked
+         * the frames will start to be delivered to client via the onCameraFrame() callback.
+         * @param width -  the width of the frames that will be delivered
+         * @param height - the height of the frames that will be delivered
+         */
+        void onCameraViewStarted(int width, int height);
+
+        /**
+         * This method is invoked when camera preview has been stopped for some reason.
+         * No frames will be delivered via onCameraFrame() callback after this method is called.
+         */
+        void onCameraViewStopped();
+
+        void onDrawFrame(Canvas canvas);
+    }
 }

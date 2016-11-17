@@ -1,10 +1,11 @@
-package com.acmerobotics.velocityvortex.drive;
+package com.acmerobotics.velocityvortex.test;
 
+import com.acmerobotics.velocityvortex.drive.DifferentialDrive;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name="Arcade DifferentialDrive")
-public class ArcadeDrive extends OpMode {
+@TeleOp(name="Arcade Differential Drive")
+public class ArcadeDifferentialTest extends OpMode {
 
     private DifferentialDrive drive;
 

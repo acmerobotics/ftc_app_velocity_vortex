@@ -1,6 +1,8 @@
-package com.acmerobotics.velocityvortex.drive;
+package com.acmerobotics.velocityvortex.test;
 
-import com.acmerobotics.velocityvortex.file.CSVFile;
+import com.acmerobotics.velocityvortex.drive.DifferentialDrive;
+import com.acmerobotics.velocityvortex.drive.PIDController;
+import com.acmerobotics.library.file.CSVFile;
 import com.acmerobotics.velocityvortex.i2c.SparkFunLineFollowingArray;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -13,12 +15,12 @@ import java.util.Date;
  * a basic PID loop suitable for line following.
  */
 @Autonomous(name = "PID Line Following")
-public class PIDLineFollowing extends OpMode {
+public class PIDLineFollowingTest extends OpMode {
 
     private PIDController controller;
     private SparkFunLineFollowingArray lineFollowingArray;
     private DifferentialDrive drive;
-    private CSVFile csvFile;
+    private CSVFile<PIDData> csvFile;
     private PIDData data;
 
     public class PIDData {
@@ -33,7 +35,7 @@ public class PIDLineFollowing extends OpMode {
 
         Date date = new Date();
 
-        csvFile = new CSVFile("pid. " + date + ".csv", PIDData.class);
+        csvFile = new CSVFile<PIDData>("pid. " + date + ".csv", PIDData.class);
 
         I2cDeviceSynch i2cDevice = hardwareMap.i2cDeviceSynch.get("lineArray");
         lineFollowingArray = new SparkFunLineFollowingArray(i2cDevice);

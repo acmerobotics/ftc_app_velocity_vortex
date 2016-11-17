@@ -1,6 +1,5 @@
 package com.acmerobotics.velocityvortex.vision;
 
-import android.app.Activity;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -8,31 +7,31 @@ import android.graphics.Paint;
 import com.acmerobotics.library.camera.CanvasOverlay;
 import com.acmerobotics.library.camera.FastCameraView;
 import com.acmerobotics.library.camera.FpsCounter;
-import com.acmerobotics.library.camera.FrameListener;
-import com.acmerobotics.library.camera.SimpleCamera;
 import com.acmerobotics.library.vision.Beacon;
 import com.acmerobotics.library.vision.BeaconAnalyzer;
+import com.acmerobotics.library.vision.BeaconAreaComparator;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.R;
 import org.opencv.core.Mat;
-import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
+/**
+ * An abstract opmode that provides a simple beacon detection interface
+ */
 public abstract class BeaconOpMode extends OpMode {
 
-    protected SimpleCamera camera;
+    protected FastCamera camera;
     protected FpsCounter fpsCounter;
     protected List<Beacon> beacons;
     private boolean ready;
 
-    private FrameListener frameListener =
-            new FrameListener() {
+    private FastCameraView.CameraViewListener cameraViewListener =
+            new FastCameraView.CameraViewListener() {
                 @Override
                 public void onCameraViewStarted(int width, int height) {
                     ready = true;
@@ -44,7 +43,7 @@ public abstract class BeaconOpMode extends OpMode {
                     ready = false;
                 }
 
-                public void onCameraFrame(Mat image) {
+                public void onFrame(Mat image) {
                     fpsCounter.measure();
 
                     Imgproc.cvtColor(image, image, Imgproc.COLOR_RGB2BGR);
@@ -66,18 +65,7 @@ public abstract class BeaconOpMode extends OpMode {
 
                     CanvasOverlay overlay = new CanvasOverlay(canvas, 15);
 
-                    Collections.sort(beacons, new Comparator<Beacon>() {
-
-                        @Override
-                        public int compare(Beacon o1, Beacon o2) {
-                            Size s1 = o1.getBounds().size;
-                            Size s2 = o2.getBounds().size;
-                            double area1 = s1.width * s1.height;
-                            double area2 = s2.width * s2.height;
-                            return (area1 > area2) ? -1 : 1;
-                        }
-
-                    });
+                    Collections.sort(beacons, new BeaconAreaComparator());
 
                     for (Beacon result : beacons) {
                         int score = result.getScore().getNumericScore();
@@ -103,8 +91,8 @@ public abstract class BeaconOpMode extends OpMode {
 
         ready = false;
 
-        camera = new SimpleCamera((Activity) hardwareMap.appContext, R.id.cameraMonitorViewId);
-        camera.setFrameListener(frameListener);
+        camera = new FastCamera(hardwareMap.appContext, R.id.cameraMonitorViewId);
+        camera.setCameraViewListener(cameraViewListener);
 
         FastCameraView.Parameters parameters = camera.getParameters();
         parameters.maxPreviewHeight = 640;
