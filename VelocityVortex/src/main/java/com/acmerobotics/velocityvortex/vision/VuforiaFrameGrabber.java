@@ -39,9 +39,6 @@ public class VuforiaFrameGrabber {
         Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
         vuforia.setFrameQueueCapacity(1);
         frameQueue = vuforia.getFrameQueue();
-
-        frameWorker = new FrameWorker();
-        frameWorker.start();
     }
 
     /**
@@ -54,6 +51,39 @@ public class VuforiaFrameGrabber {
         } catch (InterruptedException e) {
             Log.e(TAG, e.getMessage());
         }
+    }
+
+    /**
+     * Begins automatic capture and processing of frames
+     */
+    public void start() {
+        frameWorker = new FrameWorker();
+        frameWorker.start();
+    }
+
+    /**
+     * Gets the latest frame synchronously
+     * @return the frame
+     */
+    public VuforiaLocalizer.CloseableFrame getLatestVuforiaFrame() {
+        VuforiaLocalizer.CloseableFrame frame = null;
+        try {
+            frame = frameQueue.take();
+        } catch (InterruptedException e) {
+            Log.e(TAG, e.getMessage());
+            return null;
+        }
+        return frame;
+    }
+
+    protected static Image getRGBImage(VuforiaLocalizer.CloseableFrame frame) {
+        for (int i = 0; i < frame.getNumImages(); i++) {
+            Image img = frame.getImage(i);
+            if (img.getFormat() == PIXEL_FORMAT.RGB565) {
+                return img;
+            }
+        }
+        return null;
     }
 
     public void setFrameListener(VuforiaFrameListener listener) {
@@ -74,22 +104,10 @@ public class VuforiaFrameGrabber {
                         Log.e(TAG, e.getMessage());
                     }
                 } else {
-                    VuforiaLocalizer.CloseableFrame frame = null;
-                    try {
-                        frame = frameQueue.take();
-                    } catch (InterruptedException e) {
-                        Log.e(TAG, e.getMessage());
-                    }
-                    if (frame != null) {
-                        for (int i = 0; i < frame.getNumImages(); i++) {
-                            Image img = frame.getImage(i);
-                            if (img.getFormat() == PIXEL_FORMAT.RGB565) {
-                                if (listener != null) listener.onFrame(img);
-                                break;
-                            }
-                        }
-                        frame.close();
-                    }
+                    VuforiaLocalizer.CloseableFrame frame = getLatestVuforiaFrame();
+                    Image img = getRGBImage(frame);
+                    if (img != null && listener != null) listener.onFrame(img);
+                    if (frame != null) frame.close();
                 }
             }
         }

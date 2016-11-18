@@ -23,17 +23,7 @@ public class OpenCVFrameGrabber extends VuforiaFrameGrabber {
         @Override
         public void onFrame(Image frame) {
             if (frameListener != null) {
-                ByteBuffer byteBuffer = frame.getPixels();
-                if (imgData == null || imgData.length != byteBuffer.capacity()) {
-                    imgData = new byte[byteBuffer.capacity()];
-                }
-                if (raw == null || raw.width() != frame.getWidth() || raw.height() != frame.getHeight()) {
-                    raw = new Mat(frame.getHeight(), frame.getWidth(), CvType.CV_8UC2);
-                }
-                byteBuffer.get(imgData);
-                raw.put(0, 0, imgData);
-                Imgproc.cvtColor(raw, raw, Imgproc.COLOR_BGR5652BGR);
-
+                processVuforiaFrame(frame);
                 frameListener.onFrame(raw);
             }
         }
@@ -47,5 +37,25 @@ public class OpenCVFrameGrabber extends VuforiaFrameGrabber {
 
     public void setFrameListener(OpenCVFrameListener frameListener) {
         this.frameListener = frameListener;
+    }
+
+    public Mat getLatestFrame() {
+        VuforiaLocalizer.CloseableFrame frame = getLatestVuforiaFrame();
+        processVuforiaFrame(getRGBImage(frame));
+        frame.close();
+        return raw;
+    }
+
+    private void processVuforiaFrame(Image img) {
+        ByteBuffer byteBuffer = img.getPixels();
+        if (imgData == null || imgData.length != byteBuffer.capacity()) {
+            imgData = new byte[byteBuffer.capacity()];
+        }
+        if (raw == null || raw.width() != img.getWidth() || raw.height() != img.getHeight()) {
+            raw = new Mat(img.getHeight(), img.getWidth(), CvType.CV_8UC2);
+        }
+        byteBuffer.get(imgData);
+        raw.put(0, 0, imgData);
+        Imgproc.cvtColor(raw, raw, Imgproc.COLOR_BGR5652BGR);
     }
 }
