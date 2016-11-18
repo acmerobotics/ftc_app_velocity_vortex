@@ -101,7 +101,8 @@ public class BeaconVuforiaTest extends OpMode {
                 });
             }
         });
-        vuforiaCamera.startSync();
+        vuforiaCamera.initSync();
+        vuforiaCamera.start();
 
         beacons = new ArrayList<>();
 

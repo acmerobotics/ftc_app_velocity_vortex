@@ -5,6 +5,7 @@ import android.content.Context;
 import com.acmerobotics.library.camera.OpenCVFrameListener;
 
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.opencv.core.Mat;
 
 /**
  * Camera device that processes frames using a Vuforia camera view
@@ -13,6 +14,7 @@ public class VuforiaCamera extends VisionCamera {
 
     private OpenCVFrameGrabber frameGrabber;
     private VuforiaLocalizer vuforia;
+    private OpenCVFrameListener frameListener;
 
     public VuforiaCamera(Context context, VuforiaLocalizer vuforia) {
         super(context);
@@ -22,7 +24,7 @@ public class VuforiaCamera extends VisionCamera {
 
     @Override
     public void setFrameListener(OpenCVFrameListener frameListener) {
-        super.setFrameListener(frameListener);
+        this.frameListener = frameListener;
 
         if (frameGrabber != null) {
             frameGrabber.setFrameListener(frameListener);
@@ -30,13 +32,22 @@ public class VuforiaCamera extends VisionCamera {
     }
 
     @Override
-    protected void onStop() {
-        frameGrabber.close();
+    protected void onFinishInit() {
+
     }
 
     @Override
-    protected void onStart() {
+    public Mat getLatestFrame() {
+        return frameGrabber.getLatestFrame();
+    }
+
+    public void start() {
         frameGrabber = new OpenCVFrameGrabber(vuforia);
         frameGrabber.setFrameListener(this.frameListener);
+        frameGrabber.start();
+    }
+
+    public void stop() {
+        frameGrabber.close();
     }
 }

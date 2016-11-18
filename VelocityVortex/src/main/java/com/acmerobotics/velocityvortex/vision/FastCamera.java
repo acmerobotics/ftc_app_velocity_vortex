@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.view.ViewGroup;
 
 import com.acmerobotics.library.camera.FastCameraView;
+import com.acmerobotics.library.camera.OpenCVFrameListener;
 
 import org.firstinspires.ftc.robotcore.internal.AppUtil;
 import org.opencv.core.Mat;
@@ -48,33 +49,37 @@ public class FastCamera extends VisionCamera {
      * Set the camera view listener
      * @param listener camera view listener
      */
-    public void setCameraViewListener(final FastCameraView.CameraViewListener listener) {
+    public void setCameraViewListener(FastCameraView.CameraViewListener listener) {
+        cameraView.setCameraViewListener(listener);
+    }
+
+    @Override
+    public void setFrameListener(final OpenCVFrameListener frameListener) {
         cameraView.setCameraViewListener(new FastCameraView.CameraViewListener() {
             @Override
             public void onCameraViewStarted(int width, int height) {
-                listener.onCameraViewStarted(width, height);
+
             }
 
             @Override
             public void onCameraViewStopped() {
-                listener.onCameraViewStopped();
+
             }
 
             @Override
             public void onDrawFrame(Canvas canvas) {
-                listener.onDrawFrame(canvas);
+
             }
 
             @Override
             public void onFrame(Mat frame) {
-                if (frameListener != null) frameListener.onFrame(frame);
-                listener.onFrame(frame);
+                frameListener.onFrame(frame);
             }
         });
     }
 
     @Override
-    protected void onStop() {
+    public void stop() {
         appUtil.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -85,7 +90,21 @@ public class FastCamera extends VisionCamera {
     }
 
     @Override
-    protected void onStart() {
+    public void start() {
         cameraView.start();
+    }
+
+    @Override
+    protected void onFinishInit() {
+
+    }
+
+    @Override
+    public Mat getLatestFrame() {
+        Mat mat = new Mat();
+        synchronized (cameraView) {
+            cameraView.getLatestFrame().copyTo(mat);
+        }
+        return mat;
     }
 }

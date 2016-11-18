@@ -447,6 +447,10 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
         return new Size(calcWidth, calcHeight);
     }
 
+    public Mat getLatestFrame() {
+        return mDrawFrame;
+    }
+
     private class CameraWorker implements Runnable {
 
         @Override

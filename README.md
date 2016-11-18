@@ -2,7 +2,7 @@
 
 Android code used by FTC team #8367 ACME Robotics in the RES-Q and Velocity Vortex seasons.
 
-
+------
 
 FTC Android Studio project to create FTC Robot Controller app.
 
@@ -23,12 +23,11 @@ For technical questions regarding the SDK, please visit the FTC Technology forum
 
   http://ftcforum.usfirst.org/forumdisplay.php?156-FTC-Technology
 
-
 **************************************************************************************
 
 Version 2.4 (released on 16.11.13)
-  * Fix to avoid crashing for nonexistent resources.
-  * Blocks Programming mode changes:
+* Fix to avoid crashing for nonexistent resources.
+* Blocks Programming mode changes:
      - Added blocks to support OpenGLMatrix, MatrixF, and VectorF.
      - Added blocks to support AngleUnit, AxesOrder, AxesReference, CameraDirection, CameraMonitorFeedback, DistanceUnit, and TempUnit.
      - Added blocks to support Acceleration.
@@ -50,14 +49,14 @@ Version 2.4 (released on 16.11.13)
      - Fixed bug to properly render blocks even if missing devices from configuration file.
      - Added support for additional characters (not just alphanumeric) for the block file names (for download and upload).
      - Added support for OpMode flavor (“Autonomous” or “TeleOp”) and group.
-  * Changes to Samples to prevent tutorial issues.
-  * Incorporated suggested changes from public pull 216 (“Replace .. paths”).
-  * Remove Servo Glitches when robot stopped.
-  * if user hits “Cancels” when editing a configuration file, clears the unsaved changes and reverts to original unmodified configuration.
-  * Added log info to help diagnose why the Robot Controller app was terminated (for example, by watch dog function).
-  * Added ability to transfer log from the controller.
-  * Fixed inconsistency for AngularVelocity
-  * Limit unbounded growth of data for telemetry.  If user does not call telemetry.update() for LinearOpMode in a timely manner, data added for telemetry might get lost if size limit is exceeded.
+* Changes to Samples to prevent tutorial issues.
+     * Incorporated suggested changes from public pull 216 (“Replace .. paths”).
+     * Remove Servo Glitches when robot stopped.
+     * if user hits “Cancels” when editing a configuration file, clears the unsaved changes and reverts to original unmodified configuration.
+     * Added log info to help diagnose why the Robot Controller app was terminated (for example, by watch dog function).
+     * Added ability to transfer log from the controller.
+     * Fixed inconsistency for AngularVelocity
+     * Limit unbounded growth of data for telemetry.  If user does not call telemetry.update() for LinearOpMode in a timely manner, data added for telemetry might get lost if size limit is exceeded.
 
 **************************************************************************************
 

@@ -45,11 +45,13 @@ public class VuforiaFrameGrabber {
      * Closes the device and halts frame updates
      */
     public void close() {
-        frameWorker.terminate();
-        try {
-            frameWorker.join();
-        } catch (InterruptedException e) {
-            Log.e(TAG, e.getMessage());
+        if (frameWorker != null) {
+            frameWorker.terminate();
+            try {
+                frameWorker.join();
+            } catch (InterruptedException e) {
+                Log.e(TAG, e.getMessage());
+            }
         }
     }
 

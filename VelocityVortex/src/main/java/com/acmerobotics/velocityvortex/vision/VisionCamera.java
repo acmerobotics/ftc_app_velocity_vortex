@@ -8,6 +8,7 @@ import com.acmerobotics.library.camera.OpenCVFrameListener;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Mat;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -19,7 +20,6 @@ public abstract class VisionCamera {
     private static final String TAG = "VisionCamera";
 
     private BaseLoaderCallback loaderCallback;
-    protected OpenCVFrameListener frameListener;
     private Context context;
 
     private CountDownLatch latch;
@@ -32,7 +32,7 @@ public abstract class VisionCamera {
                 switch (status) {
                     case LoaderCallbackInterface.SUCCESS: {
                         Log.i(TAG, "OpenCV loaded successfully");
-                        onStart();
+                        onFinishInit();
                         if (latch != null) latch.countDown();
                     }
                     break;
@@ -46,9 +46,9 @@ public abstract class VisionCamera {
     }
 
     /**
-     * Starts the camera and initializes OpenCV asynchonously
+     * Initializes OpenCV asynchronously
      */
-    public final void start() {
+    public final void init() {
         if (!OpenCVLoader.initDebug()) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager f" +
                     " initialization");
@@ -60,11 +60,11 @@ public abstract class VisionCamera {
     }
 
     /**
-     * Completes the actions of {@link #start()} synchronously
+     * Completes the actions of {@link #init()} synchronously
      */
-    public final void startSync() {
+    public final void initSync() {
         latch = new CountDownLatch(1);
-        start();
+        init();
         try {
             latch.await();
         } catch (InterruptedException e) {
@@ -72,24 +72,25 @@ public abstract class VisionCamera {
         }
     }
 
-    /**
-     * Stops the camera
-     */
-    public final void stop() {
-        onStop();
-    }
-
-    public void setFrameListener(OpenCVFrameListener frameListener) {
-        this.frameListener = frameListener;
-    }
+    public abstract void setFrameListener(OpenCVFrameListener frameListener);
 
     /**
-     * Called when the camera is stopped
+     * Called when OpenCV is initialized
      */
-    protected abstract void onStop();
+    protected abstract void onFinishInit();
 
     /**
-     * Called when the camera is started and OpenCV is initialized
+     * Called to provide the latest frame
      */
-    protected abstract void onStart();
+    public abstract Mat getLatestFrame();
+
+    /**
+     * Called to start live processing
+     */
+    public abstract void start();
+
+    /**
+     * Called to stop live processing
+     */
+    public abstract void stop();
 }
