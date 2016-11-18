@@ -1,6 +1,7 @@
 package com.acmerobotics.velocityvortex.test;
 
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
+import com.acmerobotics.velocityvortex.drive.Vector2D;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -28,6 +29,6 @@ public class MecanumTest extends OpMode {
         if (Math.abs(omega) < 0.05) {
             omega = 0;
         }
-        mecanumDrive.setVelocity(x, y, omega);
+        mecanumDrive.setVelocity(new Vector2D(x, y), omega);
     }
 }
