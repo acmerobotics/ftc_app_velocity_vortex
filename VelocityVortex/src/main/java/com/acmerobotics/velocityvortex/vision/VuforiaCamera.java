@@ -13,13 +13,12 @@ import org.opencv.core.Mat;
 public class VuforiaCamera extends VisionCamera {
 
     private OpenCVFrameGrabber frameGrabber;
-    private VuforiaLocalizer vuforia;
     private OpenCVFrameListener frameListener;
 
     public VuforiaCamera(Context context, VuforiaLocalizer vuforia) {
         super(context);
 
-        this.vuforia = vuforia;
+        frameGrabber = new OpenCVFrameGrabber(vuforia);
     }
 
     @Override
@@ -32,7 +31,7 @@ public class VuforiaCamera extends VisionCamera {
     }
 
     @Override
-    protected void onFinishInit() {
+    protected void postInit() {
 
     }
 
@@ -42,7 +41,6 @@ public class VuforiaCamera extends VisionCamera {
     }
 
     public void start() {
-        frameGrabber = new OpenCVFrameGrabber(vuforia);
         frameGrabber.setFrameListener(this.frameListener);
         frameGrabber.start();
     }

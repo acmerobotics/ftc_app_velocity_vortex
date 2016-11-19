@@ -32,7 +32,7 @@ public abstract class VisionCamera {
                 switch (status) {
                     case LoaderCallbackInterface.SUCCESS: {
                         Log.i(TAG, "OpenCV loaded successfully");
-                        onFinishInit();
+                        postInit();
                         if (latch != null) latch.countDown();
                     }
                     break;
@@ -77,7 +77,7 @@ public abstract class VisionCamera {
     /**
      * Called when OpenCV is initialized
      */
-    protected abstract void onFinishInit();
+    protected abstract void postInit();
 
     /**
      * Called to provide the latest frame

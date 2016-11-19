@@ -95,7 +95,7 @@ public class FastCamera extends VisionCamera {
     }
 
     @Override
-    protected void onFinishInit() {
+    protected void postInit() {
 
     }
 

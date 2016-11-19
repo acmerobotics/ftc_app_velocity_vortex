@@ -23,8 +23,6 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.internal.AppUtil;
 import org.opencv.core.Mat;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,8 +30,6 @@ import java.util.List;
 
 @Autonomous(name="Beacon Vuforia")
 public class BeaconVuforiaTest extends OpMode {
-
-    private static final int MAX_DIMENSION = 640;
 
     private AppUtil appUtil = AppUtil.getInstance();
     private VuforiaInterface vuforia;
@@ -88,7 +84,6 @@ public class BeaconVuforiaTest extends OpMode {
             @Override
             public void onFrame(Mat frame) {
                 fpsCounter.measure();
-                Imgproc.resize(frame, frame, getSmallSize(frame.size()));
                 tempBeacons.clear();
                 BeaconAnalyzer.analyzeImage(frame, tempBeacons);
                 beacons.clear();
@@ -142,13 +137,5 @@ public class BeaconVuforiaTest extends OpMode {
                 frameLayout.removeView(overlayView);
             }
         });
-    }
-
-    public Size getSmallSize(Size big) {
-        if (big.width > big.height) {
-            return new Size(MAX_DIMENSION, big.height * MAX_DIMENSION / big.width);
-        } else {
-            return new Size(big.width * MAX_DIMENSION / big.height, MAX_DIMENSION);
-        }
     }
 }

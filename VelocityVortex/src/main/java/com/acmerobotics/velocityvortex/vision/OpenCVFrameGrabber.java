@@ -1,5 +1,7 @@
 package com.acmerobotics.velocityvortex.vision;
 
+import android.util.Log;
+
 import com.acmerobotics.library.camera.OpenCVFrameListener;
 import com.vuforia.Image;
 
@@ -15,8 +17,10 @@ import java.nio.ByteBuffer;
  */
 public class OpenCVFrameGrabber extends VuforiaFrameGrabber {
 
+    private static final String TAG = "OpenCVFrameGrabber";
+
     private OpenCVFrameListener frameListener;
-    private Mat raw;
+    private Mat raw, rgb;
     private byte[] imgData;
 
     private VuforiaFrameListener vuforiaFrameListener = new VuforiaFrameListener() {
@@ -24,7 +28,7 @@ public class OpenCVFrameGrabber extends VuforiaFrameGrabber {
         public void onFrame(Image frame) {
             if (frameListener != null) {
                 processVuforiaFrame(frame);
-                frameListener.onFrame(raw);
+                frameListener.onFrame(rgb);
             }
         }
     };
@@ -41,9 +45,14 @@ public class OpenCVFrameGrabber extends VuforiaFrameGrabber {
 
     public Mat getLatestFrame() {
         VuforiaLocalizer.CloseableFrame frame = getLatestVuforiaFrame();
+        if (frame == null) {
+            return null;
+        }
         processVuforiaFrame(getRGBImage(frame));
+        Mat mat = new Mat();
+        rgb.copyTo(mat);
         frame.close();
-        return raw;
+        return mat;
     }
 
     private void processVuforiaFrame(Image img) {
@@ -53,9 +62,12 @@ public class OpenCVFrameGrabber extends VuforiaFrameGrabber {
         }
         if (raw == null || raw.width() != img.getWidth() || raw.height() != img.getHeight()) {
             raw = new Mat(img.getHeight(), img.getWidth(), CvType.CV_8UC2);
+            rgb = new Mat();
         }
         byteBuffer.get(imgData);
         raw.put(0, 0, imgData);
-        Imgproc.cvtColor(raw, raw, Imgproc.COLOR_BGR5652BGR);
+        Log.i(TAG, "raw is " + raw);
+        Log.i(TAG, "image is " + img);
+        Imgproc.cvtColor(raw, rgb, Imgproc.COLOR_BGR5652BGR);
     }
 }
