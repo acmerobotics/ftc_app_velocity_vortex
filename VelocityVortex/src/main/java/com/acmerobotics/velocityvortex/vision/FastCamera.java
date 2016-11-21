@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.view.ViewGroup;
 
+import com.acmerobotics.library.camera.CameraType;
 import com.acmerobotics.library.camera.FastCameraView;
 import com.acmerobotics.library.camera.OpenCVFrameListener;
 
@@ -76,6 +77,11 @@ public class FastCamera extends VisionCamera {
                 frameListener.onFrame(frame);
             }
         });
+    }
+
+    @Override
+    public void setCameraType(CameraType type) {
+        cameraView.getParameters().cameraType = type;
     }
 
     @Override

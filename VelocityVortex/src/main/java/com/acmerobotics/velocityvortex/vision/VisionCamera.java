@@ -3,6 +3,7 @@ package com.acmerobotics.velocityvortex.vision;
 import android.content.Context;
 import android.util.Log;
 
+import com.acmerobotics.library.camera.CameraType;
 import com.acmerobotics.library.camera.OpenCVFrameListener;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -73,6 +74,8 @@ public abstract class VisionCamera {
     }
 
     public abstract void setFrameListener(OpenCVFrameListener frameListener);
+
+    public abstract void setCameraType(CameraType type);
 
     /**
      * Called when OpenCV is initialized

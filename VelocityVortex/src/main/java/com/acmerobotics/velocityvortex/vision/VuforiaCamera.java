@@ -2,6 +2,7 @@ package com.acmerobotics.velocityvortex.vision;
 
 import android.content.Context;
 
+import com.acmerobotics.library.camera.CameraType;
 import com.acmerobotics.library.camera.OpenCVFrameListener;
 
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
@@ -28,6 +29,12 @@ public class VuforiaCamera extends VisionCamera {
         if (frameGrabber != null) {
             frameGrabber.setFrameListener(frameListener);
         }
+    }
+
+    @Override
+    public void setCameraType(CameraType type) {
+        throw new RuntimeException("setCameraType() is currently not supported with VuforiaCamera" +
+            " instances. Please use VuforiaLocalizer.Parameters instead.");
     }
 
     @Override

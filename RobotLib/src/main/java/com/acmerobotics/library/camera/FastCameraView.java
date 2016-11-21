@@ -54,7 +54,7 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
     }
 
     public class Parameters {
-        public int cameraId = 0;
+        public CameraType cameraType = CameraType.ANY;
         public PreviewType previewType = PreviewType.RGBA;
         public PreviewScale previewScale = PreviewScale.CENTER;
         public int maxPreviewWidth = Integer.MAX_VALUE;
@@ -262,7 +262,39 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
                 }
             }
 
-            mCameraId = parameters.cameraId;
+            Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+            switch (parameters.cameraType) {
+                case CUSTOM:
+                    mCameraId = parameters.cameraType.getId();
+                    break;
+                case FRONT:
+                    for (int i = 0; i < Camera.getNumberOfCameras(); i++) {
+                        Camera.getCameraInfo(i, cameraInfo);
+                        if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                            mCameraId = i;
+                            break;
+                        }
+                    }
+                    mCameraId = 0;
+                    break;
+                case REAR:
+                    for (int i = 0; i < Camera.getNumberOfCameras(); i++) {
+                        Camera.getCameraInfo(i, cameraInfo);
+                        if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
+                            mCameraId = i;
+                            break;
+                        }
+                    }
+                    mCameraId = 0;
+                    break;
+                case ANY:
+                    mCameraId = 0;
+                    break;
+                default:
+                    mCameraId = 0;
+                    Log.d(TAG, "No camera id supplied, using 0");
+                    break;
+            }
             mCamera = Camera.open(mCameraId);
 
             /* Now set camera parameters */
