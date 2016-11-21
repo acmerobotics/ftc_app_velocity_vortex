@@ -14,7 +14,7 @@ public class MecanumDrive {
     private Vector2D[] rollerDirs;
     private Vector2D[] rotDirs;
 
-    public MecanumDrive(HardwareMap map) {
+    public MecanumDrive(HardwareMap map, double offX, double offY) {
         motors = new DcMotor[4];
         motors[0] = map.dcMotor.get("left1");
         motors[1] = map.dcMotor.get("right1");
@@ -30,15 +30,19 @@ public class MecanumDrive {
         rollerDirs[3] = rollerDirs[1];
 
         rotDirs = new Vector2D[4];
-        rotDirs[0] = new Vector2D(-1, -1).normalize();
-        rotDirs[1] = new Vector2D(-1, 1).normalize();
-        rotDirs[2] = new Vector2D(1, 1).normalize();
-        rotDirs[3] = new Vector2D(1, -1).normalize();
+        rotDirs[0] = new Vector2D(-offY, -offX).normalize();
+        rotDirs[1] = new Vector2D(-offY, offX).normalize();
+        rotDirs[2] = new Vector2D(offY, offX).normalize();
+        rotDirs[3] = new Vector2D(offY, -offX).normalize();
+    }
+
+    public MecanumDrive(HardwareMap map) {
+        this(map, 1, 1);
     }
 
     /**
      * Sets the angular velocity of the mecanum drive system. This includes both the translational
-     * component and the angular component
+     * component and the angular component.
      * @param v translational velocity
      * @param angularSpeed angular speed
      */
@@ -62,6 +66,15 @@ public class MecanumDrive {
             motors[i].setPower(transVelocity.dot(rollerDirs[i]));
         }
 
+    }
+
+    /**
+     * Stop the motors.
+     */
+    public void stop() {
+        for (DcMotor motor : motors) {
+            motor.setPower(0);
+        }
     }
 
 }

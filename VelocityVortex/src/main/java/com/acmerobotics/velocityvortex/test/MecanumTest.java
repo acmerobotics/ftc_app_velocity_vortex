@@ -17,18 +17,9 @@ public class MecanumTest extends OpMode {
 
     @Override
     public void loop() {
-        double x = gamepad1.left_stick_x;
-        double y = gamepad1.left_stick_y;
-        double omega = gamepad1.right_stick_x;
-        if (Math.abs(x) < 0.05) {
-            x = 0;
-        }
-        if (Math.abs(y) < 0.05) {
-            y = 0;
-        }
-        if (Math.abs(omega) < 0.05) {
-            omega = 0;
-        }
-        mecanumDrive.setVelocity(new Vector2D(-x, -y), -omega);
+        double x = -gamepad1.left_stick_x;
+        double y = -gamepad1.left_stick_y;
+        double omega = -gamepad1.right_stick_x;
+        mecanumDrive.setVelocity(new Vector2D(x, y), omega);
     }
 }

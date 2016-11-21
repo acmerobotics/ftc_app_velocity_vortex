@@ -40,12 +40,12 @@ public class PIDController {
     }
 
     /**
-     * Run a single iteration of the feedback loop with the provided
+     * Run a single iteration of the feedback update with the provided
      * error.
      * @param error calculated error
      * @return the calculated correction (update)
      */
-    public double loop(double error) {
+    public double update(double error) {
         // do the PID update
         double time = System.nanoTime() / Math.pow(10, 9);
         double update = 0;

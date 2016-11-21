@@ -12,7 +12,7 @@ import java.util.Date;
 
 /**
  * This class contains a concept line following array opmode with
- * a basic PID loop suitable for line following.
+ * a basic PID update suitable for line following.
  */
 @Autonomous(name = "PID Line Following")
 public class PIDLineFollowingTest extends OpMode {
@@ -51,7 +51,7 @@ public class PIDLineFollowingTest extends OpMode {
         lineFollowingArray.scan();
         int error = lineFollowingArray.getPosition();
 
-        double update = controller.loop(error);
+        double update = controller.update(error);
 
         telemetry.addData("error", error);
         telemetry.addData("update", update);
