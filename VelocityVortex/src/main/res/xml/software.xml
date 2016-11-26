@@ -8,7 +8,8 @@
         <Motor name="left1" port="1" />
         <Motor name="left2" port="2" />
     </MotorController>
-    <DeviceInterfaceModule serialNumber="AL00VFTI" name="dim">
-        <I2cDeviceSynch name="lineArray" port="0"/>
+    <DeviceInterfaceModule name="dim" serialNumber="AL00VFTI">
+        <I2cDeviceSynch name="imu" port="0" />
     </DeviceInterfaceModule>
+
 </Robot>

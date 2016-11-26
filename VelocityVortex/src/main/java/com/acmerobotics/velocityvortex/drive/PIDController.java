@@ -7,7 +7,7 @@ public class PIDController {
 
     private PIDCoefficients coeff;
 
-    private double sum, lastError, lastTime;
+    private double sum, lastError, lastTime, deriv;
 
     /**
      * This class contains the necessary parameters to configure
@@ -56,7 +56,7 @@ public class PIDController {
             double dt = time - lastTime;
             // sum computed using trapezoidal rule
             sum += (error + lastError) * dt / 2.0;
-            double deriv = (error - lastError) / dt;
+            deriv = (error - lastError) / dt;
             update = coeff.p * error + coeff.i * sum + coeff.d * deriv;
         }
 
@@ -64,6 +64,14 @@ public class PIDController {
         lastTime = time;
 
         return update;
+    }
+
+    public double getErrorSum() {
+        return sum;
+    }
+
+    public double getErrorDerivative() {
+        return deriv;
     }
 
 }

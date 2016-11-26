@@ -23,6 +23,10 @@ public class MecanumDrive {
         motors[2].setDirection(DcMotorSimple.Direction.REVERSE);
         motors[3] = map.dcMotor.get("left2");
 
+        for (DcMotor motor : motors) {
+            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+
         rollerDirs = new Vector2D[4];
         rollerDirs[0] = new Vector2D(1, 1).normalize();
         rollerDirs[1] = new Vector2D(-1, 1).normalize();

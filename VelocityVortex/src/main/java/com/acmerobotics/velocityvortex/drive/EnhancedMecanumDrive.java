@@ -1,6 +1,9 @@
 package com.acmerobotics.velocityvortex.drive;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
+import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 /**
  * Orientation-preserving drive interface based on an existing mecanum drive
@@ -9,43 +12,22 @@ public class EnhancedMecanumDrive {
 
     public static final Vector2D INERT = new Vector2D(0, 0);
 
-    public static final PIDController.PIDCoefficients PID_COEFFICIENTS = new PIDController.PIDCoefficients(1, 0, 0);
-    public static final double DEFAULT_TURN_EPSILON = 2.5;
+    // worked quite well for a battery @ ~11.5V
+    // TODO test again with encoders and PID
+    public static final PIDController.PIDCoefficients PID_COEFFICIENTS = new PIDController.PIDCoefficients(-0.025, 0, 0);
 
-    public enum AngleUnit {
-        DEGREES(BNO055IMU.AngleUnit.DEGREES),
-        RADIANS(BNO055IMU.AngleUnit.RADIANS);
-        private BNO055IMU.AngleUnit unit;
-        AngleUnit(BNO055IMU.AngleUnit angleUnit) {
-            unit = angleUnit;
-        }
-        public double fromDegrees(double degrees) {
-            return (unit == BNO055IMU.AngleUnit.DEGREES) ? degrees : Math.toRadians(degrees);
-        }
-        public double fromRadians(double radians) {
-            return (unit == BNO055IMU.AngleUnit.RADIANS) ? radians : Math.toDegrees(radians);
-        }
-        public static AngleUnit from(BNO055IMU.AngleUnit unit) {
-            for (AngleUnit angleUnit : AngleUnit.values()) {
-                if (angleUnit.unit == unit) {
-                    return angleUnit;
-                }
-            }
-            return null;
-        }
-    }
+    public static final double MAX_TURN_SPEED = 0.5;
+    public static final double DEFAULT_TURN_EPSILON = 2.5;
 
     private PIDController controller;
     private MecanumDrive drive;
     private BNO055IMU imu;
     private Vector2D velocity;
-    private AngleUnit angleUnit;
     private double targetHeading;
 
     public EnhancedMecanumDrive(MecanumDrive drive, BNO055IMU imu) {
         this.drive = drive;
         this.imu = imu;
-        this.angleUnit = AngleUnit.from(imu.getParameters().angleUnit);
         controller = new PIDController(PID_COEFFICIENTS);
         velocity = INERT;
         resetHeading();
@@ -57,7 +39,21 @@ public class EnhancedMecanumDrive {
      * @return the heading
      */
     public double getHeading() {
-        return imu.getAngularOrientation().firstAngle;
+        return -imu.getAngularOrientation().firstAngle;
+    }
+
+    public double getTargetHeading() {
+        return targetHeading;
+    }
+
+    public PIDController getController() {
+        return controller;
+    }
+
+    public void log(Telemetry telemetry) {
+        telemetry.addData("heading", getHeading());
+        telemetry.addData("targetHeading", getTargetHeading());
+        telemetry.addData("error", getHeadingError());
     }
 
     /**
@@ -71,13 +67,13 @@ public class EnhancedMecanumDrive {
 
     /**
      * Updates the drive system using the latest PID controller feedback.
-     * @return the orientation error
+     * @return the angular velocity
      */
     public double update() {
         double error = getHeadingError();
         double feedback = controller.update(error);
-        drive.setVelocity(velocity, feedback);
-        return error;
+        drive.setVelocity(velocity, Range.clip(feedback, -MAX_TURN_SPEED, MAX_TURN_SPEED));
+        return feedback;
     }
 
     /**
@@ -105,11 +101,12 @@ public class EnhancedMecanumDrive {
      */
     public void turnSync(double turnAngle, double epsilon) {
         turn(turnAngle);
-        double error;
+        double feedback;
         do {
-            error = update();
+            feedback = update();
             Thread.yield(); // equivalent to LinearOpMode#idle()
-        } while (Math.abs(error) < epsilon);
+        } while (Math.abs(getHeadingError()) > epsilon || Math.abs(feedback) > 0.0025);
+        stop();
     }
 
     /**
@@ -118,7 +115,7 @@ public class EnhancedMecanumDrive {
      * @param turnAngle the turn angle
      */
     public void turnSync(double turnAngle) {
-        turnSync(turnAngle, angleUnit.fromDegrees(DEFAULT_TURN_EPSILON));
+        turnSync(turnAngle, DEFAULT_TURN_EPSILON);
     }
 
     /**
@@ -143,9 +140,14 @@ public class EnhancedMecanumDrive {
      * <a href="https://cdn-shop.adafruit.com/datasheets/BST_BNO055_DS000_12.pdf">the spec</a>).
      * @return the heading error
      */
-    protected double getHeadingError() {
-        double error = Math.abs(targetHeading - getHeading()) % angleUnit.fromDegrees(360);
-        return (error > angleUnit.fromDegrees(180)) ? (angleUnit.fromDegrees(180) - error) : error;
+    public double getHeadingError() {
+//        double error = Math.abs(targetHeading - getHeading()) % 360;
+//        return (error > 180) ? (180 - error) : error;
+        double error = targetHeading - getHeading();
+        while (Math.abs(error) > 180) {
+            error += -Math.signum(error) * 360;
+        }
+        return error;
     }
 
 }

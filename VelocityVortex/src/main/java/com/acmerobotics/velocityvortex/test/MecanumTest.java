@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp(name="Mecanum Test")
 public class MecanumTest extends OpMode {
 
-    private MecanumDrive mecanumDrive;
+    protected MecanumDrive mecanumDrive;
 
     @Override
     public void init() {
