@@ -8,8 +8,11 @@
         <Motor name="left1" port="1" />
         <Motor name="left2" port="2" />
     </MotorController>
+    <ServoController name="pusher" serialNumber="AL026EWW">
+        <Servo name="leftPusher" port="1" />
+        <Servo name="rightPusher" port="2" />
+    </ServoController>
     <DeviceInterfaceModule name="dim" serialNumber="AL00VFTI">
         <I2cDeviceSynch name="imu" port="0" />
     </DeviceInterfaceModule>
-
 </Robot>

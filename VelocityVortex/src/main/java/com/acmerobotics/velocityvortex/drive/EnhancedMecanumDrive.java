@@ -12,12 +12,10 @@ public class EnhancedMecanumDrive {
 
     public static final Vector2D INERT = new Vector2D(0, 0);
 
-    // worked quite well for a battery @ ~11.5V
-    // TODO test again with encoders and PID
-    public static final PIDController.PIDCoefficients PID_COEFFICIENTS = new PIDController.PIDCoefficients(-0.025, 0, 0);
+    public static final PIDController.PIDCoefficients PID_COEFFICIENTS = new PIDController.PIDCoefficients(-0.03, 0, 0);
 
-    public static final double MAX_TURN_SPEED = 0.5;
-    public static final double DEFAULT_TURN_EPSILON = 2.5;
+    public static final double MAX_TURN_SPEED = 0.6;
+    public static final double DEFAULT_TURN_EPSILON = 1;
 
     private PIDController controller;
     private MecanumDrive drive;

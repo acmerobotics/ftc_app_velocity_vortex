@@ -81,4 +81,8 @@ public class MecanumDrive {
         }
     }
 
+    public DcMotor[] getMotors() {
+        return motors;
+    }
+
 }

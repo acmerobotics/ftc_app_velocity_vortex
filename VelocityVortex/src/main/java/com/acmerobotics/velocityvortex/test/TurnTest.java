@@ -24,24 +24,15 @@ public class TurnTest extends LinearOpMode {
 
         waitForStart();
 
-        long start = System.currentTimeMillis();
-        drive.turnSync(90, 0.5);
-//        double feedback = 0;
-//        while (opModeIsActive() && (Math.abs(drive.getHeadingError()) > 1 || Math.abs(feedback) > 0.0025)) {
-//            feedback = drive.update();
-//            telemetry.addData("feedback", feedback);
-//            drive.log(telemetry);
-//            telemetry.update();
-//        }
-//        drive.stop();
-        double time = (System.currentTimeMillis() - start) / 1000.0;
-
         while (opModeIsActive()) {
-            telemetry.addData("time", time + "s");
-            try {
+            long start = System.currentTimeMillis();
+            drive.turnSync(90, 0.5);
+            double time = (System.currentTimeMillis() - start) / 1000.0;
+
+            while(System.currentTimeMillis() - start < 5000) {
+                telemetry.addData("time", time + "s");
                 telemetry.update();
-            } catch (Exception e) {
-                e.printStackTrace();
+                idle();
             }
         }
     }

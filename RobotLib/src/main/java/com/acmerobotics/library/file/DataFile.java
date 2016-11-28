@@ -24,8 +24,10 @@ public class DataFile implements AutoCloseable {
 
     protected void openFile(String filename) {
         File dir = getStorageDir();
+        dir.mkdirs();
         this.file = new File(dir, filename);
         try {
+            this.file.createNewFile();
             this.reader = new BufferedReader(new FileReader(file));
             this.writer = new BufferedWriter(new FileWriter(file));
         } catch (IOException e) {
