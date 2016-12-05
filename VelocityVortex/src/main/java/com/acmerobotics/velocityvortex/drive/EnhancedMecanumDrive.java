@@ -1,21 +1,20 @@
 package com.acmerobotics.velocityvortex.drive;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 /**
  * Orientation-preserving drive interface based on an existing mecanum drive
  */
 public class EnhancedMecanumDrive {
 
-    public static final Vector2D INERT = new Vector2D(0, 0);
+    public static final Vector2D INERT_VELOCITY = new Vector2D(0, 0);
 
-    public static final PIDController.PIDCoefficients PID_COEFFICIENTS = new PIDController.PIDCoefficients(-0.03, 0, 0);
+    public static final PIDController.PIDCoefficients PID_COEFFICIENTS = new PIDController.PIDCoefficients(-0.05, 0, 0);
 
-    public static final double MAX_TURN_SPEED = 0.6;
-    public static final double DEFAULT_TURN_EPSILON = 1;
+    public static final double MAX_TURN_SPEED = 1;
+    public static final double DEFAULT_TURN_EPSILON = 2;
 
     private PIDController controller;
     private MecanumDrive drive;
@@ -27,7 +26,7 @@ public class EnhancedMecanumDrive {
         this.drive = drive;
         this.imu = imu;
         controller = new PIDController(PID_COEFFICIENTS);
-        velocity = INERT;
+        velocity = INERT_VELOCITY;
         resetHeading();
     }
 
@@ -44,14 +43,30 @@ public class EnhancedMecanumDrive {
         return targetHeading;
     }
 
+    public void moveForward(int ticks) {
+        DcMotor[] motors = drive.getMotors();
+        for (DcMotor motor : motors) {
+            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            motor.setTargetPosition(motor.getCurrentPosition() + ticks);
+        }
+        setVelocity(new Vector2D(0, 0.65));
+        resetHeading();
+        while (motors[0].isBusy()) {
+            update();
+            Thread.yield();
+        }
+        stop();
+        for (DcMotor motor : motors) {
+            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+    }
+
     public PIDController getController() {
         return controller;
     }
 
-    public void log(Telemetry telemetry) {
-        telemetry.addData("heading", getHeading());
-        telemetry.addData("targetHeading", getTargetHeading());
-        telemetry.addData("error", getHeadingError());
+    public MecanumDrive getDrive() {
+        return drive;
     }
 
     /**
@@ -78,7 +93,7 @@ public class EnhancedMecanumDrive {
      * Stop the motors.
      */
     public void stop() {
-        velocity = INERT;
+        velocity = INERT_VELOCITY;
         drive.stop();
     }
 

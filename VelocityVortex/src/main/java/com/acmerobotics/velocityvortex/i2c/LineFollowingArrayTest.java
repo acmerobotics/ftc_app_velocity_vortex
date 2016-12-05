@@ -1,12 +1,14 @@
 package com.acmerobotics.velocityvortex.i2c;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 
 /**
  * This class tests the functionality of the line following array
  */
+@Disabled
 @Autonomous(name = "Line Following Array Test")
 public class LineFollowingArrayTest extends OpMode {
 

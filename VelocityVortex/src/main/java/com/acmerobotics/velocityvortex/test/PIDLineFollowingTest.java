@@ -5,6 +5,7 @@ import com.acmerobotics.velocityvortex.drive.PIDController;
 import com.acmerobotics.library.file.CSVFile;
 import com.acmerobotics.velocityvortex.i2c.SparkFunLineFollowingArray;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 
@@ -14,6 +15,7 @@ import java.util.Date;
  * This class contains a concept line following array opmode with
  * a basic PID update suitable for line following.
  */
+@Disabled
 @Autonomous(name = "PID Line Following")
 public class PIDLineFollowingTest extends OpMode {
 

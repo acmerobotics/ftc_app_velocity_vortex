@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-@TeleOp(name="Test Op Mode")
+@TeleOp(name="Test")
 public class TestOpMode extends OpMode {
 
     public enum Mode {

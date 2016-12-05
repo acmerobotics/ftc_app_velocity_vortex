@@ -6,6 +6,7 @@ import com.acmerobotics.library.vision.BeaconAnalyzer;
 import com.acmerobotics.velocityvortex.localization.VuforiaInterface;
 import com.acmerobotics.velocityvortex.vision.VuforiaCamera;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.opencv.core.Mat;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+@Disabled
 @Autonomous(name="Beacon Pusher Test")
 public class BeaconPusherTest extends LinearOpMode {
 

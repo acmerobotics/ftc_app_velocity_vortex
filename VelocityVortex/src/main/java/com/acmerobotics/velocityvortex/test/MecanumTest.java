@@ -21,5 +21,6 @@ public class MecanumTest extends OpMode {
         double y = -gamepad1.left_stick_y;
         double omega = -gamepad1.right_stick_x;
         mecanumDrive.setVelocity(new Vector2D(x, y), omega);
+        mecanumDrive.log(telemetry);
     }
 }

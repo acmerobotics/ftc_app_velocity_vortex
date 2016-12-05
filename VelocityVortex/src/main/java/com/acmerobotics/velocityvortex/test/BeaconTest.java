@@ -3,7 +3,9 @@ package com.acmerobotics.velocityvortex.test;
 import com.acmerobotics.library.vision.Beacon;
 import com.acmerobotics.velocityvortex.vision.BeaconOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
+@Disabled
 @Autonomous(name="Beacon Test")
 public class BeaconTest extends BeaconOpMode {
     @Override
