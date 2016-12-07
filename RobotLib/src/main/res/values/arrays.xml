@@ -4,4 +4,8 @@
         <item>Red</item>
         <item>Blue</item>
     </string-array>
+    <string-array name="robot_types">
+        <item>Competition</item>
+        <item>Software</item>
+    </string-array>
 </resources>

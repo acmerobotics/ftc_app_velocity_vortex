@@ -1,49 +1,50 @@
 package com.acmerobotics.velocityvortex.mech;
 
+import com.acmerobotics.library.configuration.RobotProperties;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class BeaconPusher {
 
-    public static final double LEFT_DOWN = 0.44;
-    public static final double RIGHT_DOWN = 0.41;
-
-    public static final double LEFT_UP = 0;
-    public static final double RIGHT_UP = 1;
-
-    private boolean leftUp, rightUp;
+    private double leftDown, leftUp, rightDown, rightUp;
+    private boolean isLeftUp, isRightUp;
     private Servo leftServo, rightServo;
 
-    public BeaconPusher(HardwareMap hardwareMap) {
+    public BeaconPusher(HardwareMap hardwareMap, RobotProperties properties) {
         leftServo = hardwareMap.servo.get("leftPusher");
         rightServo = hardwareMap.servo.get("rightPusher");
+
+        leftDown = properties.getLeftPusherDown();
+        leftUp = properties.getLeftPusherUp();
+        rightDown = properties.getRightPusherDown();
+        rightUp = properties.getRightPusherUp();
 
         leftDown();
         rightDown();
     }
 
     public void leftUp() {
-        leftUp = true;
-        leftServo.setPosition(LEFT_UP);
+        isLeftUp = true;
+        leftServo.setPosition(leftUp);
     }
 
     public void leftDown() {
-        leftUp = false;
-        leftServo.setPosition(LEFT_DOWN);
+        isLeftUp = false;
+        leftServo.setPosition(leftDown);
     }
 
     public void rightUp() {
-        rightUp = true;
-        rightServo.setPosition(RIGHT_UP);
+        isRightUp = true;
+        rightServo.setPosition(rightUp);
     }
 
     public void rightDown() {
-        rightUp = false;
-        rightServo.setPosition(RIGHT_DOWN);
+        isRightUp = false;
+        rightServo.setPosition(rightDown);
     }
 
     public void leftToggle() {
-        if (leftUp) {
+        if (isLeftUp) {
             leftDown();
         } else {
             leftUp();
@@ -51,7 +52,7 @@ public class BeaconPusher {
     }
 
     public void rightToggle() {
-        if (rightUp) {
+        if (isRightUp) {
             rightDown();
         } else {
             rightUp();

@@ -58,6 +58,20 @@ public class OpModeConfigurationActivity extends Activity {
 
             }
         });
+
+        Spinner robotTypeSpinner = (Spinner) findViewById(R.id.robot_type_spinner);
+        robotTypeSpinner.setSelection(configuration.getRobotType().getIndex());
+        robotTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                configuration.setRobotType(OpModeConfiguration.RobotType.fromIndex(position));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
 
     @Override
