@@ -22,8 +22,7 @@ public class NavigationTest extends OpMode{
 
     @Override
     public void loop () {
-        telemetry.addData("Location", location.asString());
-        telemetry.addData("transform", vuforia.getLocationTransform().formatAsTransform());
+
         vuforia.update();
         if (vuforia.getLocation() != null) {
             location = vuforia.getLocation();
@@ -32,6 +31,8 @@ public class NavigationTest extends OpMode{
             telemetry.addData ("visible", "false");
         }
 
+        telemetry.addData("Location", location.asString());
+        telemetry.addData("transform", vuforia.getLocationTransform().formatAsTransform());
     }
 
 }

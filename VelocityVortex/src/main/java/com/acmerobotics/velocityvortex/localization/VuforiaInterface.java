@@ -65,13 +65,13 @@ public class VuforiaInterface extends LocalizationInterface{
         this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
 
         VuforiaTrackables images = this.vuforia.loadTrackablesFromAsset("velocityVortex");
-        VuforiaTrackable wheelsTarget = images.get(2);
+        VuforiaTrackable wheelsTarget = images.get(0);
         wheelsTarget.setName("wheelsTarget");
 
-        VuforiaTrackable toolsTarget = images.get(0);
+        VuforiaTrackable toolsTarget = images.get(1);
         toolsTarget.setName("toolsTarget");
 
-        VuforiaTrackable legoesTarget = images.get(1);
+        VuforiaTrackable legoesTarget = images.get(2);
         legoesTarget.setName("legoesTarget");
 
         VuforiaTrackable gearsTarget = images.get(3);
