@@ -14,5 +14,6 @@
     </ServoController>
     <DeviceInterfaceModule name="dim" serialNumber="AL00VFTI">
         <I2cDeviceSynch name="imu" port="0" />
+        <I2cDeviceSynch name="lineArray" port="1" />
     </DeviceInterfaceModule>
 </Robot>

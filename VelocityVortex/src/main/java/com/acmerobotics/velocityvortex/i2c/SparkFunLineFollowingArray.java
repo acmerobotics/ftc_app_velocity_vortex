@@ -14,192 +14,6 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynchDevice;
  */
 public class SparkFunLineFollowingArray extends I2cDeviceSynchDevice<I2cDeviceSynch> {
 
-    public static final I2cAddr I2CADDR_DEFAULT = I2cAddr.create7bit(0x3E);
-    private static final String TAG = "LineFollowingArray";
-    public Parameters parameters;
-
-    private int lastBarRawValue;
-
-    /**
-     * This constructor creates and initializes the device.
-     *
-     * @param deviceClient
-     */
-    public SparkFunLineFollowingArray(I2cDeviceSynch deviceClient) {
-        super(deviceClient, true);
-
-        this.parameters = new Parameters();
-
-        doInitialize();
-    }
-
-    public Parameters getParameters() {
-        return this.parameters;
-    }
-
-    protected void delay(int ms) {
-        try {
-            // delays are usually relative to preceding writes, so make sure they're all out to the controller
-            this.deviceClient.waitForWriteCompletions();
-            Thread.sleep(ms);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    private int readWord(int ireg) {
-        byte[] result = this.deviceClient.read(ireg, 2);
-        int msb = ((int) result[0] & 0xFF) << 8;
-        int lsb = (int) result[1] & 0xFF;
-        return msb | lsb;
-    }
-
-    private int readByte(int ireg) {
-        return (int) this.deviceClient.read8(ireg) & 0xFF;
-    }
-
-    @Override
-    protected boolean doInitialize() {
-        this.deviceClient.engage();
-
-        this.deviceClient.setI2cAddress(parameters.i2cAddr);
-
-        reset();
-
-        // Communication test: read two registers with different
-        // default values to verify communication
-        int testRegisters = readWord(Registers.REG_INTERRUPT_MASK_A);
-        Log.i(TAG, Integer.toHexString(testRegisters));
-        // This should always be 0xFF00
-        if (testRegisters == 0xFF00) {
-            Log.i(TAG, "Connection successful");
-            // Success; configure the device
-            this.deviceClient.write8(Registers.REG_DIR_A, 0xFF);
-            this.deviceClient.write8(Registers.REG_DIR_B, 0xFC);
-            this.deviceClient.write8(Registers.REG_DATA_B, 0x01);
-
-            this.deviceClient.waitForWriteCompletions();
-
-            return true;
-        } else {
-            Log.i(TAG, "Connection unsuccessful");
-            return false;
-        }
-    }
-
-    /**
-     * Perform a software reset of the device.
-     */
-    protected void reset() {
-        this.deviceClient.write8(Registers.REG_RESET, 0x12);
-
-        this.deviceClient.waitForWriteCompletions();
-
-        this.deviceClient.write8(Registers.REG_RESET, 0x34);
-
-        this.deviceClient.waitForWriteCompletions();
-    }
-
-    /**
-     * Get the raw output of the device. This method does not query the
-     * sensor directly. Call {@link #scan()} to accomplish this first.
-     *
-     * @return the raw output where each bit corresponds to one of the IR sensors
-     */
-    public int getRaw() {
-        return lastBarRawValue;
-    }
-
-    /**
-     * Get the density of the device output. This method does not query
-     * the sensor direcly. Call {@link #scan()} first.
-     *
-     * @return the number of triggered sensors
-     */
-    public int getDensity() {
-        int bitsCounted = 0;
-
-        for (int i = 0; i < 8; i++) {
-            if (((lastBarRawValue >> i) & 0x01) == 1) {
-                bitsCounted++;
-            }
-        }
-
-        return bitsCounted;
-    }
-
-    /**
-     * Computes a weighted, right-left position estimate of the line. Positive
-     * values correspond to sensors 0-3 and negative values correspond to sensors
-     * 4-7.
-     *
-     * @return the position estimate ranging from -127 to +127
-     */
-    public int getPosition() {
-        int bitsCounted = getDensity();
-
-        int accumulator = 0, lastBarPositionValue;
-
-        // find the vector value of each positive bit and sum
-        for (int i = 7; i > 3; i--) // iterate negative side bits
-        {
-            if (((lastBarRawValue >> i) & 0x01) == 1) {
-                accumulator += ((-32 * (i - 3)) + 1);
-            }
-        }
-        for (int i = 0; i < 4; i++) // iterate positive side bits
-        {
-            if (((lastBarRawValue >> i) & 0x01) == 1) {
-                accumulator += ((32 * (4 - i)) - 1);
-            }
-        }
-
-        if (bitsCounted > 0) {
-            lastBarPositionValue = accumulator / bitsCounted;
-        } else {
-            lastBarPositionValue = 0;
-        }
-
-        return lastBarPositionValue;
-    }
-
-    /**
-     * Read the output of the device. This method should be called
-     * before attempting to access the position result with a method
-     * like {@link #getRaw()}.
-     */
-    public void scan() {
-        if (this.parameters.barStrobe) {
-            this.deviceClient.write8(Registers.REG_DATA_B, 0x02); // turn on IR
-            delay(2);
-            this.deviceClient.write8(Registers.REG_DATA_B, 0x00); // turn on feedback
-        } else {
-            this.deviceClient.write8(Registers.REG_DATA_B, 0x00); // make sure both IR and indicators are on
-        }
-
-        this.deviceClient.waitForWriteCompletions();
-
-        lastBarRawValue = readByte(Registers.REG_DATA_A); // peel the data off port A
-        if (this.parameters.invertBits) {
-            lastBarRawValue ^= 0xFF;
-        }
-
-        if (this.parameters.barStrobe) {
-            this.deviceClient.write8(Registers.REG_DATA_B, 0x03); // turn off IR and feedback when done
-            this.deviceClient.waitForWriteCompletions();
-        }
-    }
-
-    @Override
-    public Manufacturer getManufacturer() {
-        return Manufacturer.Other;
-    }
-
-    @Override
-    public String getDeviceName() {
-        return "SparkFun SX1509 Line Following Array";
-    }
-
     @SuppressWarnings("unused")
     public class Registers {
         public static final int REG_INPUT_DISABLE_B = 0x00;
@@ -330,4 +144,199 @@ public class SparkFunLineFollowingArray extends I2cDeviceSynchDevice<I2cDeviceSy
         /** if true, the input readings are inverted */
         public boolean invertBits = false;
     }
+
+    public static final I2cAddr I2CADDR_DEFAULT = I2cAddr.create7bit(0x3E);
+    private static final String TAG = "LineFollowingArray";
+    public Parameters parameters;
+
+    private int lastBarRawValue;
+
+    /**
+     * This constructor creates and initializes the device.
+     *
+     * @param deviceClient
+     */
+    public SparkFunLineFollowingArray(I2cDeviceSynch deviceClient) {
+        super(deviceClient, true);
+
+        this.parameters = new Parameters();
+
+        doInitialize();
+    }
+
+    public Parameters getParameters() {
+        return this.parameters;
+    }
+
+    protected void delay(int ms) {
+        try {
+            // delays are usually relative to preceding writes, so make sure they're all out to the controller
+            this.deviceClient.waitForWriteCompletions();
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private int readWord(int ireg) {
+        byte[] result = this.deviceClient.read(ireg, 2);
+        int msb = ((int) result[0] & 0xFF) << 8;
+        int lsb = (int) result[1] & 0xFF;
+        return msb | lsb;
+    }
+
+    private int readByte(int ireg) {
+        return (int) this.deviceClient.read8(ireg) & 0xFF;
+    }
+
+    @Override
+    protected boolean doInitialize() {
+        this.deviceClient.engage();
+
+        this.deviceClient.setI2cAddress(parameters.i2cAddr);
+
+        reset();
+
+        // Communication test: read two registers with different
+        // default values to verify communication
+        int testRegisters = readWord(Registers.REG_INTERRUPT_MASK_A);
+        Log.i(TAG, Integer.toHexString(testRegisters));
+        // This should always be 0xFF00
+        if (testRegisters == 0xFF00) {
+            Log.i(TAG, "Connection successful");
+            // Success; configure the device
+            this.deviceClient.write8(Registers.REG_DIR_A, 0xFF);
+            this.deviceClient.write8(Registers.REG_DIR_B, 0xFC);
+            this.deviceClient.write8(Registers.REG_DATA_B, 0x01);
+
+            this.deviceClient.waitForWriteCompletions();
+
+            return true;
+        } else {
+            Log.i(TAG, "Connection unsuccessful");
+            return false;
+        }
+    }
+
+    /**
+     * Perform a software reset of the device.
+     */
+    protected void reset() {
+        this.deviceClient.write8(Registers.REG_RESET, 0x12);
+
+        this.deviceClient.waitForWriteCompletions();
+
+        this.deviceClient.write8(Registers.REG_RESET, 0x34);
+
+        this.deviceClient.waitForWriteCompletions();
+    }
+
+    /**
+     * Get the raw output of the device. This method does not query the
+     * sensor directly. Call {@link #scan()} to accomplish this first.
+     *
+     * @return the raw output where each bit corresponds to one of the IR sensors
+     */
+    public int getRaw() {
+        return lastBarRawValue;
+    }
+
+    public int[] getRawArray() {
+        int[] arr = new int[8];
+        for (int i = 0; i < 8; i++) {
+            arr[i] = (lastBarRawValue >> i) & 0x01;
+        }
+        return arr;
+    }
+
+    /**
+     * Get the density of the device output. This method does not query
+     * the sensor direcly. Call {@link #scan()} first.
+     *
+     * @return the number of triggered sensors
+     */
+    public int getDensity() {
+        int bitsCounted = 0;
+
+        for (int i = 0; i < 8; i++) {
+            if (((lastBarRawValue >> i) & 0x01) == 1) {
+                bitsCounted++;
+            }
+        }
+
+        return bitsCounted;
+    }
+
+    /**
+     * Computes a weighted, right-left position estimate of the line. Positive
+     * values correspond to sensors 0-3 and negative values correspond to sensors
+     * 4-7.
+     *
+     * @return the position estimate ranging from -127 to +127
+     */
+    public int getPosition() {
+        int bitsCounted = getDensity();
+
+        int accumulator = 0, lastBarPositionValue;
+
+        // find the vector value of each positive bit and sum
+        for (int i = 7; i > 3; i--) // iterate negative side bits
+        {
+            if (((lastBarRawValue >> i) & 0x01) == 1) {
+                accumulator += ((-32 * (i - 3)) + 1);
+            }
+        }
+        for (int i = 0; i < 4; i++) // iterate positive side bits
+        {
+            if (((lastBarRawValue >> i) & 0x01) == 1) {
+                accumulator += ((32 * (4 - i)) - 1);
+            }
+        }
+
+        if (bitsCounted > 0) {
+            lastBarPositionValue = accumulator / bitsCounted;
+        } else {
+            lastBarPositionValue = 0;
+        }
+
+        return lastBarPositionValue;
+    }
+
+    /**
+     * Read the output of the device. This method should be called
+     * before attempting to access the position result with a method
+     * like {@link #getRaw()}.
+     */
+    public void scan() {
+        if (this.parameters.barStrobe) {
+            this.deviceClient.write8(Registers.REG_DATA_B, 0x02); // turn on IR
+            delay(2);
+            this.deviceClient.write8(Registers.REG_DATA_B, 0x00); // turn on feedback
+        } else {
+            this.deviceClient.write8(Registers.REG_DATA_B, 0x00); // make sure both IR and indicators are on
+        }
+
+        this.deviceClient.waitForWriteCompletions();
+
+        lastBarRawValue = readByte(Registers.REG_DATA_A); // peel the data off port A
+        if (this.parameters.invertBits) {
+            lastBarRawValue ^= 0xFF;
+        }
+
+        if (this.parameters.barStrobe) {
+            this.deviceClient.write8(Registers.REG_DATA_B, 0x03); // turn off IR and feedback when done
+            this.deviceClient.waitForWriteCompletions();
+        }
+    }
+
+    @Override
+    public Manufacturer getManufacturer() {
+        return Manufacturer.Other;
+    }
+
+    @Override
+    public String getDeviceName() {
+        return "SparkFun SX1509 Line Following Array";
+    }
+
 }

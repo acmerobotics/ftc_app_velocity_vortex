@@ -5,9 +5,54 @@ import android.content.SharedPreferences;
 
 public class OpModeConfiguration {
 
+    private static final RobotProperties SOFTWARE_BOT = new RobotProperties() {
+        @Override
+        public double getLeftPusherUp() {
+            return 0;
+        }
+
+        @Override
+        public double getLeftPusherDown() {
+            return 0.44;
+        }
+
+        @Override
+        public double getRightPusherUp() {
+            return 1;
+        }
+
+        @Override
+        public double getRightPusherDown() {
+            return 0.41;
+        }
+    };
+
+    private static final RobotProperties COMP_BOT = new RobotProperties() {
+        @Override
+        public double getLeftPusherUp() {
+            return 0;
+        }
+
+        @Override
+        public double getLeftPusherDown() {
+            return 0.44;
+        }
+
+        @Override
+        public double getRightPusherUp() {
+            return 1;
+        }
+
+        @Override
+        public double getRightPusherDown() {
+            return 0.41;
+        }
+    };
+
     private static final String PREFS_NAME = "opmode";
     private static final String PREF_ALLIANCE_COLOR = "alliance_color";
     private static final String PREF_DELAY = "delay";
+    private static final String PREF_ROBOT_TYPE = "robot_type";
 
     public enum AllianceColor {
         RED(0),
@@ -23,6 +68,31 @@ public class OpModeConfiguration {
             for (AllianceColor color : AllianceColor.values()) {
                 if (color.getIndex() == i) {
                     return color;
+                }
+            }
+            return null;
+        }
+    }
+
+    public enum RobotType {
+        SOFTWARE(0, SOFTWARE_BOT),
+        COMPETITION(1, COMP_BOT);
+        private int index;
+        private RobotProperties props;
+        RobotType(int i, RobotProperties p) {
+            index = i;
+            props = p;
+        }
+        public int getIndex() {
+            return index;
+        }
+        public RobotProperties getProperties() {
+            return props;
+        }
+        public static RobotType fromIndex(int i) {
+            for (RobotType type : RobotType.values()) {
+                if (type.getIndex() == i) {
+                    return type;
                 }
             }
             return null;
@@ -53,6 +123,14 @@ public class OpModeConfiguration {
         if (delay >= 0 && delay <= 30) {
             editor.putInt(PREF_DELAY, delay);
         }
+    }
+
+    public RobotType getRobotType() {
+        return RobotType.fromIndex(preferences.getInt(PREF_ROBOT_TYPE, 0));
+    }
+
+    public void setRobotType(RobotType type) {
+        editor.putInt(PREF_ROBOT_TYPE, type.getIndex());
     }
 
     public boolean commit() {

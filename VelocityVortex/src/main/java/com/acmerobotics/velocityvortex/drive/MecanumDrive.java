@@ -62,7 +62,7 @@ public class MecanumDrive {
         }
 
         if (Math.abs(speed) > 0.0000001) {
-            v.normalize();
+            v = v.copy().normalize();
         }
 
         for (int i = 0; i < 4; i++) {
