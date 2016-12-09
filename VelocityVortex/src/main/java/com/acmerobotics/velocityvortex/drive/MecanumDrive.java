@@ -125,6 +125,14 @@ public class MecanumDrive {
         return raw;
     }
 
+    public int getMeanPosition() {
+        int sum = 0;
+        for (int pos : getPositions()) {
+            sum += pos;
+        }
+        return sum / motors.length;
+    }
+
     /**
      * Move the robot forward a specific number of encoder ticks
      * @param ticks number of encoder ticks

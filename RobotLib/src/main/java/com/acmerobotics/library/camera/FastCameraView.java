@@ -202,6 +202,11 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
     }
 
     protected void drawFrame(Mat frame) {
+        Log.i(TAG, "dims: " + frame.dims());
+        Log.i(TAG, "height: " + frame.height());
+        Log.i(TAG, "width: " + frame.width());
+        Log.i(TAG, "height: " + mCacheBitmap.getHeight());
+        Log.i(TAG, "width: " + mCacheBitmap.getWidth());
         Utils.matToBitmap(frame, mCacheBitmap);
         Canvas canvas = getHolder().lockCanvas();
         Paint black = new Paint();
@@ -346,7 +351,6 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
                         mFrameWidth = mFrameHeight;
                         mFrameHeight = temp;
                     }
-                    mCacheBitmap = Bitmap.createBitmap(mFrameWidth, mFrameHeight, Bitmap.Config.ARGB_8888);
 
                     mSurfaceTexture = new SurfaceTexture(MAGIC_TEXTURE_ID);
                     mCamera.setPreviewTexture(mSurfaceTexture);
@@ -504,6 +508,11 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
                             }
                             rotateFrame(mDrawFrame);
                             mListener.onFrame(mDrawFrame);
+                            int rows = mDrawFrame.rows();
+                            int cols = mDrawFrame.cols();
+                            if (mCacheBitmap == null || mCacheBitmap.getHeight() != rows || mCacheBitmap.getWidth() != cols) {
+                                mCacheBitmap = Bitmap.createBitmap(cols, rows, Bitmap.Config.ARGB_8888);
+                            }
                             if (mVisible) drawFrame(mDrawFrame);
                             mCameraFrameReady = false;
                         }

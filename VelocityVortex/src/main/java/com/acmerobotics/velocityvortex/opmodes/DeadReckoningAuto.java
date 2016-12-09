@@ -21,10 +21,12 @@ import org.opencv.core.Mat;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.acmerobotics.library.configuration.OpModeConfiguration.AllianceColor.BLUE;
+
 @Autonomous(name="Dead Reckoning Auto")
 public class DeadReckoningAuto extends LinearOpMode {
 
-    public static final PIDController.PIDCoefficients LINE_PID_COEFF = new PIDController.PIDCoefficients(-0.1, 0, 0);
+    public static final PIDController.PIDCoefficients LINE_PID_COEFF = new PIDController.PIDCoefficients(-0.06, 0, 0);
     public static final Vector2D BASE_VELOCITY = new Vector2D(-0.25, 0);
 
     public static final int PULSES_PER_REV = 1680;
@@ -32,40 +34,57 @@ public class DeadReckoningAuto extends LinearOpMode {
     public static final double ROBOT_LENGTH = 18; // inches
     public static final double TILE_WIDTH = 24; // inches
 
+    public static final int MAX_TURN_ERROR = 3;
+
     private EnhancedMecanumDrive drive;
     private BNO055IMU imu;
     private VuforiaCamera camera;
     private BeaconPusher pusher;
     private SparkFunLineFollowingArray lineSensor;
+    private OpModeConfiguration configuration;
+    private OpModeConfiguration.AllianceColor allianceColor;
+    private Beacon.BeaconColor targetBeaconColor;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        imu = new AdafruitBNO055IMU(hardwareMap.i2cDeviceSynch.get("imu"));
-        BNO055IMU.Parameters params = new BNO055IMU.Parameters();
-        params.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        imu.initialize(params);
-
-        OpModeConfiguration config = new OpModeConfiguration(hardwareMap.appContext);
-
-        pusher = new BeaconPusher(hardwareMap, config.getRobotType().getProperties());
-
-        lineSensor = new SparkFunLineFollowingArray(hardwareMap.i2cDeviceSynch.get("lineArray"));
-
-        drive = new EnhancedMecanumDrive(new MecanumDrive(hardwareMap), imu);
+        configuration = new OpModeConfiguration(hardwareMap.appContext);
+        allianceColor = configuration.getAllianceColor();
+        targetBeaconColor = allianceColor == BLUE ? Beacon.BeaconColor.BLUE : Beacon.BeaconColor.RED;
 
         VuforiaInterface vuforia = new VuforiaInterface("", 0);
         camera = new VuforiaCamera(hardwareMap.appContext, vuforia.getLocalizer());
         camera.initSync();
 
+        imu = new AdafruitBNO055IMU(hardwareMap.i2cDeviceSynch.get("imu"));
+        BNO055IMU.Parameters params = new BNO055IMU.Parameters();
+        params.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        imu.initialize(params);
+
+        pusher = new BeaconPusher(hardwareMap, configuration.getRobotType().getProperties());
+
+        lineSensor = new SparkFunLineFollowingArray(hardwareMap.i2cDeviceSynch.get("lineArray"));
+
+        drive = new EnhancedMecanumDrive(new MecanumDrive(hardwareMap), imu);
+
         waitForStart();
 
-        moveForward(2 * TILE_WIDTH - ROBOT_LENGTH / 2);
+        sleep(1000 * configuration.getDelay());
 
-        drive.turnSync(45);
+        moveForward(13);
+
+        if (allianceColor == BLUE) {
+            drive.turnSync(45, MAX_TURN_ERROR);
+        } else {
+            drive.turnSync(-45, MAX_TURN_ERROR);
+        }
 
         moveForward(1.5 * TILE_WIDTH * Math.sqrt(2));
 
-        drive.turnSync(-45);
+        if (allianceColor == BLUE) {
+            drive.turnSync(-45, MAX_TURN_ERROR);
+        } else {
+            drive.turnSync(45, MAX_TURN_ERROR);
+        }
 
         List<Beacon> beacons = new ArrayList<Beacon>();
         while (beacons.isEmpty()) {
@@ -74,38 +93,60 @@ public class DeadReckoningAuto extends LinearOpMode {
             idle();
         }
         Beacon b = beacons.get(0);
-        if (b.getLeftRegion().getColor() == Beacon.BeaconColor.BLUE) {
+        if (b.getLeftRegion().getColor() == targetBeaconColor) {
             pusher.leftUp();
         } else {
             pusher.rightUp();
         }
 
-        drive.setVelocity(BASE_VELOCITY);
-        lineSensor.scan();
-        while (opModeIsActive() && lineSensor.getDensity() == 0) {
-            lineSensor.scan();
-            Thread.yield();
-        }
-        drive.stop();
-
-        followLine(lineSensor, drive.getDrive(), this);
+//        drive.setVelocity(BASE_VELOCITY);
+//        lineSensor.scan();
+//        while (opModeIsActive() && lineSensor.getDensity() == 0) {
+//            lineSensor.scan();
+//            Thread.yield();
+//        }
+//        drive.stop();
+//
+//        followLine(lineSensor, drive.getDrive(), this);
     }
 
     public void moveForward(double inches) {
         drive.moveForward((int)((inches * PULSES_PER_REV) / (Math.PI * DIAMETER)));
     }
 
-    public static void followLine(SparkFunLineFollowingArray lineSensor, MecanumDrive drive, LinearOpMode mode) {
+    public static void followLine(SparkFunLineFollowingArray lineSensor, EnhancedMecanumDrive drive, LinearOpMode mode) {
         PIDController lineController = new PIDController(LINE_PID_COEFF);
+        MecanumDrive basic = drive.getDrive();
+        double lastError = 0;
         while(mode.opModeIsActive()) {
             lineSensor.scan();
             int[] values = lineSensor.getRawArray();
-            int error = (values[0] + values[1] + values[2] + values[3]) - (values[4] + values[5] + values[6] + values[7]);
+            double sum = 0;
+            double count = 0;
+            for (int i = 0; i < 8; i++) {
+                sum += values[i] * (i - 4);
+                count += values[i];
+            }
+            double error;
+            if (count == 0) {
+                error = Math.signum(lastError) * 5;
+            } else {
+                error = sum / count;
+                lastError = error;
+            }
+//            if (lineSensor.getDensity() == 0) {
+//                error = Math.signum(lastError) * 5;
+//            } else {
+//                lastError = error;
+//            }
+//            error += 0.4 * drive.getHeadingError();
             double update = lineController.update(error);
-            drive.setVelocity(BASE_VELOCITY.copy(), update);
+            // removed the copy -- watch out
+            basic.setVelocity(BASE_VELOCITY, update);
+
             mode.telemetry.addData("error", error);
             mode.telemetry.addData("update", update);
-            drive.log(mode.telemetry);
+            basic.log(mode.telemetry);
             mode.telemetry.update();
             mode.idle();
         }

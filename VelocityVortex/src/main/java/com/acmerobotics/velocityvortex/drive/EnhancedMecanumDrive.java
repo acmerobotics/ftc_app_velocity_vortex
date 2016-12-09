@@ -1,7 +1,6 @@
 package com.acmerobotics.velocityvortex.drive;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
 /**
@@ -11,7 +10,7 @@ public class EnhancedMecanumDrive {
 
     public static final Vector2D INERT_VELOCITY = new Vector2D(0, 0);
 
-    public static final PIDController.PIDCoefficients PID_COEFFICIENTS = new PIDController.PIDCoefficients(-0.05, 0, 0);
+    public static final PIDController.PIDCoefficients PID_COEFFICIENTS = new PIDController.PIDCoefficients(-0.06, 0, 0);
 
     public static final double MAX_TURN_SPEED = 1;
     public static final double DEFAULT_TURN_EPSILON = 2;
@@ -44,21 +43,16 @@ public class EnhancedMecanumDrive {
     }
 
     public void moveForward(int ticks) {
-        DcMotor[] motors = drive.getMotors();
-        for (DcMotor motor : motors) {
-            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            motor.setTargetPosition(motor.getCurrentPosition() + ticks);
-        }
-        setVelocity(new Vector2D(0, 0.65));
         resetHeading();
-        while (motors[0].isBusy()) {
+        drive.resetEncoders();
+        int error = ticks;
+        while (error > 0) {
+            error = ticks - drive.getMeanPosition();
+            setVelocity(new Vector2D(0, 0.0003 * error + 0.1));
             update();
             Thread.yield();
         }
         stop();
-        for (DcMotor motor : motors) {
-            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        }
     }
 
     public PIDController getController() {
@@ -118,7 +112,7 @@ public class EnhancedMecanumDrive {
         do {
             feedback = update();
             Thread.yield(); // equivalent to LinearOpMode#idle()
-        } while (Math.abs(getHeadingError()) > epsilon || Math.abs(feedback) > 0.0025);
+        } while (Math.abs(getHeadingError()) > epsilon); // || Math.abs(feedback) > 0.025);
         stop();
     }
 
