@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
 <Robot type="FirstInspires-FTC" name="test">
-    <MotorController name="launcher" serialNumber="AH00QHU3">
+    <MotorController name="test" serialNumber="AH00QHU3">
         <Motor name="launcherRight" port="1" />
         <Motor name="launcherLeft" port="2" />
     </MotorController>
