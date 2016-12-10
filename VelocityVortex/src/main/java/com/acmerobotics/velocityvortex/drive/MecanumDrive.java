@@ -69,7 +69,7 @@ public class MecanumDrive {
             Vector2D angularVelocity = rotDirs[i].copy().multiply(angularSpeed);
             Vector2D transVelocity = v.copy().multiply(Math.min(1 - angularSpeed, speed));
             transVelocity.add(angularVelocity);
-            motors[i].setPower(transVelocity.dot(rollerDirs[i]));
+            motors[i].setPower(Range.clip((transVelocity.dot(rollerDirs[i])), -1, 1));
         }
 
     }

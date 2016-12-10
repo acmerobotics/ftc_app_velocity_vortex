@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.Range;
 
 /**
  * Created by kelly on 12/6/2016.
@@ -15,18 +16,17 @@ public class Launcher {
     private double velocity;
     private double velocityStep = .1;
 
-    private long rampTime = 1000;
-    private boolean ramping;
-    private double targetVelocity;
-    private double initialVelocity;
-    private long startTime;
+    private long rampTime = 100;
+    private double rampIncerment = .1;
+    private double accelerationLeft;
+    private long lastTime;
 
     private DcMotor right, left, elevation;
-    private Servo gate, trigger;
+    private Servo trigger;
 
     private double  gateOpenPos = 0, //todo the servo positions
                     gateClosePos = 0,
-                    triggerUpPos = 0,
+                    triggerUpPos = .45,
                     triggerDownPos = 0;
 
     private boolean gateIsOpen, triggerIsUp;
@@ -37,15 +37,23 @@ public class Launcher {
         elevation = hardwareMap.dcMotor.get ("launcherElevation");
 
         left.setDirection(DcMotorSimple.Direction.REVERSE);
-        right.setDirection (DcMotorSimple.Direction.FORWARD);
+        right.setDirection (DcMotorSimple.Direction.REVERSE);
+
+        left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+        elevation.setDirection (DcMotorSimple.Direction.REVERSE); //todo motor elevation motor direction - forward should be up
+        elevation.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        elevation.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        elevation.setPower (0);
 
         setVelocity (0);
 
         trigger = hardwareMap.servo.get("trigger");
-        gate = hardwareMap.servo.get("gate");
+        //gate = hardwareMap.servo.get("gate");
 
         triggerDown();
-        gateClose();
+        //gateClose();
 
     }
 
@@ -54,51 +62,41 @@ public class Launcher {
      * @param velocity between 0 and one
      */
     public void setVelocity(double velocity) {
-        velocity = velocity > 1 ? 1 : velocity;
-        velocity = velocity < 0 ? 0 : velocity;
-        this.velocity = velocity;
+        this.velocity = Range.clip(velocity, 0, 1);
+        if (velocity < .2) velocity = 0;
         right.setPower (velocity);
         left.setPower (velocity);
-        ramping = false;
     }
 
-    /**
-     * set a target velocity to be ramped to over 1 second
-     * updateVelocity must be called each loop in order for the velocity to be changed incrementally
-     * @param target between 0 and 1
-     */
     public void setTargetVelocity (double target) {
-        if (target == velocity) return;
-        ramping = true;
-        startTime = System.currentTimeMillis();
-        targetVelocity = target;
-        initialVelocity = velocity;
-    }
-
-    /**
-     * update the velocity to the current value in the ramping
-     * does nothing if not currently ramping
-     */
-    public void updateVelocity () {
-        if (!ramping) return;
-
-        long diff = System.currentTimeMillis() - startTime;
-        velocity = ((diff/rampTime)*(targetVelocity - initialVelocity)) + initialVelocity; //the percentage through the ramp, times the distance to go, plus the initial value
-
-        if (diff >= rampTime) {
-            velocity = targetVelocity;
-            ramping = false;
-        }
-
-        right.setPower (velocity);
-        left.setPower (velocity);
+        accelerationLeft = target - velocity;
+        lastTime = System.currentTimeMillis();
     }
 
     public void toggleVelocity () {
         if (velocity == 0) {
-            setTargetVelocity(1);
+            setVelocity(1);
         }
-        else setTargetVelocity (0);
+        else setVelocity (0);
+    }
+
+    public void updateVelocity () {
+        long diff = System.currentTimeMillis() - lastTime;
+        lastTime = System.currentTimeMillis();
+        if (diff < rampTime) {
+            return;
+        }
+        if (accelerationLeft < velocityStep) setVelocity(velocity + accelerationLeft);
+        else {
+            if (accelerationLeft >= 0){
+                setVelocity(velocity + velocityStep);
+                accelerationLeft -= velocityStep;
+            }else {
+                setVelocity (velocity - velocityStep);
+                accelerationLeft += velocityStep;
+            }
+        }
+
     }
 
     public double getVelocity () {
@@ -117,7 +115,7 @@ public class Launcher {
         setVelocity(0);
     }
 
-    public void gateOpen () {
+    /*public void gateOpen () {
         gate.setPosition (gateOpenPos);
         gateIsOpen = true;
     }
@@ -130,7 +128,7 @@ public class Launcher {
     public void gateToggle () {
         if (gateIsOpen) gateClose();
         else gateOpen();
-    }
+    }*/
 
     public void triggerUp () {
         trigger.setPosition(triggerUpPos);
@@ -145,6 +143,10 @@ public class Launcher {
     public void triggerToggle () {
         if (triggerIsUp) triggerDown();
         else triggerDown();
+    }
+
+    public void setElevationVelocity (double velocity) {
+        elevation.setPower(Range.clip(velocity, -1, 1));
     }
 
 }

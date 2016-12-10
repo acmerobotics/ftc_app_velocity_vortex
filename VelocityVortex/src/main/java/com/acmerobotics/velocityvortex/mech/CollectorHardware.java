@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 /**
+ *
  * Created by kelly on 12/7/2016.
  */
 
@@ -20,7 +21,7 @@ public class CollectorHardware {
 
     public void setVelocity (double velocity) {
         this.velocity = velocity;
-        running = velocity > 0 ? true : false;
+        running = velocity > 0;
         motor.setPower (velocity);
     }
 

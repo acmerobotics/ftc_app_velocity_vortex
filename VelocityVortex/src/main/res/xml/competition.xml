@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
-<Robot type="FirstInspires-FTC" name="software">
+<Robot type="FirstInspires-FTC" name="competition">
     <MotorController name="rightDrive" serialNumber="AH00QHU3">
         <Motor name="right1" port="1" />
         <Motor name="right2" port="2" />
@@ -12,17 +12,16 @@
         <Motor name="launcherLeft" port="1" />
         <Motor name="launcherRight" port="2" />
     </MotorController>
-    <MotorController name="collector" serialNumber="AI00VV8X">
+    <MotorController name="collector" serialNumber="AL00VV8X">
         <Motor name="collector" port="1" />
         <Motor name="launcherElevation" port="2" />
     </MotorController>
     <ServoController name="pusher" serialNumber="AI02RKXM">
         <Servo name="leftPusher" port="1" />
         <Servo name="rightPusher" port="2" />
-        <Servo name="gate" port="3" />
-        <Servo name="trigger" port="4" />
+        <Servo name="trigger" port="3" />
     </ServoController>
-    <DeviceInterfaceModule name="dim" serialNumber="AIO2RLOW">
+    <DeviceInterfaceModule name="dim" serialNumber="AI02RLOW">
         <I2cDeviceSynch name="imu" port="0" />
         <I2cDeviceSynch name="lineArray" port="1" />
     </DeviceInterfaceModule>
