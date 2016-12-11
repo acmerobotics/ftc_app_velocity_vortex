@@ -21,6 +21,9 @@ public class Launcher {
     private double accelerationLeft;
     private long lastTime;
 
+    private double trim = 0; // positive moves to the right
+    private double maxVelocity = 1;
+
     private DcMotor right, left, elevation;
     private Servo trigger;
 
@@ -42,7 +45,7 @@ public class Launcher {
         left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        elevation.setDirection (DcMotorSimple.Direction.REVERSE); //todo motor elevation motor direction - forward should be up
+        elevation.setDirection (DcMotorSimple.Direction.REVERSE);
         elevation.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         elevation.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         elevation.setPower (0);
@@ -62,15 +65,52 @@ public class Launcher {
      * @param velocity between 0 and one
      */
     public void setVelocity(double velocity) {
-        this.velocity = Range.clip(velocity, 0, 1);
+        this.velocity = Range.clip(velocity, 0, maxVelocity);
         if (velocity < .2) velocity = 0;
-        right.setPower (velocity);
-        left.setPower (velocity);
+        right.setPower (Range.clip((velocity - trim), 0, maxVelocity));
+        left.setPower (Range.clip((velocity + trim), 0, maxVelocity));
+    }
+
+    public void stop () {
+        right.setPower (0);
+        left.setPower (0);
+    }
+
+    public void setMaxVelocity (double max) {
+        maxVelocity = Range.clip (max, 0, 1);
+    }
+
+    public double getMaxVelocity () {
+        return maxVelocity;
+    }
+
+    public void maxVelocityUp () {
+        setMaxVelocity(maxVelocity + .05);
+    }
+
+    public void maxVelocityDown () {
+        setMaxVelocity(maxVelocity - .05);
     }
 
     public void setTargetVelocity (double target) {
         accelerationLeft = target - velocity;
         lastTime = System.currentTimeMillis();
+    }
+
+    public void setTrim (double trim) {
+        this.trim = Range.clip (trim, 0, .5);
+    }
+
+    public double getTrim () {
+        return trim;
+    }
+
+    public void trimUp () {
+        setTrim (trim + .05);
+    }
+
+    public void trimDown () {
+        setTrim (trim - .05);
     }
 
     public void toggleVelocity () {
@@ -109,10 +149,6 @@ public class Launcher {
 
     public void velocityDown () {
         setVelocity (velocity - velocityStep);
-    }
-
-    public void stop() {
-        setVelocity(0);
     }
 
     /*public void gateOpen () {

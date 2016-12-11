@@ -5,6 +5,7 @@ import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
 import com.acmerobotics.velocityvortex.drive.Vector2D;
 import com.acmerobotics.velocityvortex.mech.BeaconPusher;
+import com.acmerobotics.velocityvortex.mech.BeaconSwich;
 import com.acmerobotics.velocityvortex.mech.CollectorHardware;
 import com.acmerobotics.velocityvortex.mech.Launcher;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
@@ -22,10 +23,11 @@ public class MainTeleOp extends OpMode {
     private double stickExponent = 1.8;
 
     private MecanumDrive drive;
-    private BeaconPusher beaconPusher;
+    private BeaconSwich beaconPusher;
     private Launcher launcher;
     private CollectorHardware collector;
     private boolean leftTriggerDown, rightTriggerDown, rightBumperDown = false, leftBumperDown2 = false;
+    private boolean upDown, rightDown, leftDown, downDown;
     private BNO055IMU imu;
     private OpModeConfiguration configuration;
 
@@ -42,7 +44,7 @@ public class MainTeleOp extends OpMode {
 
         //enhancedMecanumDrive = new EnhancedMecanumDrive(drive, imu);
 
-        beaconPusher = new BeaconPusher(hardwareMap, configuration.getRobotType().getProperties());
+        beaconPusher = new BeaconSwich(hardwareMap);
 
         launcher = new Launcher (hardwareMap);
         collector = new CollectorHardware(hardwareMap);
@@ -66,7 +68,7 @@ public class MainTeleOp extends OpMode {
         if (gamepad1.left_trigger == 1) {
             if (!leftTriggerDown) {
                 leftTriggerDown = true;
-                beaconPusher.leftToggle();
+                beaconPusher.left();
             }
         } else if (gamepad1.left_trigger < .5){
             leftTriggerDown = false;
@@ -75,7 +77,7 @@ public class MainTeleOp extends OpMode {
         if (gamepad1.right_trigger == 1) {
             if (!rightTriggerDown) {
                 rightTriggerDown = true;
-                beaconPusher.rightToggle();
+                beaconPusher.right();
             }
         } else if (gamepad1.right_trigger < .5){
             rightTriggerDown = false;
@@ -113,8 +115,40 @@ public class MainTeleOp extends OpMode {
         } else if (gamepad2.left_bumper) {
             if (!leftBumperDown2) {
                 leftBumperDown2 = true;
-                launcher.setVelocity (0);
+                launcher.stop();
             }
         } else leftBumperDown2 = false;
+
+        if (gamepad2.y) {
+            if (!upDown) {
+                launcher.maxVelocityUp();
+                upDown = true;
+            }
+        } else upDown = false;
+
+        if (gamepad2.a) {
+            if (!downDown) {
+                launcher.maxVelocityDown();
+                downDown = true;
+            }
+        } else downDown = false;
+
+        if (gamepad2.b) {
+            if (!rightDown) {
+                launcher.trimUp();
+                rightDown = true;
+            }
+        } else rightDown = false;
+
+        if (gamepad2.x) {
+            if (!leftDown) {
+                launcher.trimDown();
+                leftDown = true;
+            }
+        } else leftDown = false;
+
+        telemetry.addData ("maxVelocity", launcher.getMaxVelocity());
+        telemetry.addData ("trim", launcher.getTrim());
+
      }
 }

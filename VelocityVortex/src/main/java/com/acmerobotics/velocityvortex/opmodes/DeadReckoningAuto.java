@@ -10,6 +10,7 @@ import com.acmerobotics.velocityvortex.drive.Vector2D;
 import com.acmerobotics.velocityvortex.i2c.SparkFunLineFollowingArray;
 import com.acmerobotics.velocityvortex.localization.VuforiaInterface;
 import com.acmerobotics.velocityvortex.mech.BeaconPusher;
+import com.acmerobotics.velocityvortex.mech.BeaconSwich;
 import com.acmerobotics.velocityvortex.vision.VuforiaCamera;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
@@ -29,7 +30,7 @@ public class DeadReckoningAuto extends LinearOpMode {
     public static final PIDController.PIDCoefficients LINE_PID_COEFF = new PIDController.PIDCoefficients(-0.06, 0, 0);
     public static final Vector2D BASE_VELOCITY = new Vector2D(-0.25, 0);
 
-    public static final int PULSES_PER_REV = 1680;
+    public static final int PULSES_PER_REV = 1120;
     public static final double DIAMETER = 4; // inches
     public static final double ROBOT_LENGTH = 18; // inches
     public static final double TILE_WIDTH = 24; // inches
@@ -39,7 +40,8 @@ public class DeadReckoningAuto extends LinearOpMode {
     private EnhancedMecanumDrive drive;
     private BNO055IMU imu;
     private VuforiaCamera camera;
-    private BeaconPusher pusher;
+    //private BeaconPusher pusher;
+    private BeaconSwich beacon;
     private SparkFunLineFollowingArray lineSensor;
     private OpModeConfiguration configuration;
     private OpModeConfiguration.AllianceColor allianceColor;
@@ -60,7 +62,9 @@ public class DeadReckoningAuto extends LinearOpMode {
         params.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         imu.initialize(params);
 
-        pusher = new BeaconPusher(hardwareMap, configuration.getRobotType().getProperties());
+        //pusher = new BeaconPusher(hardwareMap, configuration.getRobotType().getProperties());
+        beacon = new BeaconSwich(hardwareMap);
+        beacon.store();
 
         lineSensor = new SparkFunLineFollowingArray(hardwareMap.i2cDeviceSynch.get("lineArray"));
 
@@ -70,7 +74,7 @@ public class DeadReckoningAuto extends LinearOpMode {
 
         sleep(1000 * configuration.getDelay());
 
-        moveForward(13);
+        moveForward(14);
 
         if (allianceColor == BLUE) {
             drive.turnSync(45, MAX_TURN_ERROR);
@@ -94,9 +98,11 @@ public class DeadReckoningAuto extends LinearOpMode {
         }
         Beacon b = beacons.get(0);
         if (b.getLeftRegion().getColor() == targetBeaconColor) {
-            pusher.leftUp();
+            //pusher.leftUp();
+            beacon.left();
         } else {
-            pusher.rightUp();
+            //pusher.rightUp();
+            beacon.right();
         }
 
 //        drive.setVelocity(BASE_VELOCITY);
