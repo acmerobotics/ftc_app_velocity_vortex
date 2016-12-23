@@ -12,20 +12,37 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
  */
 public class MecanumDrive {
 
+    public static class Configuration {
+        public double[] wheelRadii;
+        public double offX = 1, offY = 1;
+
+        public static Configuration createFixedRadius(double radius) {
+            Configuration config = new Configuration();
+            config.wheelRadii = new double[] { radius, radius, radius, radius };
+            return config;
+        }
+    }
+
+    public static final Vector2D INERT_VELOCITY = new Vector2D(0, 0);
+
+    private Configuration configuration;
+
     private DcMotor[] motors;
     private Vector2D[] rollerDirs;
     private Vector2D[] rotDirs;
 
     private int[] offsets;
 
-    public MecanumDrive(HardwareMap map, double offX, double offY) {
+    public MecanumDrive(HardwareMap map, Configuration config) {
+        configuration = config;
+
         motors = new DcMotor[4];
-        motors[0] = map.dcMotor.get("left1");
-        motors[1] = map.dcMotor.get("right1");
+        motors[0] = map.dcMotor.get("leftFront");
+        motors[1] = map.dcMotor.get("rightFront");
         motors[1].setDirection(DcMotorSimple.Direction.REVERSE);
-        motors[2] = map.dcMotor.get("right2");
+        motors[2] = map.dcMotor.get("rightBack");
         motors[2].setDirection(DcMotorSimple.Direction.REVERSE);
-        motors[3] = map.dcMotor.get("left2");
+        motors[3] = map.dcMotor.get("leftBack");
 
         rollerDirs = new Vector2D[4];
         rollerDirs[0] = new Vector2D(1, 1).normalize();
@@ -33,6 +50,7 @@ public class MecanumDrive {
         rollerDirs[2] = rollerDirs[0];
         rollerDirs[3] = rollerDirs[1];
 
+        double offX = config.offX, offY = config.offY;
         rotDirs = new Vector2D[4];
         rotDirs[0] = new Vector2D(-offY, -offX).normalize();
         rotDirs[1] = new Vector2D(-offY, offX).normalize();
@@ -40,10 +58,6 @@ public class MecanumDrive {
         rotDirs[3] = new Vector2D(offY, -offX).normalize();
 
         resetEncoders();
-    }
-
-    public MecanumDrive(HardwareMap map) {
-        this(map, 1, 1);
     }
 
     /**
@@ -69,7 +83,7 @@ public class MecanumDrive {
             Vector2D angularVelocity = rotDirs[i].copy().multiply(angularSpeed);
             Vector2D transVelocity = v.copy().multiply(Math.min(1 - angularSpeed, speed));
             transVelocity.add(angularVelocity);
-            motors[i].setPower(Range.clip((transVelocity.dot(rollerDirs[i])), -1, 1));
+            motors[i].setPower(transVelocity.dot(rollerDirs[i]));
         }
 
     }
@@ -133,26 +147,26 @@ public class MecanumDrive {
         return sum / motors.length;
     }
 
-    /**
-     * Move the robot forward a specific number of encoder ticks
-     * @param ticks number of encoder ticks
-     */
-    public void moveForward(int ticks) {
-        for (DcMotor motor : motors) {
+    public void move(double inches, double speed) {
+        DcMotor.RunMode[] prevModes = new DcMotor.RunMode[motors.length];
+        for (int i = 0; i < motors.length; i++) {
+            DcMotor motor = motors[i];
+            prevModes[i] = motor.getMode();
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            int ticks = (int) Math.round(inches / (2 * Math.PI * configuration.wheelRadii[i]));
             motor.setTargetPosition(motor.getCurrentPosition() + ticks);
-            motor.setPower(0.65);
+            motor.setPower(speed);
         }
-        boolean busy = true;
-        while (busy) {
-            busy = true;
+        boolean done = false;
+        while (!done) {
             for (DcMotor motor : motors) {
-                busy = busy && motor.isBusy();
+                if (!motor.isBusy()) done = true;
             }
             Thread.yield();
         }
-        for (DcMotor motor : motors) {
-            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        for (int i = 0; i < motors.length; i++) {
+            DcMotor motor = motors[i];
+            motor.setMode(prevModes[i]);
             motor.setPower(0);
         }
     }

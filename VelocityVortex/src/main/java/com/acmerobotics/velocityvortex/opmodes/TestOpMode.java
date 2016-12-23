@@ -1,19 +1,20 @@
 package com.acmerobotics.velocityvortex.opmodes;
 
-import com.qualcomm.hardware.ArmableUsbDevice;
+import com.acmerobotics.velocityvortex.opmodes.tester.MRDeviceInterfaceModuleTester;
+import com.acmerobotics.velocityvortex.opmodes.tester.MRMotorControllerTester;
+import com.acmerobotics.velocityvortex.opmodes.tester.MRServoControllerTester;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsUsbDcMotorController;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsUsbDeviceInterfaceModule;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsUsbServoController;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
-import com.qualcomm.robotcore.hardware.ServoController;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
-import com.qualcomm.robotcore.util.Range;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-@TeleOp(name="Test")
+@TeleOp(name="Tester")
 public class TestOpMode extends OpMode {
 
     public enum Mode {
@@ -21,25 +22,51 @@ public class TestOpMode extends OpMode {
         DETAIL
     }
 
-    private List<HardwareDevice> devices;
-    private HardwareDevice currentDevice;
-    private int currentDeviceIndex;
-    private int currentDevicePort;
-    private double servoPosition;
+    private List<TesterBinding> bindings;
+    private List<Tester> testers;
+    private int testerIndex;
     private Mode mode;
     private StickyGamepad stickyGamepad1;
     private Set<String> names;
+    private Tester currentTester;
 
     @Override
     public void init() {
+        bindings = new ArrayList<>();
+        makeBindings();
+
         stickyGamepad1 = new StickyGamepad(gamepad1);
-        devices = new ArrayList<>();
+
+        testers = new ArrayList<>();
         for (HardwareDevice device : hardwareMap.getAll(HardwareDevice.class)) {
-            if (device instanceof ArmableUsbDevice) {
-                devices.add(device);
+            names = hardwareMap.getNamesOf(device);
+            String name = names.size() > 0 ? names.iterator().next() : "";
+            for (TesterBinding binding : bindings) {
+                if (binding.matches(name, device)) {
+                    testers.add(binding.newTester(name, device));
+                    break;
+                }
             }
         }
+
         mode = Mode.MAIN;
+        testerIndex = 0;
+    }
+
+    public <T extends HardwareDevice> void bind(Class<T> deviceClass, Class<? extends Tester<T>> testerClass) {
+        bind("", deviceClass, testerClass);
+    }
+
+    public <T extends HardwareDevice> void bind(String nameRegex, Class<T> deviceClass, Class<? extends Tester<T>> testerClass) {
+        bindings.add(new TesterBinding(nameRegex, deviceClass, testerClass));
+    }
+
+    public void makeBindings() {
+        bind(ModernRoboticsUsbDcMotorController.class, MRMotorControllerTester.class);
+        bind(ModernRoboticsUsbServoController.class, MRServoControllerTester.class);
+        bind(ModernRoboticsUsbDeviceInterfaceModule.class, MRDeviceInterfaceModuleTester.class);
+
+//        bind(HardwareDevice.class, DefaultTester.class);
     }
 
     @Override
@@ -48,89 +75,36 @@ public class TestOpMode extends OpMode {
         stickyGamepad1.update();
         switch (mode) {
             case MAIN:
-                telemetry.addData("INFO", "use the dpad to select the right controller");
+                if (stickyGamepad1.dpad_down) {
+                    testerIndex = Tester.cycleForward(testerIndex, 0, testers.size() - 1);
+                }
+                if (stickyGamepad1.dpad_up) {
+                    testerIndex = Tester.cycleBackward(testerIndex, 0, testers.size() - 1);
+                }
 
-                if (stickyGamepad1.dpad_down && currentDeviceIndex != devices.size() - 1) {
-                    currentDeviceIndex += 1;
-                }
-                if (stickyGamepad1.dpad_up && currentDeviceIndex != 0) {
-                    currentDeviceIndex -= 1;
-                }
                 if (stickyGamepad1.dpad_right) {
-                    currentDevice = devices.get(currentDeviceIndex);
                     mode = Mode.DETAIL;
-                }
-
-                for (int i = 0; i < devices.size(); i++) {
-                    HardwareDevice device = devices.get(i);
-                    if (i == currentDeviceIndex) {
-                        telemetry.addData("[>]", getDeviceString(device));
-                    } else {
-                        telemetry.addData("[ ]", getDeviceString(device));
+                    currentTester = testers.get(testerIndex);
+                } else {
+                    for (int i = 0; i < testers.size(); i++) {
+                        Tester tester = testers.get(i);
+                        String s = tester.getName() + " (" + tester.getType() + ")";
+                        if (i == testerIndex) {
+                            telemetry.addData("[>]", s);
+                        } else {
+                            telemetry.addData("[ ]", s);
+                        }
                     }
                 }
                 break;
             case DETAIL:
-                telemetry.addData("INFO", "press left on the dpad to go back");
-
                 if (stickyGamepad1.dpad_left) {
-                    currentDevicePort = 0;
                     mode = Mode.MAIN;
                 }
 
-                telemetry.addData("device", getDeviceString(currentDevice));
-                telemetry.addData("type", currentDevice.getDeviceName());
-                if (currentDevice instanceof DcMotorController) {
-                    if (stickyGamepad1.a || stickyGamepad1.b) {
-                        currentDevicePort = 1 - currentDevicePort;
-                    }
-                    DcMotorController controller = (DcMotorController) currentDevice;
-                    double power = -gamepad1.left_stick_y;
-                    telemetry.addData("motor", currentDevicePort + 1);
-                    telemetry.addData("power", power);
-                    controller.setMotorPower(currentDevicePort + 1, power);
-                    telemetry.addData("encoder", controller.getMotorCurrentPosition(currentDevicePort + 1));
-                    telemetry.addData("voltage", Math.round(100.0 * ((VoltageSensor) controller).getVoltage()) / 100.0 + " V");
-                } else if (currentDevice instanceof ServoController) {
-                    ServoController controller = (ServoController) currentDevice;
-                    if (stickyGamepad1.a) {
-                        currentDevicePort = (currentDevicePort + 1) % 6;
-                    }
-                    if (stickyGamepad1.b) {
-                        currentDevicePort = (currentDevicePort + 5) % 6;
-                    }
-                    if (stickyGamepad1.y) {
-                        servoPosition += 0.025;
-                    }
-                    if (stickyGamepad1.x) {
-                        servoPosition -= 0.025;
-                    }
-                    if (gamepad1.left_stick_y != 0) {
-                        servoPosition = 0.5 * (1 - gamepad1.left_stick_y);
-                    }
-                    servoPosition = Range.clip(servoPosition, 0, 1);
-                    telemetry.addData("servo", currentDevicePort + 1);
-                    telemetry.addData("position", servoPosition);
-                    controller.setServoPosition(currentDevicePort + 1, servoPosition);
-                } else {
-                    telemetry.addData("ERROR", "sorry, devices of this type are not supported");
-                }
-                break;
+                telemetry.addData("name", currentTester.getName());
+                telemetry.addData("type", currentTester.getType());
+                currentTester.loop(gamepad1, stickyGamepad1, telemetry);
         }
-    }
-
-    private String getDeviceString(HardwareDevice device) {
-        String deviceString;
-        names = hardwareMap.getNamesOf(device);
-        if (names.isEmpty()) {
-            deviceString = device.getDeviceName();
-            deviceString = deviceString.replaceAll("Modern Robotics", "MR");
-        } else {
-            deviceString = names.iterator().next();
-        }
-        if (device instanceof ArmableUsbDevice) {
-            deviceString += " [" + ((ArmableUsbDevice) device).getSerialNumber().toString() + "]";
-        }
-        return deviceString;
     }
 }

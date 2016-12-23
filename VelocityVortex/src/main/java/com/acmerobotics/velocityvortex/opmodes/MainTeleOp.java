@@ -1,18 +1,15 @@
 package com.acmerobotics.velocityvortex.opmodes;
 
 import com.acmerobotics.library.configuration.OpModeConfiguration;
-import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
 import com.acmerobotics.velocityvortex.drive.Vector2D;
-import com.acmerobotics.velocityvortex.mech.BeaconPusher;
-import com.acmerobotics.velocityvortex.mech.BeaconSwich;
+import com.acmerobotics.velocityvortex.mech.BeaconSwitch;
 import com.acmerobotics.velocityvortex.mech.CollectorHardware;
 import com.acmerobotics.velocityvortex.mech.Launcher;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name="TeleOp")
 public class MainTeleOp extends OpMode {
@@ -23,7 +20,7 @@ public class MainTeleOp extends OpMode {
     private double stickExponent = 1.8;
 
     private MecanumDrive drive;
-    private BeaconSwich beaconPusher;
+    private BeaconSwitch beaconPusher;
     private Launcher launcher;
     private CollectorHardware collector;
     private boolean leftTriggerDown, rightTriggerDown, rightBumperDown = false, leftBumperDown2 = false;
@@ -35,7 +32,7 @@ public class MainTeleOp extends OpMode {
     public void init() {
         configuration = new OpModeConfiguration(hardwareMap.appContext);
 
-        drive = new MecanumDrive(hardwareMap);
+        drive = new MecanumDrive(hardwareMap, MecanumDrive.Configuration.createFixedRadius(4));
 
         imu = new AdafruitBNO055IMU(hardwareMap.i2cDeviceSynch.get("imu"));
         BNO055IMU.Parameters params = new BNO055IMU.Parameters();
@@ -44,7 +41,7 @@ public class MainTeleOp extends OpMode {
 
         //enhancedMecanumDrive = new EnhancedMecanumDrive(drive, imu);
 
-        beaconPusher = new BeaconSwich(hardwareMap);
+        beaconPusher = new BeaconSwitch(hardwareMap);
 
         launcher = new Launcher (hardwareMap);
         collector = new CollectorHardware(hardwareMap);

@@ -19,7 +19,6 @@ import com.acmerobotics.library.vision.BeaconAreaComparator;
 import com.acmerobotics.velocityvortex.localization.VuforiaInterface;
 import com.acmerobotics.velocityvortex.vision.VuforiaCamera;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.internal.AppUtil;
@@ -29,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@Disabled
+//@Disabled
 @Autonomous(name="Beacon Vuforia")
 public class BeaconVuforiaTest extends OpMode {
 

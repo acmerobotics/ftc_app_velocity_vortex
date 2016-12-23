@@ -6,47 +6,11 @@ import android.content.SharedPreferences;
 public class OpModeConfiguration {
 
     private static final RobotProperties SOFTWARE_BOT = new RobotProperties() {
-        @Override
-        public double getLeftPusherUp() {
-            return 0;
-        }
 
-        @Override
-        public double getLeftPusherDown() {
-            return 0.44;
-        }
-
-        @Override
-        public double getRightPusherUp() {
-            return 1;
-        }
-
-        @Override
-        public double getRightPusherDown() {
-            return 0.41;
-        }
     };
 
     private static final RobotProperties COMP_BOT = new RobotProperties() {
-        @Override
-        public double getLeftPusherUp() {
-            return 0;
-        }
 
-        @Override
-        public double getLeftPusherDown() {
-            return 0.44;
-        }
-
-        @Override
-        public double getRightPusherUp() {
-            return 1;
-        }
-
-        @Override
-        public double getRightPusherDown() {
-            return 0.41;
-        }
     };
 
     private static final String PREFS_NAME = "opmode";

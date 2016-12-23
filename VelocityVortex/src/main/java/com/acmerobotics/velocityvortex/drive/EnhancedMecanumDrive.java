@@ -8,8 +8,6 @@ import com.qualcomm.robotcore.util.Range;
  */
 public class EnhancedMecanumDrive {
 
-    public static final Vector2D INERT_VELOCITY = new Vector2D(0, 0);
-
     public static final PIDController.PIDCoefficients PID_COEFFICIENTS = new PIDController.PIDCoefficients(-0.06, 0, 0);
 
     public static final double MAX_TURN_SPEED = 1;
@@ -25,7 +23,7 @@ public class EnhancedMecanumDrive {
         this.drive = drive;
         this.imu = imu;
         controller = new PIDController(PID_COEFFICIENTS);
-        velocity = INERT_VELOCITY;
+        stop();
         resetHeading();
     }
 
@@ -87,7 +85,7 @@ public class EnhancedMecanumDrive {
      * Stop the motors.
      */
     public void stop() {
-        velocity = INERT_VELOCITY;
+        velocity = MecanumDrive.INERT_VELOCITY;
         drive.stop();
     }
 
@@ -148,8 +146,6 @@ public class EnhancedMecanumDrive {
      * @return the heading error
      */
     public double getHeadingError() {
-//        double error = Math.abs(targetHeading - getHeading()) % 360;
-//        return (error > 180) ? (180 - error) : error;
         double error = targetHeading - getHeading();
         while (Math.abs(error) > 180) {
             error += -Math.signum(error) * 360;
