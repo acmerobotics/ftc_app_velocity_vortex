@@ -7,13 +7,14 @@ import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
 import com.acmerobotics.velocityvortex.drive.PIDController;
 import com.acmerobotics.velocityvortex.drive.Vector2D;
-import com.acmerobotics.velocityvortex.i2c.SparkFunLineFollowingArray;
+import com.acmerobotics.velocityvortex.sensors.SparkFunLineFollowingArray;
 import com.acmerobotics.velocityvortex.localization.VuforiaInterface;
 import com.acmerobotics.velocityvortex.mech.BeaconSwitch;
 import com.acmerobotics.velocityvortex.vision.VuforiaCamera;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.opencv.core.Mat;
@@ -24,6 +25,7 @@ import java.util.List;
 import static com.acmerobotics.library.configuration.OpModeConfiguration.AllianceColor.BLUE;
 
 @Autonomous(name="Dead Reckoning Auto")
+@Disabled
 public class DeadReckoningAuto extends LinearOpMode {
 
     public static final PIDController.PIDCoefficients LINE_PID_COEFF = new PIDController.PIDCoefficients(-0.06, 0, 0);

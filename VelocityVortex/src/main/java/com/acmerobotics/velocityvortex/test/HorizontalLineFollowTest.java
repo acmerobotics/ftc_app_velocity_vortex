@@ -2,7 +2,7 @@ package com.acmerobotics.velocityvortex.test;
 
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
-import com.acmerobotics.velocityvortex.i2c.SparkFunLineFollowingArray;
+import com.acmerobotics.velocityvortex.sensors.SparkFunLineFollowingArray;
 import com.acmerobotics.velocityvortex.opmodes.DeadReckoningAuto;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
@@ -25,6 +25,7 @@ public class HorizontalLineFollowTest extends LinearOpMode {
 
         lineSensor = new SparkFunLineFollowingArray(hardwareMap.i2cDeviceSynch.get("lineArray"));
         lineSensor.getParameters().invertBits = true;
+        lineSensor.initialize();
 
         drive = new EnhancedMecanumDrive(new MecanumDrive(hardwareMap, MecanumDrive.Configuration.createFixedRadius(4)), imu);
 

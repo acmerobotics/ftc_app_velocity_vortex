@@ -1,4 +1,4 @@
-package com.acmerobotics.velocityvortex.i2c;
+package com.acmerobotics.velocityvortex.sensors;
 
 import android.util.Log;
 
@@ -160,8 +160,6 @@ public class SparkFunLineFollowingArray extends I2cDeviceSynchDevice<I2cDeviceSy
         super(deviceClient, true);
 
         this.parameters = new Parameters();
-
-        doInitialize();
     }
 
     public Parameters getParameters() {

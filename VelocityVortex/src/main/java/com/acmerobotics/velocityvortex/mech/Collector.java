@@ -8,14 +8,14 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
  * Created by kelly on 12/7/2016.
  */
 
-public class CollectorHardware {
+public class Collector {
 
     private double velocity;
     private DcMotor motor;
 
     private boolean running;
 
-    public CollectorHardware (HardwareMap hardwareMap) {
+    public Collector(HardwareMap hardwareMap) {
         motor = hardwareMap.dcMotor.get("collector");
     }
 

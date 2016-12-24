@@ -1,5 +1,6 @@
-package com.acmerobotics.velocityvortex.i2c;
+package com.acmerobotics.velocityvortex.test;
 
+import com.acmerobotics.velocityvortex.sensors.SparkFunLineFollowingArray;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;

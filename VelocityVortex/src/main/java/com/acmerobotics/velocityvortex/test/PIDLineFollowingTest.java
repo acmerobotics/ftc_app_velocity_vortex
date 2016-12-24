@@ -3,7 +3,7 @@ package com.acmerobotics.velocityvortex.test;
 import com.acmerobotics.velocityvortex.drive.DifferentialDrive;
 import com.acmerobotics.velocityvortex.drive.PIDController;
 import com.acmerobotics.library.file.CSVFile;
-import com.acmerobotics.velocityvortex.i2c.SparkFunLineFollowingArray;
+import com.acmerobotics.velocityvortex.sensors.SparkFunLineFollowingArray;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -41,6 +41,7 @@ public class PIDLineFollowingTest extends OpMode {
 
         I2cDeviceSynch i2cDevice = hardwareMap.i2cDeviceSynch.get("lineArray");
         lineFollowingArray = new SparkFunLineFollowingArray(i2cDevice);
+        lineFollowingArray.initialize();
 
         controller = new PIDController(new PIDController.PIDCoefficients(0.025, 0.005, 0));
 
