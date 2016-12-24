@@ -33,6 +33,10 @@ public class MecanumDrive {
 
     private int[] offsets;
 
+    public MecanumDrive(HardwareMap map) {
+        this(map, Configuration.createFixedRadius(4));
+    }
+
     public MecanumDrive(HardwareMap map, Configuration config) {
         configuration = config;
 
