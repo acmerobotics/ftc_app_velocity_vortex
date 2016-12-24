@@ -26,7 +26,7 @@ public class HorizontalLineFollowTest extends LinearOpMode {
         lineSensor = new SparkFunLineFollowingArray(hardwareMap.i2cDeviceSynch.get("lineArray"));
         lineSensor.getParameters().invertBits = true;
 
-        drive = new EnhancedMecanumDrive(new MecanumDrive(hardwareMap, MecanumDrive.Configuration.createFixedRadius(4)), imu);
+        //drive = new EnhancedMecanumDrive(new MecanumDrive(hardwareMap, MecanumDrive.Configuration.createFixedRadius(4)), imu);
 
         waitForStart();
 

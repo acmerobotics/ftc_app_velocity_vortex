@@ -66,8 +66,6 @@ public class DeadReckoningAuto extends LinearOpMode {
 
         lineSensor = new SparkFunLineFollowingArray(hardwareMap.i2cDeviceSynch.get("lineArray"));
 
-        drive = new EnhancedMecanumDrive(new MecanumDrive(hardwareMap, MecanumDrive.Configuration.createFixedRadius(4)), imu);
-
         waitForStart();
 
         sleep(1000 * configuration.getDelay());

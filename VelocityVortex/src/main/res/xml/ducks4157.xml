@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<Robot type="FirstInspires-FTC" name="ducks4157">
+    <MotorController name="Motor Controller 1" serialNumber="AL00VW5Y">
+        <Motor name="collector" port="1" />
+        <Motor name="hinge" port="2" />
+    </MotorController>
+    <MotorController name="Motor Controller 2" serialNumber="AL00VWLM">
+        <Motor name="leftMotor" port="1" />
+        <Motor name="frontMotor" port="2" />
+    </MotorController>
+    <MotorController name="Motor Controller 3" serialNumber="AL00VWOM">
+        <Motor name="backMotor" port="1" />
+        <Motor name="rightMotor" port="2" />
+    </MotorController>
+</Robot>

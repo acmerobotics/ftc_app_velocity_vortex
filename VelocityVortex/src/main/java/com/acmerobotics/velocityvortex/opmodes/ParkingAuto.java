@@ -7,7 +7,6 @@ import com.acmerobotics.velocityvortex.drive.MecanumDrive;
 import com.acmerobotics.velocityvortex.drive.PIDController;
 import com.acmerobotics.velocityvortex.drive.Vector2D;
 import com.acmerobotics.velocityvortex.i2c.SparkFunLineFollowingArray;
-import com.acmerobotics.velocityvortex.mech.BeaconSwich;
 import com.acmerobotics.velocityvortex.mech.Launcher;
 import com.acmerobotics.velocityvortex.vision.FastCamera;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
@@ -42,7 +41,6 @@ public class ParkingAuto extends LinearOpMode{
     //private VuforiaCamera camera;
     private FastCamera camera;
     //private BeaconPusher pusher;
-    private BeaconSwich beacon;
     private SparkFunLineFollowingArray lineSensor;
     private OpModeConfiguration configuration;
     private OpModeConfiguration.AllianceColor allianceColor;
@@ -65,8 +63,6 @@ public class ParkingAuto extends LinearOpMode{
         imu.initialize(params);
 
         //pusher = new BeaconPusher(hardwareMap, configuration.getRobotType().getProperties());
-        beacon = new BeaconSwich(hardwareMap);
-        beacon.store();
 
 //        lineSensor = new SparkFunLineFollowingArray(hardwareMap.i2cDeviceSynch.get("lineArray"));
 
@@ -104,7 +100,7 @@ public class ParkingAuto extends LinearOpMode{
     }
 
     public void moveBackward(double inches) {
-        drive.moveBackward((int)((inches * PULSES_PER_REV) / (Math.PI * DIAMETER)));
+
     }
 
 }

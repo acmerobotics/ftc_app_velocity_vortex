@@ -19,6 +19,7 @@ public class EnhancedMecanumDrive {
     private MecanumDrive drive;
     private BNO055IMU imu;
     private Vector2D velocity;
+    private double angularVelocity;
     private double targetHeading;
 
     public EnhancedMecanumDrive(MecanumDrive drive, BNO055IMU imu) {
@@ -48,7 +49,7 @@ public class EnhancedMecanumDrive {
         int error = ticks;
         while (error > 0) {
             error = ticks - drive.getMeanPosition();
-            setVelocity(new Vector2D(0, 0.0003 * error + 0.1));
+            setVelocity(new Vector2D(0, 0.0003 * error + 0.1), 0);
             update();
             Thread.yield();
         }
@@ -68,8 +69,10 @@ public class EnhancedMecanumDrive {
      * motors; please use in tandem with {@link #update()}.
      * @param velocity the translational velocity
      */
-    public void setVelocity(Vector2D velocity) {
+    public void setVelocity(Vector2D velocity, double angularVelocity) {
         this.velocity = velocity;
+        this.angularVelocity = angularVelocity;
+        drive.setVelocity(velocity, angularVelocity);
     }
 
     /**
@@ -79,7 +82,7 @@ public class EnhancedMecanumDrive {
     public double update() {
         double error = getHeadingError();
         double feedback = controller.update(error);
-        drive.setVelocity(velocity, Range.clip(feedback, -MAX_TURN_SPEED, MAX_TURN_SPEED));
+        drive.setVelocity(velocity, angularVelocity + Range.clip(feedback, -MAX_TURN_SPEED, MAX_TURN_SPEED));
         return feedback;
     }
 
@@ -92,7 +95,7 @@ public class EnhancedMecanumDrive {
     }
 
     /**
-     * Turns the robot. Like {@link #setVelocity(Vector2D)}}, this method does not actually update
+     * Turns the robot. Like {@link #setVelocity(Vector2D, double)}}, this method does not actually update
      * the underlying motors, so please use {@link #update()} or {@link #turnSync(double, double)}.
      * @param turnAngle the turn angle (right is positive, left is negative)
      */
