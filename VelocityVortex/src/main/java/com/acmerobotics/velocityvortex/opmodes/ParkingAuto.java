@@ -6,7 +6,6 @@ import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
 import com.acmerobotics.velocityvortex.drive.PIDController;
 import com.acmerobotics.velocityvortex.drive.Vector2D;
-import com.acmerobotics.velocityvortex.i2c.SparkFunLineFollowingArray;
 import com.acmerobotics.velocityvortex.mech.Launcher;
 import com.acmerobotics.velocityvortex.vision.FastCamera;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
@@ -14,7 +13,7 @@ import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-
+import com.acmerobotics.velocityvortex.sensors.SparkFunLineFollowingArray;
 import org.firstinspires.ftc.teamcode.R;
 
 import static com.acmerobotics.library.configuration.OpModeConfiguration.AllianceColor.BLUE;

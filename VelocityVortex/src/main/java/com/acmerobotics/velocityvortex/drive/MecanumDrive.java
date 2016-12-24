@@ -33,6 +33,12 @@ public class MecanumDrive {
 
     private int[] offsets;
 
+
+    public MecanumDrive(HardwareMap map) {
+        this(map, Configuration.createFixedRadius(4));
+    }
+
+
     public MecanumDrive(HardwareMap map, Configuration config) {
         configuration = config;
 
@@ -64,9 +70,6 @@ public class MecanumDrive {
         resetEncoders();
     }
 
-    public MecanumDrive (HardwareMap map) {
-        new MecanumDrive(map, Configuration.createFixedRadius(4));
-    }
 
     /**
      * Sets the angular velocity of the mecanum drive system. This includes both the translational
