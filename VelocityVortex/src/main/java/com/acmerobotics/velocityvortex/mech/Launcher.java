@@ -16,10 +16,9 @@ public class Launcher {
     private double velocity;
     private double velocityStep = .1;
 
-    private long rampTime = 100;
-    private double rampIncerment = .1;
-    private double accelerationLeft;
+    private double targetVelocity;
     private long lastTime;
+    private boolean ramping;
 
     private double trim = 0; // positive moves to the right
     private double maxVelocity = 1;
@@ -65,6 +64,7 @@ public class Launcher {
      * @param velocity between 0 and one
      */
     public void setVelocity(double velocity) {
+        if (ramping) return;
         this.velocity = Range.clip(velocity, 0, maxVelocity);
         if (velocity < .2) velocity = 0;
         right.setPower (Range.clip((velocity - trim), 0, maxVelocity));
@@ -93,12 +93,14 @@ public class Launcher {
     }
 
     public void setTargetVelocity (double target) {
-        accelerationLeft = target - velocity;
+        targetVelocity = Range.clip (target, 0, 1);
         lastTime = System.currentTimeMillis();
+
+        ramping = true;
     }
 
     public void setTrim (double trim) {
-        this.trim = Range.clip (trim, 0, .5);
+        this.trim = Range.clip (trim, -.5, .5);
     }
 
     public double getTrim () {
@@ -121,22 +123,20 @@ public class Launcher {
     }
 
     public void updateVelocity () {
+        if (!ramping) return;
         long diff = System.currentTimeMillis() - lastTime;
         lastTime = System.currentTimeMillis();
-        if (diff < rampTime) {
-            return;
-        }
-        if (accelerationLeft < velocityStep) setVelocity(velocity + accelerationLeft);
-        else {
-            if (accelerationLeft >= 0){
-                setVelocity(velocity + velocityStep);
-                accelerationLeft -= velocityStep;
-            }else {
-                setVelocity (velocity - velocityStep);
-                accelerationLeft += velocityStep;
-            }
-        }
 
+        double percentChange = diff/15;
+        double accelerationLeft = targetVelocity - velocity;
+        if (Math.abs (accelerationLeft)*100 < percentChange) {
+            velocity = targetVelocity;
+            ramping = false;
+        }
+        else  {
+            double acceleration = accelerationLeft>0 ? .01 : -.01;
+            setVelocity (velocity + acceleration);
+        }
     }
 
     public double getVelocity () {

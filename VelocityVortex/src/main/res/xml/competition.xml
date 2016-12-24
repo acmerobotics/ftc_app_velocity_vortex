@@ -17,7 +17,7 @@
         <Motor name="launcherElevation" port="2" />
     </MotorController>
     <ServoController name="servo" serialNumber="AI02RKXM">
-        <Servo name="beacon" port="1" />
+        <Servo name="pusher" port="1" />
         <Servo name="trigger" port="3" />
     </ServoController>
     <DeviceInterfaceModule name="dim" serialNumber="AI02RLOW">

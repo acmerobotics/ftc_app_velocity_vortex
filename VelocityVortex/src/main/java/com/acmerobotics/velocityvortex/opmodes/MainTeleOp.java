@@ -10,6 +10,7 @@ import com.acmerobotics.velocityvortex.mech.CollectorHardware;
 import com.acmerobotics.velocityvortex.mech.Launcher;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.Range;
@@ -26,7 +27,7 @@ public class MainTeleOp extends OpMode {
     private BeaconSwich beaconPusher;
     private Launcher launcher;
     private CollectorHardware collector;
-    private boolean leftTriggerDown, rightTriggerDown, rightBumperDown = false, leftBumperDown2 = false;
+    private boolean leftTriggerDown, rightTriggerDown, rightBumperDown = false, leftBumperDown = false, leftBumperDown2 = false;
     private boolean upDown, rightDown, leftDown, downDown;
     private BNO055IMU imu;
     private OpModeConfiguration configuration;
@@ -37,14 +38,12 @@ public class MainTeleOp extends OpMode {
 
         drive = new MecanumDrive(hardwareMap);
 
-        imu = new AdafruitBNO055IMU(hardwareMap.i2cDeviceSynch.get("imu"));
-        BNO055IMU.Parameters params = new BNO055IMU.Parameters();
-        params.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        imu.initialize(params);
+//        imu = new AdafruitBNO055IMU(hardwareMap.i2cDeviceSynch.get("imu"));
+//        BNO055IMU.Parameters params = new BNO055IMU.Parameters();
+//        params.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+//        imu.initialize(params);
 
-        //enhancedMecanumDrive = new EnhancedMecanumDrive(drive, imu);
 
-        beaconPusher = new BeaconSwich(hardwareMap);
 
         launcher = new Launcher (hardwareMap);
         collector = new CollectorHardware(hardwareMap);
@@ -57,6 +56,7 @@ public class MainTeleOp extends OpMode {
         //double y = Math.pow(-gamepad1.left_stick_y, stickExponent);
         double x = -gamepad1.left_stick_x;
         double y = -gamepad1.left_stick_y;
+        if (x == 0) x = -gamepad2.left_stick_x;
         //double omega = Math.pow(-gamepad1.right_stick_x, stickExponent);
         double omega = -gamepad1.right_stick_x;
         if (omega == 0) omega = -gamepad2.left_stick_x;
@@ -65,22 +65,15 @@ public class MainTeleOp extends OpMode {
         enhancedMecanumDrive.update();*/
         drive.setVelocity(new Vector2D(x, y), omega);
 
-        if (gamepad1.left_trigger == 1) {
-            if (!leftTriggerDown) {
-                leftTriggerDown = true;
-                beaconPusher.left();
-            }
-        } else if (gamepad1.left_trigger < .5){
-            leftTriggerDown = false;
-        }
 
-        if (gamepad1.right_trigger == 1) {
-            if (!rightTriggerDown) {
-                rightTriggerDown = true;
-                beaconPusher.right();
+
+        if (gamepad1.left_bumper) {
+            if (!leftBumperDown) {
+                leftBumperDown = true;
+                beaconPusher.store();
             }
-        } else if (gamepad1.right_trigger < .5){
-            rightTriggerDown = false;
+        } else {
+            leftBumperDown = false;
         }
 
         if (gamepad1.right_bumper) {

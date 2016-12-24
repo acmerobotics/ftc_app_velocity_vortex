@@ -21,11 +21,15 @@ public class MecanumDrive {
     public MecanumDrive(HardwareMap map, double offX, double offY) {
         motors = new DcMotor[4];
         motors[0] = map.dcMotor.get("left1");
+        motors[0].setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motors[1] = map.dcMotor.get("right1");
         motors[1].setDirection(DcMotorSimple.Direction.REVERSE);
+        motors[1].setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motors[2] = map.dcMotor.get("right2");
         motors[2].setDirection(DcMotorSimple.Direction.REVERSE);
+        motors[2].setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motors[3] = map.dcMotor.get("left2");
+        motors[3].setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         rollerDirs = new Vector2D[4];
         rollerDirs[0] = new Vector2D(1, 1).normalize();
