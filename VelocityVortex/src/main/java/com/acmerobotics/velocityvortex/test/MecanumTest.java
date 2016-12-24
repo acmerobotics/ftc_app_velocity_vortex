@@ -12,7 +12,7 @@ public class MecanumTest extends OpMode {
 
     @Override
     public void init() {
-        mecanumDrive = new MecanumDrive(hardwareMap);
+        mecanumDrive = new MecanumDrive(hardwareMap, MecanumDrive.Configuration.createFixedRadius(4));
     }
 
     @Override

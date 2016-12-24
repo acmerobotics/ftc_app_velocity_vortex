@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
 <Robot type="FirstInspires-FTC" name="competition">
     <MotorController name="rightDrive" serialNumber="AH00QHU3">
-        <Motor name="right1" port="1" />
-        <Motor name="right2" port="2" />
+        <Motor name="rightFront" port="1" />
+        <Motor name="rightBack" port="2" />
     </MotorController>
     <MotorController name="leftDrive" serialNumber="AI049PHE">
-        <Motor name="left1" port="1" />
-        <Motor name="left2" port="2" />
+        <Motor name="leftFront" port="1" />
+        <Motor name="leftBack" port="2" />
     </MotorController>
     <MotorController name="launcher" serialNumber="AI049Q4A">
         <Motor name="launcherLeft" port="1" />

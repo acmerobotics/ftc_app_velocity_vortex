@@ -8,13 +8,13 @@ import com.qualcomm.robotcore.hardware.Servo;
  *
  */
 
-public class BeaconSwich {
+public class BeaconSwitch {
 
     private Servo servo;
 
     private double rightPos = .14, leftPos = .8, storePos = 0;
 
-    public BeaconSwich (HardwareMap hardwareMap) {
+    public BeaconSwitch(HardwareMap hardwareMap) {
         servo = hardwareMap.servo.get("beacon");
     }
 

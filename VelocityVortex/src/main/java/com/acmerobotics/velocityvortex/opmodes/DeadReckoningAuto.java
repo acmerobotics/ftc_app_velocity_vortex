@@ -9,8 +9,7 @@ import com.acmerobotics.velocityvortex.drive.PIDController;
 import com.acmerobotics.velocityvortex.drive.Vector2D;
 import com.acmerobotics.velocityvortex.i2c.SparkFunLineFollowingArray;
 import com.acmerobotics.velocityvortex.localization.VuforiaInterface;
-import com.acmerobotics.velocityvortex.mech.BeaconPusher;
-import com.acmerobotics.velocityvortex.mech.BeaconSwich;
+import com.acmerobotics.velocityvortex.mech.BeaconSwitch;
 import com.acmerobotics.velocityvortex.vision.VuforiaCamera;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
@@ -41,7 +40,7 @@ public class DeadReckoningAuto extends LinearOpMode {
     private BNO055IMU imu;
     private VuforiaCamera camera;
     //private BeaconPusher pusher;
-    private BeaconSwich beacon;
+    private BeaconSwitch beacon;
     private SparkFunLineFollowingArray lineSensor;
     private OpModeConfiguration configuration;
     private OpModeConfiguration.AllianceColor allianceColor;
@@ -62,13 +61,12 @@ public class DeadReckoningAuto extends LinearOpMode {
         params.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         imu.initialize(params);
 
-        //pusher = new BeaconPusher(hardwareMap, configuration.getRobotType().getProperties());
-        beacon = new BeaconSwich(hardwareMap);
+        beacon = new BeaconSwitch(hardwareMap);
         beacon.store();
 
         lineSensor = new SparkFunLineFollowingArray(hardwareMap.i2cDeviceSynch.get("lineArray"));
 
-        drive = new EnhancedMecanumDrive(new MecanumDrive(hardwareMap), imu);
+        drive = new EnhancedMecanumDrive(new MecanumDrive(hardwareMap, MecanumDrive.Configuration.createFixedRadius(4)), imu);
 
         waitForStart();
 
