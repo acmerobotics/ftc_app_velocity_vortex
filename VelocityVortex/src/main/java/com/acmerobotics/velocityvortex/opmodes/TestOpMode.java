@@ -1,14 +1,20 @@
 package com.acmerobotics.velocityvortex.opmodes;
 
+import com.acmerobotics.velocityvortex.opmodes.tester.ColorSensorTester;
+import com.acmerobotics.velocityvortex.opmodes.tester.DistanceSensorTester;
 import com.acmerobotics.velocityvortex.opmodes.tester.MRDeviceInterfaceModuleTester;
 import com.acmerobotics.velocityvortex.opmodes.tester.MRMotorControllerTester;
 import com.acmerobotics.velocityvortex.opmodes.tester.MRServoControllerTester;
+import com.acmerobotics.velocityvortex.opmodes.tester.UltrasonicSensorTester;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsUsbDcMotorController;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsUsbDeviceInterfaceModule;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsUsbServoController;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
+import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +72,10 @@ public class TestOpMode extends OpMode {
         bind(ModernRoboticsUsbServoController.class, MRServoControllerTester.class);
         bind(ModernRoboticsUsbDeviceInterfaceModule.class, MRDeviceInterfaceModuleTester.class);
 
+        bind(ColorSensor.class, ColorSensorTester.class);
+        bind(DistanceSensor.class, DistanceSensorTester.class);
+        bind(UltrasonicSensor.class, UltrasonicSensorTester.class);
+
 //        bind(HardwareDevice.class, DefaultTester.class);
     }
 
@@ -104,6 +114,7 @@ public class TestOpMode extends OpMode {
 
                 telemetry.addData("name", currentTester.getName());
                 telemetry.addData("type", currentTester.getType());
+                if (currentTester.getId() != "") telemetry.addData("id", currentTester.getId());
                 currentTester.loop(gamepad1, stickyGamepad1, telemetry);
         }
     }
