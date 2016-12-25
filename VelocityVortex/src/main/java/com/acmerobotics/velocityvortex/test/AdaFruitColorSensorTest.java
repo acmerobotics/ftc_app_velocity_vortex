@@ -5,8 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 
-@TeleOp(name="ColorSensorTest")
-public class ColorSensorTest extends OpMode {
+@TeleOp(name="AdaFruitColorSensorTest")
+public class AdaFruitColorSensorTest extends OpMode {
 
     TCS34725ColorSensor colorSensor;
 //    AMSColorSensor colorSensor;
