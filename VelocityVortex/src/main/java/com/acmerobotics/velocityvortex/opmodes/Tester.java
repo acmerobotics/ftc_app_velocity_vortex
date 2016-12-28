@@ -1,18 +1,25 @@
 package com.acmerobotics.velocityvortex.opmodes;
 
+import com.qualcomm.hardware.ArmableUsbDevice;
+import com.qualcomm.robotcore.exception.RobotCoreException;
+import com.qualcomm.robotcore.hardware.Engagable;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public abstract class Tester<T extends HardwareDevice> {
 
+    private boolean enabled;
     protected T device;
     protected String hardwareName;
 
     public Tester(String name, T device) {
         this.hardwareName = name;
         this.device = device;
+        this.enabled = true;
+        onCreate();
     }
 
     public static int cycleForward(int i, int min, int max) {
@@ -33,6 +40,52 @@ public abstract class Tester<T extends HardwareDevice> {
 
     public String getName() {
         return hardwareName;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void enable() {
+        if (isEnabled()) return;
+        if (device instanceof Engagable) {
+            Engagable engagable = (Engagable) device;
+            engagable.engage();
+            enabled = true;
+        } else if (device instanceof ArmableUsbDevice) {
+            ArmableUsbDevice armable = (ArmableUsbDevice) device;
+            try {
+                armable.arm();
+                enabled = true;
+            } catch (RobotCoreException e) {
+                RobotLog.e(e.getMessage());
+            } catch (InterruptedException e) {
+                RobotLog.e(e.getMessage());
+            }
+        }
+    }
+
+    public void disable() {
+        if (!isEnabled()) return;
+        if (device instanceof Engagable) {
+            Engagable engagable = (Engagable) device;
+            engagable.disengage();
+            enabled = false;
+        } else if (device instanceof ArmableUsbDevice) {
+            ArmableUsbDevice armable = (ArmableUsbDevice) device;
+            try {
+                armable.disarm();
+                enabled = false;
+            } catch (RobotCoreException e) {
+                RobotLog.e(e.getMessage());
+            } catch (InterruptedException e) {
+                RobotLog.e(e.getMessage());
+            }
+        }
+    }
+
+    protected void onCreate() {
+
     }
 
     public abstract String getType();

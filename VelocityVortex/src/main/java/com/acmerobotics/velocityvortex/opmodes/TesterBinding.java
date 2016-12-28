@@ -33,4 +33,8 @@ public class TesterBinding<T extends HardwareDevice> {
         return null;
     }
 
+    public boolean isValid() {
+        return testerClass != null;
+    }
+
 }

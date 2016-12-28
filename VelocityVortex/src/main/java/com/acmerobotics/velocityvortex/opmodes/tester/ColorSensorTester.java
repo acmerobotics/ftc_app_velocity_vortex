@@ -7,19 +7,9 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-public class ColorSensorTester extends Tester<ColorSensor> {
-    public ColorSensorTester(String name, ColorSensor device) {
+public abstract class ColorSensorTester<T extends ColorSensor> extends Tester<T> {
+    public ColorSensorTester(String name, T device) {
         super(name, device);
-    }
-
-    @Override
-    public String getType() {
-        return "Color Sensor";
-    }
-
-    @Override
-    public String getId() {
-        return "";
     }
 
     @Override
