@@ -1,5 +1,7 @@
 package com.acmerobotics.velocityvortex.opmodes;
 
+import com.acmerobotics.library.file.LogFile;
+import com.acmerobotics.library.logging.MultipleLogger;
 import com.acmerobotics.velocityvortex.opmodes.tester.DefaultTester;
 import com.acmerobotics.velocityvortex.opmodes.tester.DistanceSensorTester;
 import com.acmerobotics.velocityvortex.opmodes.tester.MRDeviceInterfaceModuleTester;
@@ -18,6 +20,7 @@ import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,20 +41,32 @@ public class TestOpMode extends OpMode {
     private StickyGamepad stickyGamepad1;
     private Set<String> names;
     private Tester currentTester;
-
-    private long lastLoopTime;
+    private ElapsedTime loopTimer;
+    private MultipleLogger logger;
+    private LogFile logFile;
 
     @Override
     public void init() {
+        String logName = "tester_timer_" + System.currentTimeMillis() + ".txt";
+        logFile = new LogFile(logName);
+        logger = new MultipleLogger();
+        logger.addLogger(logFile);
+
+        loopTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+
         bindings = new ArrayList<>();
         makeBindings();
 
         stickyGamepad1 = new StickyGamepad(gamepad1);
 
+        logger.msg(logName);
+        logger.msg("devices:");
+
         testers = new ArrayList<>();
         for (HardwareDevice device : hardwareMap.getAll(HardwareDevice.class)) {
             names = hardwareMap.getNamesOf(device);
             String name = names.size() > 0 ? names.iterator().next() : "";
+            logger.msg("'%s': %s", name, device.getConnectionInfo());
             for (TesterBinding binding : bindings) {
                 if (binding.matches(name, device)) {
                     if (binding.isValid())
@@ -60,6 +75,8 @@ public class TestOpMode extends OpMode {
                 }
             }
         }
+
+        logger.msg("loop_times:");
 
         mode = Mode.MAIN;
         testerIndex = 0;
@@ -91,13 +108,11 @@ public class TestOpMode extends OpMode {
 
     @Override
     public void loop() {
-        long currentLoopTime = System.currentTimeMillis();
-        long loopTime;
-        if (lastLoopTime == 0) {
-            loopTime = 0;
-        } else {
-            loopTime = currentLoopTime - lastLoopTime;
-        }
+        double loopTime = loopTimer.milliseconds();
+
+        logger.msg("%6.3f ms", loopTime);
+
+        loopTimer.reset();
 
         telemetry.clearAll();
         stickyGamepad1.update();
@@ -118,10 +133,12 @@ public class TestOpMode extends OpMode {
                     } else {
                         currentTester.enable();
                     }
+                    logger.msg("'%s' changed state to %b", currentTester.getName(), currentTester.isEnabled());
                 }
 
                 if (stickyGamepad1.dpad_right && currentTester.isEnabled()) {
                     mode = Mode.DETAIL;
+                    logger.msg("'%s' selected", currentTester.getName());
                 } else {
                     for (int i = 0; i < testers.size(); i++) {
                         Tester tester = testers.get(i);
@@ -140,14 +157,23 @@ public class TestOpMode extends OpMode {
             case DETAIL:
                 if (stickyGamepad1.dpad_left) {
                     mode = Mode.MAIN;
+                    logger.msg("'%s' deselected", currentTester.getName());
                 }
 
                 telemetry.addData("name", currentTester.getName());
                 telemetry.addData("type", currentTester.getType());
                 if (currentTester.getId() != "") telemetry.addData("id", currentTester.getId());
-                currentTester.loop(gamepad1, stickyGamepad1, telemetry);
+                currentTester.loop(gamepad1, stickyGamepad1, telemetry, logger);
         }
-
-        lastLoopTime = System.currentTimeMillis();
     }
+
+    @Override
+    public void stop() {
+        try {
+            logFile.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

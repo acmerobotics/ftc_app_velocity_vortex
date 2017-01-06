@@ -51,9 +51,17 @@ public class DataFile implements AutoCloseable {
         return file;
     }
 
+    public void write() {
+        write("");
+    }
+
     public void write(String s) {
+        write(s, true);
+    }
+
+    public void write(String s, boolean newline) {
         try {
-            writer.write(s);
+            writer.write(s + (newline ? "\r\n" : ""));
         } catch (IOException e) {
             Log.e(TAG, "IO error while attempting to write data to file\n" + e.getMessage());
         }

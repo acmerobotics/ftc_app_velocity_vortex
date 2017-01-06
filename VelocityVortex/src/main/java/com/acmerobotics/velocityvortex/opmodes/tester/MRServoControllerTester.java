@@ -1,5 +1,6 @@
 package com.acmerobotics.velocityvortex.opmodes.tester;
 
+import com.acmerobotics.library.logging.Logger;
 import com.acmerobotics.velocityvortex.opmodes.StickyGamepad;
 import com.acmerobotics.velocityvortex.opmodes.Tester;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsUsbServoController;
@@ -28,12 +29,14 @@ public class MRServoControllerTester extends Tester<ModernRoboticsUsbServoContro
     }
 
     @Override
-    public void loop(Gamepad gamepad, StickyGamepad stickyGamepad, Telemetry telemetry) {
+    public void loop(Gamepad gamepad, StickyGamepad stickyGamepad, Telemetry telemetry, Logger logger) {
         if (stickyGamepad.a) {
             port = cycleForward(port, 1, 6);
+            logger.msg("servo_controller: servo port change: %d", port);
         }
         if (stickyGamepad.b) {
             port = cycleBackward(port, 1, 6);
+            logger.msg("servo_controller: servo port change: %d", port);
         }
 
         if (stickyGamepad.x) {

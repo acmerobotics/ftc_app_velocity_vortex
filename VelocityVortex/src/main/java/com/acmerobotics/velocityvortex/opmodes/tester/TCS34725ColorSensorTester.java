@@ -1,5 +1,6 @@
 package com.acmerobotics.velocityvortex.opmodes.tester;
 
+import com.acmerobotics.library.logging.Logger;
 import com.acmerobotics.velocityvortex.opmodes.StickyGamepad;
 import com.acmerobotics.velocityvortex.opmodes.Tester;
 import com.acmerobotics.velocityvortex.sensors.TCS34725ColorSensor;
@@ -29,7 +30,7 @@ public class TCS34725ColorSensorTester extends Tester<I2cDeviceSynch> {
     }
 
     @Override
-    public void loop(Gamepad gamepad, StickyGamepad stickyGamepad, Telemetry telemetry) {
+    public void loop(Gamepad gamepad, StickyGamepad stickyGamepad, Telemetry telemetry, Logger logger) {
         telemetry.addData("alpha", colorSensor.alpha());
         telemetry.addData("red", colorSensor.red());
         telemetry.addData("green", colorSensor.green());

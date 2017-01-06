@@ -26,7 +26,7 @@ public class CSVFile<T> extends DataFile {
     }
 
     public void writeHeader() {
-        write(TextUtils.join(",", fieldNames) + "\n");
+        write(TextUtils.join(",", fieldNames));
     }
 
     public void write(T o) {
@@ -48,7 +48,7 @@ public class CSVFile<T> extends DataFile {
                 Log.e(TAG, e.getMessage());
             }
         }
-        write(TextUtils.join(",", values) + "\n");
+        write(TextUtils.join(",", values));
     }
 
 }

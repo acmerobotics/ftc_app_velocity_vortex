@@ -1,5 +1,6 @@
 package com.acmerobotics.velocityvortex.opmodes.tester;
 
+import com.acmerobotics.library.logging.Logger;
 import com.acmerobotics.velocityvortex.opmodes.StickyGamepad;
 import com.acmerobotics.velocityvortex.opmodes.Tester;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -24,7 +25,7 @@ public class DistanceSensorTester extends Tester<DistanceSensor> {
     }
 
     @Override
-    public void loop(Gamepad gamepad, StickyGamepad stickyGamepad, Telemetry telemetry) {
+    public void loop(Gamepad gamepad, StickyGamepad stickyGamepad, Telemetry telemetry, Logger logger) {
         telemetry.addData("distance", device.getDistance(DistanceUnit.INCH) + "in");
     }
 }

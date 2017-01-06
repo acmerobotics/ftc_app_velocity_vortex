@@ -1,5 +1,6 @@
 package com.acmerobotics.velocityvortex.opmodes.tester;
 
+import com.acmerobotics.library.logging.Logger;
 import com.acmerobotics.velocityvortex.opmodes.StickyGamepad;
 import com.acmerobotics.velocityvortex.opmodes.Tester;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsUsbDeviceInterfaceModule;
@@ -26,15 +27,17 @@ public class MRDeviceInterfaceModuleTester extends Tester<ModernRoboticsUsbDevic
     }
 
     @Override
-    public void loop(Gamepad gamepad, StickyGamepad stickyGamepad, Telemetry telemetry) {
+    public void loop(Gamepad gamepad, StickyGamepad stickyGamepad, Telemetry telemetry, Logger logger) {
         blueLed = device.getLEDState(0);
         redLed = device.getLEDState(1);
         if (stickyGamepad.x) {
             blueLed = !blueLed;
+            logger.msg("dim: blue led state change: %b", blueLed);
         }
         device.setLED(0, blueLed);
         if (stickyGamepad.y) {
             redLed = !redLed;
+            logger.msg("dim: red led state change: %b", redLed);
         }
         device.setLED(1, redLed);
 

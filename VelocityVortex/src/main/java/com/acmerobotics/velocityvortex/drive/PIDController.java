@@ -14,7 +14,7 @@ public class PIDController {
      * a PID controller.
      */
     public static class PIDCoefficients {
-        private double p, i, d;
+        public double p, i, d;
 
         public PIDCoefficients(double p, double i, double d) {
             this.p = p;
@@ -32,6 +32,11 @@ public class PIDController {
 
         public double d() {
             return d;
+        }
+
+        @Override
+        public String toString() {
+            return "(" + p + ", " + i + ", " + d + ")";
         }
     }
 

@@ -1,5 +1,6 @@
 package com.acmerobotics.velocityvortex.opmodes;
 
+import com.acmerobotics.library.logging.Logger;
 import com.qualcomm.hardware.ArmableUsbDevice;
 import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.hardware.Engagable;
@@ -19,7 +20,6 @@ public abstract class Tester<T extends HardwareDevice> {
         this.hardwareName = name;
         this.device = device;
         this.enabled = true;
-        onCreate();
     }
 
     public static int cycleForward(int i, int min, int max) {
@@ -84,11 +84,7 @@ public abstract class Tester<T extends HardwareDevice> {
         }
     }
 
-    protected void onCreate() {
-
-    }
-
     public abstract String getType();
     public abstract String getId();
-    public abstract void loop(Gamepad gamepad, StickyGamepad stickyGamepad, Telemetry telemetry);
+    public abstract void loop(Gamepad gamepad, StickyGamepad stickyGamepad, Telemetry telemetry, Logger logger);
 }

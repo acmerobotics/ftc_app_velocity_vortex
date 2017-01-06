@@ -1,5 +1,6 @@
 package com.acmerobotics.velocityvortex.opmodes.tester;
 
+import com.acmerobotics.library.logging.Logger;
 import com.acmerobotics.velocityvortex.opmodes.StickyGamepad;
 import com.acmerobotics.velocityvortex.opmodes.Tester;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -23,7 +24,7 @@ public class DefaultTester extends Tester<HardwareDevice> {
     }
 
     @Override
-    public void loop(Gamepad gamepad, StickyGamepad stickyGamepad, Telemetry telemetry) {
+    public void loop(Gamepad gamepad, StickyGamepad stickyGamepad, Telemetry telemetry, Logger logger) {
         telemetry.addData("conn_info", device.getConnectionInfo());
         telemetry.addData("version", device.getVersion());
         telemetry.addData("manufacturer", device.getManufacturer());

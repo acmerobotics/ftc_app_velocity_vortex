@@ -10,7 +10,7 @@ public class EnhancedMecanumDrive {
 
     public static final Vector2D INERT_VELOCITY = new Vector2D(0, 0);
 
-    public static final PIDController.PIDCoefficients PID_COEFFICIENTS = new PIDController.PIDCoefficients(-0.06, 0, 0);
+    public static final PIDController.PIDCoefficients PID_COEFFICIENTS = new PIDController.PIDCoefficients(-0, 0, 0);
 
     public static final double MAX_TURN_SPEED = 1;
     public static final double DEFAULT_TURN_EPSILON = 2;
@@ -72,7 +72,11 @@ public class EnhancedMecanumDrive {
     public void setVelocity(Vector2D velocity, double angularVelocity) {
         this.velocity = velocity;
         this.angularVelocity = angularVelocity;
-        drive.setVelocity(velocity, angularVelocity);
+//        drive.setVelocity(velocity, angularVelocity);
+    }
+
+    public void setVelocity(Vector2D velocity) {
+        setVelocity(velocity, 0);
     }
 
     /**
@@ -82,7 +86,8 @@ public class EnhancedMecanumDrive {
     public double update() {
         double error = getHeadingError();
         double feedback = controller.update(error);
-        drive.setVelocity(velocity, angularVelocity + Range.clip(feedback, -MAX_TURN_SPEED, MAX_TURN_SPEED));
+//        drive.setVelocity(velocity, angularVelocity + Range.clip(feedback, -MAX_TURN_SPEED, MAX_TURN_SPEED));
+        drive.setVelocity(velocity, Range.clip(feedback, -MAX_TURN_SPEED, MAX_TURN_SPEED));
         return feedback;
     }
 

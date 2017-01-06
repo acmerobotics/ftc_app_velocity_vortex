@@ -6,13 +6,13 @@ import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-public class MaxSonarEZ3UltrasonicSensor implements UltrasonicSensor, DistanceSensor {
+public class MaxSonarEZ1UltrasonicSensor implements UltrasonicSensor, DistanceSensor {
 
     public static final double VOLTS_PER_INCH = 0.0098;
 
     AnalogInput input;
 
-    public MaxSonarEZ3UltrasonicSensor(AnalogInput analogInput) {
+    public MaxSonarEZ1UltrasonicSensor(AnalogInput analogInput) {
         input = analogInput;
     }
 
@@ -38,7 +38,7 @@ public class MaxSonarEZ3UltrasonicSensor implements UltrasonicSensor, DistanceSe
 
     @Override
     public String getDeviceName() {
-        return "MaxSonar EZ3 Ultrasonic Sensor";
+        return "MaxSonar EZ1 Ultrasonic Sensor";
     }
 
     @Override

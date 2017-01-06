@@ -1,5 +1,6 @@
 package com.acmerobotics.velocityvortex.opmodes.tester;
 
+import com.acmerobotics.library.logging.Logger;
 import com.acmerobotics.velocityvortex.opmodes.StickyGamepad;
 import com.acmerobotics.velocityvortex.opmodes.Tester;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -23,7 +24,7 @@ public class UltrasonicSensorTester extends Tester<UltrasonicSensor> {
     }
 
     @Override
-    public void loop(Gamepad gamepad, StickyGamepad stickyGamepad, Telemetry telemetry) {
+    public void loop(Gamepad gamepad, StickyGamepad stickyGamepad, Telemetry telemetry, Logger logger) {
         telemetry.addData("ultrasonic_level", device.getUltrasonicLevel());
     }
 }

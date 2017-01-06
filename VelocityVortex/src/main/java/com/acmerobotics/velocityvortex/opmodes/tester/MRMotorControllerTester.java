@@ -1,5 +1,6 @@
 package com.acmerobotics.velocityvortex.opmodes.tester;
 
+import com.acmerobotics.library.logging.Logger;
 import com.acmerobotics.velocityvortex.opmodes.StickyGamepad;
 import com.acmerobotics.velocityvortex.opmodes.Tester;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsUsbDcMotorController;
@@ -30,14 +31,16 @@ public class MRMotorControllerTester extends Tester<ModernRoboticsUsbDcMotorCont
     }
 
     @Override
-    public void loop(Gamepad gamepad, StickyGamepad stickyGamepad, Telemetry telemetry) {
+    public void loop(Gamepad gamepad, StickyGamepad stickyGamepad, Telemetry telemetry, Logger logger) {
         if (stickyGamepad.a) {
             port = cycleForward(port, 1, 2);
+            logger.msg("motor_controller: motor port change: %d", port);
         }
 
         runMode = device.getMotorMode(port);
         if (stickyGamepad.x) {
             runMode = DcMotor.RunMode.values()[cycleForward(runMode.ordinal(), 0, 2)];
+            logger.msg("motor_controller: run mode change: %s", runMode);
         }
         device.setMotorMode(port, runMode);
 
@@ -46,6 +49,7 @@ public class MRMotorControllerTester extends Tester<ModernRoboticsUsbDcMotorCont
             do {
                 zeroPowerBehavior = DcMotor.ZeroPowerBehavior.values()[cycleForward(zeroPowerBehavior.ordinal(), 0, 2)];
             } while (zeroPowerBehavior == DcMotor.ZeroPowerBehavior.UNKNOWN);
+            logger.msg("motor_controller: zero power behavior change: %s", zeroPowerBehavior);
         }
         device.setMotorZeroPowerBehavior(port, zeroPowerBehavior);
 
@@ -53,7 +57,7 @@ public class MRMotorControllerTester extends Tester<ModernRoboticsUsbDcMotorCont
         device.setMotorPower(port, power);
 
         telemetry.addData("port (A)", port);
-                telemetry.addData("mode (X)", runMode);
+        telemetry.addData("mode (X)", runMode);
         telemetry.addData("zero_behavior (Y)", zeroPowerBehavior);
         telemetry.addData("power (LJ)", power);
         telemetry.addData("encoder", device.getMotorCurrentPosition(port));
