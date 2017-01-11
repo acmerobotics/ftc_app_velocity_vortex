@@ -8,8 +8,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class MaxSonarEZ1UltrasonicSensor implements UltrasonicSensor, DistanceSensor {
 
-    public static final double VOLTS_PER_INCH = 0.0098;
-
     AnalogInput input;
 
     public MaxSonarEZ1UltrasonicSensor(AnalogInput analogInput) {
@@ -23,7 +21,7 @@ public class MaxSonarEZ1UltrasonicSensor implements UltrasonicSensor, DistanceSe
 
     @Override
     public double getUltrasonicLevel() {
-        return input.getVoltage() / VOLTS_PER_INCH;
+        return input.getVoltage() * 512.0 / input.getMaxVoltage();
     }
 
     @Override

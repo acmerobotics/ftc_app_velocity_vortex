@@ -35,12 +35,12 @@ public class CSVFile<T> extends DataFile {
             try {
                 Object field = fields[i].get(o);
                 if (field.getClass().isArray()) {
-                    String arr = "[";
+                    String arr = "";
                     int length = Array.getLength(field);
-                    for (int j = 0; j < length; j ++) {
+                    for (int j = 0; j < length; j++) {
                         arr +=  Array.get(field, j).toString() + ",";
                     }
-                    values[i] = arr.substring(0, arr.length() - 1) + "]";
+                    values[i] = arr.substring(0, arr.length() - 1);
                 } else {
                     values[i] = field.toString();
                 }
