@@ -1,5 +1,7 @@
 package com.acmerobotics.velocityvortex.opmodes;
 
+import com.acmerobotics.library.configuration.OpModeConfiguration;
+import com.acmerobotics.library.configuration.RobotProperties;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
 import com.acmerobotics.velocityvortex.drive.Vector2D;
@@ -23,16 +25,22 @@ public class MainTeleOp extends OpMode {
 
     private StickyGamepad stickyGamepad1, stickyGamepad2;
 
+    private OpModeConfiguration configuration;
+    private RobotProperties properties;
+
     @Override
     public void init() {
-        drive = new MecanumDrive(hardwareMap);
+        configuration = new OpModeConfiguration(hardwareMap.appContext);
+        properties = configuration.getRobotType().getProperties();
+
+        drive = new MecanumDrive(hardwareMap, properties.getWheelRadius());
 
         imu = new AdafruitBNO055IMU(hardwareMap.i2cDeviceSynch.get("imu"));
         BNO055IMU.Parameters params = new BNO055IMU.Parameters();
         params.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         imu.initialize(params);
 
-        enhancedMecanumDrive = new EnhancedMecanumDrive(drive, imu);
+        enhancedMecanumDrive = new EnhancedMecanumDrive(drive, imu, properties.getTurnParameters());
 
         launcher = new Launcher (hardwareMap);
         collector = new Collector(hardwareMap);
@@ -55,7 +63,7 @@ public class MainTeleOp extends OpMode {
         double omega = -gamepad1.right_stick_x;
         if (omega == 0) omega = -gamepad2.left_stick_x;
 
-        enhancedMecanumDrive.setVelocity(new Vector2D(Range.clip(x, -1, 1), Range.clip(y, -1, 1)), omega);
+        enhancedMecanumDrive.setVelocity(new Vector2D(Range.clip(x, -1, 1), Range.clip(y, -1, 1)));
         enhancedMecanumDrive.update();
 
         //collector

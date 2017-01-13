@@ -3,14 +3,32 @@ package com.acmerobotics.library.configuration;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.qualcomm.robotcore.util.DifferentialControlLoopCoefficients;
+
 public class OpModeConfiguration {
 
     private static final RobotProperties SOFTWARE_BOT = new RobotProperties() {
+        @Override
+        public DifferentialControlLoopCoefficients getTurnParameters() {
+            return new DifferentialControlLoopCoefficients(0.01, 0, 0);
+        }
 
+        @Override
+        public double getWheelRadius() {
+            return 4;
+        }
     };
 
     private static final RobotProperties COMP_BOT = new RobotProperties() {
+        @Override
+        public DifferentialControlLoopCoefficients getTurnParameters() {
+            return null;
+        }
 
+        @Override
+        public double getWheelRadius() {
+            return 4;
+        }
     };
 
     private static final String PREFS_NAME = "opmode";

@@ -1,46 +1,17 @@
 package com.acmerobotics.velocityvortex.drive;
 
+import com.qualcomm.robotcore.util.DifferentialControlLoopCoefficients;
+
 /**
  * This class implements a regular PID controller.
  */
 public class PIDController {
 
-    private PIDCoefficients coeff;
+    private DifferentialControlLoopCoefficients coeff;
 
     private double sum, lastError, lastTime, deriv;
 
-    /**
-     * This class contains the necessary parameters to configure
-     * a PID controller.
-     */
-    public static class PIDCoefficients {
-        public double p, i, d;
-
-        public PIDCoefficients(double p, double i, double d) {
-            this.p = p;
-            this.i = i;
-            this.d = d;
-        }
-
-        public double p() {
-            return p;
-        }
-
-        public double i() {
-            return i;
-        }
-
-        public double d() {
-            return d;
-        }
-
-        @Override
-        public String toString() {
-            return "(" + p + ", " + i + ", " + d + ")";
-        }
-    }
-
-    public PIDController(PIDCoefficients coefficients) {
+    public PIDController(DifferentialControlLoopCoefficients coefficients) {
         coeff = coefficients;
     }
 
@@ -77,6 +48,15 @@ public class PIDController {
 
     public double getErrorDerivative() {
         return deriv;
+    }
+
+    public DifferentialControlLoopCoefficients getCoefficients() {
+        return coeff;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("(%4.3f,%4.3f,%4.3f)", coeff.p, coeff.i, coeff.d);
     }
 
 }

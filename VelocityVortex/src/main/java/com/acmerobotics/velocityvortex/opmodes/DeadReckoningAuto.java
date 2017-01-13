@@ -16,6 +16,7 @@ import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.DifferentialControlLoopCoefficients;
 
 import org.opencv.core.Mat;
 
@@ -28,7 +29,7 @@ import static com.acmerobotics.library.configuration.OpModeConfiguration.Allianc
 @Disabled
 public class DeadReckoningAuto extends LinearOpMode {
 
-    public static final PIDController.PIDCoefficients LINE_PID_COEFF = new PIDController.PIDCoefficients(-0.06, 0, 0);
+    public static final DifferentialControlLoopCoefficients LINE_PID_COEFF = new DifferentialControlLoopCoefficients(-0.06, 0, 0);
     public static final Vector2D BASE_VELOCITY = new Vector2D(-0.25, 0);
 
     public static final int PULSES_PER_REV = 1120;

@@ -12,35 +12,14 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
  */
 public class MecanumDrive {
 
-    public static class Configuration {
-        public double[] wheelRadii;
-        public double offX = 1, offY = 1;
-
-        public static Configuration createFixedRadius(double radius) {
-            Configuration config = new Configuration();
-            config.wheelRadii = new double[] { radius, radius, radius, radius };
-            return config;
-        }
-    }
-
-    public static final Vector2D INERT_VELOCITY = new Vector2D(0, 0);
-
-    private Configuration configuration;
-
     private DcMotor[] motors;
     private Vector2D[] rollerDirs;
     private Vector2D[] rotDirs;
-
+    private double wheelRadius;
     private int[] offsets;
 
-
-    public MecanumDrive(HardwareMap map) {
-        this(map, Configuration.createFixedRadius(4));
-    }
-
-
-    public MecanumDrive(HardwareMap map, Configuration config) {
-        configuration = config;
+    public MecanumDrive(HardwareMap map, double wheelRadius) {
+        this.wheelRadius = wheelRadius;
 
         motors = new DcMotor[4];
         motors[0] = map.dcMotor.get("leftFront");
@@ -55,12 +34,14 @@ public class MecanumDrive {
         motors[3].setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         rollerDirs = new Vector2D[4];
-        rollerDirs[0] = new Vector2D(1, 1).normalize();
-        rollerDirs[1] = new Vector2D(-1, 1).normalize();
+        rollerDirs[0] = new Vector2D(-1, 1).normalize();
+        rollerDirs[1] = new Vector2D(1, 1).normalize();
         rollerDirs[2] = rollerDirs[0];
         rollerDirs[3] = rollerDirs[1];
 
-        double offX = config.offX, offY = config.offY;
+        double offX = 1;
+        double offY = 1;
+
         rotDirs = new Vector2D[4];
         rotDirs[0] = new Vector2D(-offY, -offX).normalize();
         rotDirs[1] = new Vector2D(-offY, offX).normalize();
@@ -70,10 +51,14 @@ public class MecanumDrive {
         resetEncoders();
     }
 
+    public void setVelocity(Vector2D v) {
+        setVelocity(v, 0);
+    }
 
     /**
      * Sets the angular velocity of the mecanum drive system. This includes both the translational
-     * component and the angular component.
+     * component and the angular component. Positive angular speeds indicate counter-clockwise
+     * rotation.
      * @param v translational velocity
      * @param angularSpeed angular speed
      */
@@ -164,7 +149,7 @@ public class MecanumDrive {
             DcMotor motor = motors[i];
             prevModes[i] = motor.getMode();
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            int ticks = (int) Math.round(inches / (2 * Math.PI * configuration.wheelRadii[i]));
+            int ticks = (int) Math.round(inches / (2 * Math.PI * wheelRadius));
             motor.setTargetPosition(motor.getCurrentPosition() + ticks);
             motor.setPower(speed);
         }
