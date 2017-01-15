@@ -6,4 +6,6 @@ public interface RobotProperties {
     DifferentialControlLoopCoefficients getTurnParameters();
     /** Get wheel radius in inches */
     double getWheelRadius();
+    /** Get robot size in inches */
+    double getRobotSize();
 }

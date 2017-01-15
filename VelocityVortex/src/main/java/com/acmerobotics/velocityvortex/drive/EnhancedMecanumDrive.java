@@ -32,7 +32,7 @@ public class EnhancedMecanumDrive {
      * @return the heading
      */
     public double getHeading() {
-        return imu.getAngularOrientation().firstAngle;
+        return -imu.getAngularOrientation().firstAngle;
     }
 
     public double getTargetHeading() {
@@ -149,7 +149,7 @@ public class EnhancedMecanumDrive {
         while (Math.abs(error) > 180) {
             error += -Math.signum(error) * 360;
         }
-        return error;
+        return -error;
     }
 
 }

@@ -23,19 +23,19 @@ public class MecanumDrive {
 
         motors = new DcMotor[4];
         motors[0] = map.dcMotor.get("leftFront");
-        motors[0].setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motors[1] = map.dcMotor.get("rightFront");
         motors[1].setDirection(DcMotorSimple.Direction.REVERSE);
-        motors[1].setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motors[2] = map.dcMotor.get("rightBack");
         motors[2].setDirection(DcMotorSimple.Direction.REVERSE);
-        motors[2].setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motors[3] = map.dcMotor.get("leftBack");
-        motors[3].setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        for (DcMotor motor : motors) {
+            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
 
         rollerDirs = new Vector2D[4];
-        rollerDirs[0] = new Vector2D(-1, 1).normalize();
-        rollerDirs[1] = new Vector2D(1, 1).normalize();
+        rollerDirs[0] = new Vector2D(1, 1).normalize();
+        rollerDirs[1] = new Vector2D(-1, 1).normalize();
         rollerDirs[2] = rollerDirs[0];
         rollerDirs[3] = rollerDirs[1];
 
@@ -145,11 +145,11 @@ public class MecanumDrive {
 
     public void move(double inches, double speed) {
         DcMotor.RunMode[] prevModes = new DcMotor.RunMode[motors.length];
+        int ticks = (int) Math.round(inches / (2 * Math.PI * wheelRadius));
         for (int i = 0; i < motors.length; i++) {
             DcMotor motor = motors[i];
             prevModes[i] = motor.getMode();
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            int ticks = (int) Math.round(inches / (2 * Math.PI * wheelRadius));
             motor.setTargetPosition(motor.getCurrentPosition() + ticks);
             motor.setPower(speed);
         }

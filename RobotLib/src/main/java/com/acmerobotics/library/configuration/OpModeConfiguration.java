@@ -15,7 +15,12 @@ public class OpModeConfiguration {
 
         @Override
         public double getWheelRadius() {
-            return 4;
+            return 2;
+        }
+
+        @Override
+        public double getRobotSize() {
+            throw new RuntimeException("measure robot size");
         }
     };
 
@@ -27,7 +32,12 @@ public class OpModeConfiguration {
 
         @Override
         public double getWheelRadius() {
-            return 4;
+            return 2;
+        }
+
+        @Override
+        public double getRobotSize() {
+            return 18;
         }
     };
 
