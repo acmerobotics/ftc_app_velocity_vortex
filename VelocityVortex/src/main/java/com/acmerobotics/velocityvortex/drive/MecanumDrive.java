@@ -12,6 +12,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
  */
 public class MecanumDrive {
 
+    private static final int TICKS_PER_REV = 1670;
+
     private DcMotor[] motors;
     private Vector2D[] rollerDirs;
     private Vector2D[] rotDirs;
@@ -145,7 +147,8 @@ public class MecanumDrive {
 
     public void move(double inches, double speed) {
         DcMotor.RunMode[] prevModes = new DcMotor.RunMode[motors.length];
-        int ticks = (int) Math.round(inches / (2 * Math.PI * wheelRadius));
+        double rev = inches / (2 * Math.PI * wheelRadius);
+        int ticks = (int) Math.round(rev * TICKS_PER_REV);
         for (int i = 0; i < motors.length; i++) {
             DcMotor motor = motors[i];
             prevModes[i] = motor.getMode();

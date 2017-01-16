@@ -28,28 +28,28 @@ public class Launcher {
 
     private double  gateOpenPos = 0, //todo the servo positions
                     gateClosePos = 0,
-                    triggerUpPos = .45,
-                    triggerDownPos = 0;
+                    triggerUpPos = 0.66,
+                    triggerDownPos = 1;
 
     private boolean gateIsOpen, triggerIsUp;
 
-    public Launcher (HardwareMap hardwareMap) {
+    public Launcher(HardwareMap hardwareMap) {
         right = hardwareMap.dcMotor.get("launcherRight");
-        left = hardwareMap.dcMotor.get ("launcherLeft");
-        elevation = hardwareMap.dcMotor.get ("launcherElevation");
+        left = hardwareMap.dcMotor.get("launcherLeft");
+        elevation = hardwareMap.dcMotor.get("launcherElevation");
 
         left.setDirection(DcMotorSimple.Direction.REVERSE);
-        right.setDirection (DcMotorSimple.Direction.REVERSE);
+        right.setDirection(DcMotorSimple.Direction.REVERSE);
 
         left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        elevation.setDirection (DcMotorSimple.Direction.REVERSE);
+        elevation.setDirection(DcMotorSimple.Direction.REVERSE);
         elevation.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         elevation.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        elevation.setPower (0);
+        elevation.setPower(0);
 
-        setVelocity (0);
+        setVelocity(0);
 
         trigger = hardwareMap.servo.get("trigger");
         //gate = hardwareMap.servo.get("gate");
@@ -67,121 +67,121 @@ public class Launcher {
         if (ramping) return;
         this.velocity = Range.clip(velocity, 0, maxVelocity);
         if (velocity < .2) velocity = 0;
-        right.setPower (Range.clip((velocity - trim), 0, maxVelocity));
-        left.setPower (Range.clip((velocity + trim), 0, maxVelocity));
+        right.setPower(Range.clip((velocity - trim), 0, maxVelocity));
+        left.setPower(Range.clip((velocity + trim), 0, maxVelocity));
     }
 
-    public void stop () {
-        right.setPower (0);
-        left.setPower (0);
+    public void stop() {
+        right.setPower(0);
+        left.setPower(0);
     }
 
-    public void setMaxVelocity (double max) {
-        maxVelocity = Range.clip (max, 0, 1);
+    public void setMaxVelocity(double max) {
+        maxVelocity = Range.clip(max, 0, 1);
     }
 
-    public double getMaxVelocity () {
+    public double getMaxVelocity() {
         return maxVelocity;
     }
 
-    public void maxVelocityUp () {
+    public void maxVelocityUp() {
         setMaxVelocity(maxVelocity + .05);
     }
 
-    public void maxVelocityDown () {
+    public void maxVelocityDown() {
         setMaxVelocity(maxVelocity - .05);
     }
 
-    public void setTargetVelocity (double target) {
-        targetVelocity = Range.clip (target, 0, 1);
+    public void setTargetVelocity(double target) {
+        targetVelocity = Range.clip(target, 0, 1);
         lastTime = System.currentTimeMillis();
 
         ramping = true;
     }
 
-    public void setTrim (double trim) {
-        this.trim = Range.clip (trim, -.5, .5);
+    public void setTrim(double trim) {
+        this.trim = Range.clip(trim, -.5, .5);
     }
 
-    public double getTrim () {
+    public double getTrim() {
         return trim;
     }
 
-    public void trimUp () {
-        setTrim (trim + .05);
+    public void trimUp() {
+        setTrim(trim + .05);
     }
 
-    public void trimDown () {
-        setTrim (trim - .05);
+    public void trimDown() {
+        setTrim(trim - .05);
     }
 
-    public void toggleVelocity () {
+    public void toggleVelocity() {
         if (velocity == 0) {
             setVelocity(1);
         }
-        else setVelocity (0);
+        else setVelocity(0);
     }
 
-    public void updateVelocity () {
+    public void updateVelocity() {
         if (!ramping) return;
         long diff = System.currentTimeMillis() - lastTime;
         lastTime = System.currentTimeMillis();
 
         double percentChange = diff/15;
         double accelerationLeft = targetVelocity - velocity;
-        if (Math.abs (accelerationLeft)*100 < percentChange) {
+        if (Math.abs(accelerationLeft)*100 < percentChange) {
             velocity = targetVelocity;
             ramping = false;
         }
         else  {
             double acceleration = accelerationLeft>0 ? .01 : -.01;
-            setVelocity (velocity + acceleration);
+            setVelocity(velocity + acceleration);
         }
     }
 
-    public double getVelocity () {
+    public double getVelocity() {
         return velocity;
     }
 
-    public void velocityUp () {
-        setVelocity (velocity + velocityStep);
+    public void velocityUp() {
+        setVelocity(velocity + velocityStep);
     }
 
-    public void velocityDown () {
-        setVelocity (velocity - velocityStep);
+    public void velocityDown() {
+        setVelocity(velocity - velocityStep);
     }
 
-    /*public void gateOpen () {
-        gate.setPosition (gateOpenPos);
+    /*public void gateOpen() {
+        gate.setPosition(gateOpenPos);
         gateIsOpen = true;
     }
 
-    public void gateClose () {
+    public void gateClose() {
         gate.setPosition(gateClosePos);
         gateIsOpen = false;
     }
 
-    public void gateToggle () {
+    public void gateToggle() {
         if (gateIsOpen) gateClose();
         else gateOpen();
     }*/
 
-    public void triggerUp () {
+    public void triggerUp() {
         trigger.setPosition(triggerUpPos);
         triggerIsUp = true;
     }
 
-    public void triggerDown () {
+    public void triggerDown() {
         trigger.setPosition(triggerDownPos);
         triggerIsUp = false;
     }
 
-    public void triggerToggle () {
+    public void triggerToggle() {
         if (triggerIsUp) triggerDown();
         else triggerDown();
     }
 
-    public void setElevationVelocity (double velocity) {
+    public void setElevationVelocity(double velocity) {
         elevation.setPower(Range.clip(velocity, -1, 1));
     }
 

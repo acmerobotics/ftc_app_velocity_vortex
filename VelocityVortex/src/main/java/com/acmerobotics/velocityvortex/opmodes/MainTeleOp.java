@@ -6,6 +6,7 @@ import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
 import com.acmerobotics.velocityvortex.drive.Vector2D;
 import com.acmerobotics.velocityvortex.mech.Collector;
+import com.acmerobotics.velocityvortex.mech.FixedLauncher;
 import com.acmerobotics.velocityvortex.mech.Launcher;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
@@ -20,7 +21,7 @@ public class MainTeleOp extends OpMode {
     private BNO055IMU imu;
     private EnhancedMecanumDrive enhancedMecanumDrive;
 
-    private Launcher launcher;
+    private FixedLauncher launcher;
     private Collector collector;
 
     private StickyGamepad stickyGamepad1, stickyGamepad2;
@@ -42,7 +43,7 @@ public class MainTeleOp extends OpMode {
 
         enhancedMecanumDrive = new EnhancedMecanumDrive(drive, imu, properties.getTurnParameters());
 
-        launcher = new Launcher (hardwareMap);
+        launcher = new FixedLauncher(hardwareMap);
         collector = new Collector(hardwareMap);
 
         stickyGamepad1 = new StickyGamepad(gamepad1);
@@ -63,20 +64,12 @@ public class MainTeleOp extends OpMode {
         double omega = -gamepad1.right_stick_x;
         if (omega == 0) omega = -gamepad2.left_stick_x;
 
-        enhancedMecanumDrive.setVelocity(new Vector2D(Range.clip(x, -1, 1), Range.clip(y, -1, 1)));
-        enhancedMecanumDrive.update();
+        drive.setVelocity(new Vector2D(x, y));
 
         //collector
         if (stickyGamepad1.right_bumper) {
             collector.toggle();
         }
-
-         /*//gate
-        if (gamepad2.right_bumper) {
-            launcher.gateOpen();
-        } else {
-            launcher.gateClose();
-        }*/
 
         //launcher
         //trigger
@@ -86,30 +79,12 @@ public class MainTeleOp extends OpMode {
             launcher.triggerDown();
         }
 
-        //elevation
-        launcher.setElevationVelocity(-gamepad2.right_stick_y);
-
         //wheels
         if (gamepad2.left_trigger > 0) {
-            launcher.setVelocity(gamepad2.left_trigger);
+            launcher.setPower(gamepad2.left_trigger);
         } else if (gamepad2.left_bumper) {
-            launcher.stop();
+            launcher.setPower(0);
         }
-
-        if (stickyGamepad2.y) {
-            launcher.maxVelocityUp();
-        }
-
-        if (stickyGamepad2.a) {
-            launcher.maxVelocityDown();
-        }
-
-        if (stickyGamepad2.b) {
-            launcher.trimUp();
-        }
-
-        telemetry.addData("maxVelocity", launcher.getMaxVelocity());
-        telemetry.addData("trim", launcher.getTrim());
 
      }
 }

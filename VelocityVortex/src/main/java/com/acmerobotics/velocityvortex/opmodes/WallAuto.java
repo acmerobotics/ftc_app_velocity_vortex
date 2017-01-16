@@ -21,10 +21,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 @Autonomous(name="Wall Auto")
 public class WallAuto extends LinearOpMode {
 
-    public static final double[] TARGET_DISTANCE_RANGE = { 5, 7 };
+    public static final double[] TARGET_DISTANCE_RANGE = { 10, 12 };
     public static final double DISTANCE_SMOOTHER_EXP = 0.05;
-    public static final double BASE_FORWARD_SPEED = 0.05;
-    public static final double SENSOR_OFFSET = 6.5;
+    public static final double BASE_FORWARD_SPEED = 0.35;
+    public static final double SENSOR_OFFSET = 7.625;
     public static final double TILE_SIZE = 24;
 
     private OpModeConfiguration opModeConfiguration;
@@ -57,13 +57,13 @@ public class WallAuto extends LinearOpMode {
 
         waitForStart();
 
-        basicDrive.move((TILE_SIZE - properties.getRobotSize()) / 2, 0.4);
-
-        drive.turnSync(-45);
-
-        basicDrive.move(2 * TILE_SIZE * Math.sqrt(2), 0.4);
+        basicDrive.move((TILE_SIZE - properties.getRobotSize()) / 2, 0.6);
 
         drive.turnSync(45);
+
+        basicDrive.move(2 * TILE_SIZE * Math.sqrt(2) - 8, 1);
+
+        drive.turnSync(-45);
 
         followWall();
 
@@ -71,7 +71,7 @@ public class WallAuto extends LinearOpMode {
     }
 
     public void followWall() {
-        double startHeading = drive.getHeading();
+        double startHeading = drive.getTargetHeading();
 
         while (opModeIsActive()) {
             double rawDistance = smoother.update(distanceSensor.getDistance(DistanceUnit.INCH));

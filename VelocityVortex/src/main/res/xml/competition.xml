@@ -18,7 +18,7 @@
     </MotorController>
     <ServoController name="servo" serialNumber="AI02RKXM">
         <Servo name="pusher" port="1" />
-        <Servo name="trigger" port="3" />
+        <Servo name="trigger" port="2" />
     </ServoController>
     <DeviceInterfaceModule name="dim" serialNumber="AI02RLOW">
         <I2cDeviceSynch name="imu" port="0" />

@@ -19,26 +19,26 @@ public class Collector {
         motor = hardwareMap.dcMotor.get("collector");
     }
 
-    public void setVelocity (double velocity) {
+    public void setVelocity(double velocity) {
         this.velocity = velocity;
         running = velocity > 0;
-        motor.setPower (velocity);
+        motor.setPower(velocity);
     }
 
     public void run() {
         velocity = 1;
         running = true;
-        motor.setPower (velocity);
+        motor.setPower(1);
     }
 
-    public void stop () {
+    public void stop() {
         velocity = 0;
         running = false;
         motor.setPower(0);
     }
 
-    public void toggle () {
-        if (running) stop ();
-        else run ();
+    public void toggle() {
+        if (running) stop();
+        else run();
     }
 }
