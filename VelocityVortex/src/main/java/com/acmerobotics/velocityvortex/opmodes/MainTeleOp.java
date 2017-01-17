@@ -1,9 +1,12 @@
 package com.acmerobotics.velocityvortex.opmodes;
 
+import com.acmerobotics.library.configuration.OpModeConfiguration;
+import com.acmerobotics.library.configuration.RobotProperties;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
 import com.acmerobotics.velocityvortex.drive.Vector2D;
 import com.acmerobotics.velocityvortex.mech.Collector;
+import com.acmerobotics.velocityvortex.mech.FixedLauncher;
 import com.acmerobotics.velocityvortex.mech.Launcher;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
@@ -15,26 +18,23 @@ import com.qualcomm.robotcore.util.Range;
 public class MainTeleOp extends OpMode {
 
     private MecanumDrive drive;
-    private BNO055IMU imu;
-    private EnhancedMecanumDrive enhancedMecanumDrive;
 
-    private Launcher launcher;
+    private FixedLauncher launcher;
     private Collector collector;
 
     private StickyGamepad stickyGamepad1, stickyGamepad2;
 
+    private OpModeConfiguration configuration;
+    private RobotProperties properties;
+
     @Override
     public void init() {
-        drive = new MecanumDrive(hardwareMap);
+        configuration = new OpModeConfiguration(hardwareMap.appContext);
+        properties = configuration.getRobotType().getProperties();
 
-        imu = new AdafruitBNO055IMU(hardwareMap.i2cDeviceSynch.get("imu"));
-        BNO055IMU.Parameters params = new BNO055IMU.Parameters();
-        params.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        imu.initialize(params);
+        drive = new MecanumDrive(hardwareMap, properties.getWheelRadius());
 
-        enhancedMecanumDrive = new EnhancedMecanumDrive(drive, imu);
-
-        launcher = new Launcher (hardwareMap);
+        launcher = new FixedLauncher(hardwareMap);
         collector = new Collector(hardwareMap);
 
         stickyGamepad1 = new StickyGamepad(gamepad1);
@@ -55,53 +55,36 @@ public class MainTeleOp extends OpMode {
         double omega = -gamepad1.right_stick_x;
         if (omega == 0) omega = -gamepad2.left_stick_x;
 
-        enhancedMecanumDrive.setVelocity(new Vector2D(Range.clip(x, -1, 1), Range.clip(y, -1, 1)), omega);
-        enhancedMecanumDrive.update();
+        // apply quadratic (square) function
+        double radius = Math.pow(Math.hypot(x, y), 2);
+        double theta = Math.atan2(y, x);
+        drive.setVelocity(new Vector2D(radius * Math.cos(theta), radius * Math.sin(theta)), omega);
 
         //collector
         if (stickyGamepad1.right_bumper) {
             collector.toggle();
         }
 
-         /*//gate
-        if (gamepad2.right_bumper) {
-            launcher.gateOpen();
-        } else {
-            launcher.gateClose();
-        }*/
-
         //launcher
         //trigger
-        if (gamepad2.right_trigger > .95 ) {
+        if (gamepad2.right_bumper) {
             launcher.triggerUp();
         } else {
             launcher.triggerDown();
         }
 
-        //elevation
-        launcher.setElevationVelocity(-gamepad2.right_stick_y);
-
         //wheels
-        if (gamepad2.left_trigger > 0) {
-            launcher.setVelocity(gamepad2.left_trigger);
-        } else if (gamepad2.left_bumper) {
-            launcher.stop();
+        if (stickyGamepad2.left_bumper) {
+            if (launcher.isRunning()) {
+                launcher.setPower(0);
+            } else {
+                launcher.setPower(1, 1, 2000);
+            }
         }
+        launcher.update();
 
-        if (stickyGamepad2.y) {
-            launcher.maxVelocityUp();
-        }
-
-        if (stickyGamepad2.a) {
-            launcher.maxVelocityDown();
-        }
-
-        if (stickyGamepad2.b) {
-            launcher.trimUp();
-        }
-
-        telemetry.addData("maxVelocity", launcher.getMaxVelocity());
-        telemetry.addData("trim", launcher.getTrim());
+        telemetry.addData("leftPower", launcher.getLeftPower());
+        telemetry.addData("rightPower", launcher.getRightPower());
 
      }
 }

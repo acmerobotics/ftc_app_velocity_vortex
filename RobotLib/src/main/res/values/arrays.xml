@@ -4,6 +4,11 @@
         <item>Red</item>
         <item>Blue</item>
     </string-array>
+    <string-array name="num_balls">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
     <string-array name="robot_types">
         <item>Competition</item>
         <item>Software</item>

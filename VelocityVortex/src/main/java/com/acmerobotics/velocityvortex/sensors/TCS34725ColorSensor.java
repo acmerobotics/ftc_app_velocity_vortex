@@ -202,7 +202,7 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
 
     @Override
     public void setI2cAddress(I2cAddr newAddress) {
-
+        throw new UnsupportedOperationException("The TCS34725 I2C address is unmodifiable");
     }
 
     @Override

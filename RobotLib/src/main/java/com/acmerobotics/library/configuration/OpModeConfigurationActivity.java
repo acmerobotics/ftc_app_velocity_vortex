@@ -59,6 +59,20 @@ public class OpModeConfigurationActivity extends Activity {
             }
         });
 
+        Spinner numBallsSpinner = (Spinner) findViewById(R.id.num_balls_spinner);
+        numBallsSpinner.setSelection(configuration.getNumberOfBalls());
+        numBallsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                configuration.setNumberOfBalls(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         Spinner robotTypeSpinner = (Spinner) findViewById(R.id.robot_type_spinner);
         robotTypeSpinner.setSelection(configuration.getRobotType().getIndex());
         robotTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

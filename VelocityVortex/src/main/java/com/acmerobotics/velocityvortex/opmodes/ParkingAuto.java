@@ -1,6 +1,7 @@
 package com.acmerobotics.velocityvortex.opmodes;
 
 import com.acmerobotics.library.configuration.OpModeConfiguration;
+import com.acmerobotics.library.configuration.RobotProperties;
 import com.acmerobotics.library.vision.Beacon;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
@@ -11,21 +12,28 @@ import com.acmerobotics.velocityvortex.vision.FastCamera;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.acmerobotics.velocityvortex.sensors.SparkFunLineFollowingArray;
+import com.qualcomm.robotcore.robot.Robot;
+import com.qualcomm.robotcore.util.DifferentialControlLoopCoefficients;
+
 import org.firstinspires.ftc.teamcode.R;
 
 import static com.acmerobotics.library.configuration.OpModeConfiguration.AllianceColor.BLUE;
 
 /**
  * Created by kelly on 12/11/2016.
+ * @deprecated
  */
 
+@Deprecated
+@Disabled
 @Autonomous(name="Parking Auto")
 public class ParkingAuto extends LinearOpMode{
 
-    public static final PIDController.PIDCoefficients LINE_PID_COEFF = new PIDController.PIDCoefficients(-0.06, 0, 0);
+    public static final DifferentialControlLoopCoefficients LINE_PID_COEFF = new DifferentialControlLoopCoefficients(-0.06, 0, 0);
     public static final Vector2D BASE_VELOCITY = new Vector2D(-0.25, 0);
 
     public static final int PULSES_PER_REV = 1120;
@@ -41,13 +49,16 @@ public class ParkingAuto extends LinearOpMode{
     private FastCamera camera;
     //private BeaconPusher pusher;
     private SparkFunLineFollowingArray lineSensor;
-    private OpModeConfiguration configuration;
     private OpModeConfiguration.AllianceColor allianceColor;
     private Beacon.BeaconColor targetBeaconColor;
     private Launcher launcher;
 
+    private OpModeConfiguration configuration;
+    private RobotProperties properties;
+
     public void runOpMode() {
-        //configuration = new OpModeConfiguration(hardwareMap.appContext);
+        configuration = new OpModeConfiguration(hardwareMap.appContext);
+        properties = configuration.getRobotType().getProperties();
         //allianceColor = configuration.getAllianceColor();
         //targetBeaconColor = allianceColor == BLUE ? Beacon.BeaconColor.BLUE : Beacon.BeaconColor.RED;
 
@@ -65,7 +76,7 @@ public class ParkingAuto extends LinearOpMode{
 
 //        lineSensor = new SparkFunLineFollowingArray(hardwareMap.i2cDeviceSynch.get("lineArray"));
 
-        drive = new EnhancedMecanumDrive(new MecanumDrive(hardwareMap), imu);
+        drive = new EnhancedMecanumDrive(new MecanumDrive(hardwareMap, properties.getWheelRadius()), imu, properties.getTurnParameters());
 
         launcher = new Launcher (hardwareMap);
         launcher.setMaxVelocity(.4);

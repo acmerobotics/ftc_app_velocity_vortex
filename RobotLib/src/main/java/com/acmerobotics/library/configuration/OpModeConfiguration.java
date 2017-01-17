@@ -3,19 +3,48 @@ package com.acmerobotics.library.configuration;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.qualcomm.robotcore.util.DifferentialControlLoopCoefficients;
+
 public class OpModeConfiguration {
 
     private static final RobotProperties SOFTWARE_BOT = new RobotProperties() {
+        @Override
+        public DifferentialControlLoopCoefficients getTurnParameters() {
+            return new DifferentialControlLoopCoefficients(0.02, 0, 0);
+        }
 
+        @Override
+        public double getWheelRadius() {
+            return 2;
+        }
+
+        @Override
+        public double getRobotSize() {
+            return 18;
+        }
     };
 
     private static final RobotProperties COMP_BOT = new RobotProperties() {
+        @Override
+        public DifferentialControlLoopCoefficients getTurnParameters() {
+            return new DifferentialControlLoopCoefficients(0, 0, 0);
+        }
 
+        @Override
+        public double getWheelRadius() {
+            return 2;
+        }
+
+        @Override
+        public double getRobotSize() {
+            return 18;
+        }
     };
 
     private static final String PREFS_NAME = "opmode";
     private static final String PREF_ALLIANCE_COLOR = "alliance_color";
     private static final String PREF_DELAY = "delay";
+    private static final String PREF_NUM_BALLS = "num_balls";
     private static final String PREF_ROBOT_TYPE = "robot_type";
 
     public enum AllianceColor {
@@ -39,8 +68,8 @@ public class OpModeConfiguration {
     }
 
     public enum RobotType {
-        SOFTWARE(0, SOFTWARE_BOT),
-        COMPETITION(1, COMP_BOT);
+        COMPETITION(0, COMP_BOT),
+        SOFTWARE(1, SOFTWARE_BOT);
         private int index;
         private RobotProperties props;
         RobotType(int i, RobotProperties p) {
@@ -87,6 +116,15 @@ public class OpModeConfiguration {
         if (delay >= 0 && delay <= 30) {
             editor.putInt(PREF_DELAY, delay);
         }
+    }
+
+    public int getNumberOfBalls() {
+        return preferences.getInt(PREF_NUM_BALLS, 0);
+    }
+
+    public void setNumberOfBalls(int numBalls) {
+        if (numBalls > 2) return;
+        editor.putInt(PREF_NUM_BALLS, numBalls);
     }
 
     public RobotType getRobotType() {

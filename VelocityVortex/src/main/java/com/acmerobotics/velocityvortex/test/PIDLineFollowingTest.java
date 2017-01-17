@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
+import com.qualcomm.robotcore.util.DifferentialControlLoopCoefficients;
 
 import java.util.Date;
 
@@ -43,7 +44,7 @@ public class PIDLineFollowingTest extends OpMode {
         lineFollowingArray = new SparkFunLineFollowingArray(i2cDevice);
         lineFollowingArray.initialize();
 
-        controller = new PIDController(new PIDController.PIDCoefficients(0.025, 0.005, 0));
+        controller = new PIDController(new DifferentialControlLoopCoefficients(0.025, 0.005, 0));
 
         drive = new DifferentialDrive(hardwareMap);
     }

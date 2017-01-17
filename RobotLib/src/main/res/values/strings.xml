@@ -5,4 +5,5 @@
     <string name="alliance_color_text">Alliance Color</string>
     <string name="delay_text">Delay</string>
     <string name="robot_type_text">Robot Type</string>
+    <string name="num_balls_text">Number of Balls</string>
 </resources>
