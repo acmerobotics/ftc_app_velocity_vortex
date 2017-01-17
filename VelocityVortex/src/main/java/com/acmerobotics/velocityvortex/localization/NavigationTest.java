@@ -1,6 +1,7 @@
 package com.acmerobotics.velocityvortex.localization;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 /**
@@ -8,7 +9,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
  *
  */
 
-@Autonomous(name="navigation test")
+@Disabled
+@Autonomous(name="Navigation Test")
 public class NavigationTest extends OpMode{
 
     private RobotLocation location = RobotLocation.ORIGIN;

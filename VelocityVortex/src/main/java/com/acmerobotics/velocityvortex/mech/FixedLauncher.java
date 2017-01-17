@@ -58,6 +58,10 @@ public class FixedLauncher {
         }
     }
 
+    public boolean isRunning() {
+        return leftTarget != 0 || rightTarget != 0;
+    }
+
     public boolean isTriggered() {
         return triggered;
     }

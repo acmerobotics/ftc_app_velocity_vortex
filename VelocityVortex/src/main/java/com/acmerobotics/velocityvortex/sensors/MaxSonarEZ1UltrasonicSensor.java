@@ -6,6 +6,9 @@ import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+/**
+ * This class provides API access to the MaxSonar EZ1 Ultrasonic Sensor.
+ */
 public class MaxSonarEZ1UltrasonicSensor implements UltrasonicSensor, DistanceSensor {
 
     AnalogInput input;

@@ -12,6 +12,7 @@ import com.acmerobotics.velocityvortex.vision.FastCamera;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.acmerobotics.velocityvortex.sensors.SparkFunLineFollowingArray;
@@ -24,8 +25,11 @@ import static com.acmerobotics.library.configuration.OpModeConfiguration.Allianc
 
 /**
  * Created by kelly on 12/11/2016.
+ * @deprecated
  */
 
+@Deprecated
+@Disabled
 @Autonomous(name="Parking Auto")
 public class ParkingAuto extends LinearOpMode{
 

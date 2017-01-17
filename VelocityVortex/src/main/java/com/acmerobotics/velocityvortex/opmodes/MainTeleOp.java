@@ -19,7 +19,6 @@ public class MainTeleOp extends OpMode {
 
     private MecanumDrive drive;
     private BNO055IMU imu;
-    private EnhancedMecanumDrive enhancedMecanumDrive;
 
     private FixedLauncher launcher;
     private Collector collector;
@@ -35,13 +34,6 @@ public class MainTeleOp extends OpMode {
         properties = configuration.getRobotType().getProperties();
 
         drive = new MecanumDrive(hardwareMap, properties.getWheelRadius());
-
-        imu = new AdafruitBNO055IMU(hardwareMap.i2cDeviceSynch.get("imu"));
-        BNO055IMU.Parameters params = new BNO055IMU.Parameters();
-        params.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        imu.initialize(params);
-
-        enhancedMecanumDrive = new EnhancedMecanumDrive(drive, imu, properties.getTurnParameters());
 
         launcher = new FixedLauncher(hardwareMap);
         collector = new Collector(hardwareMap);
@@ -64,7 +56,10 @@ public class MainTeleOp extends OpMode {
         double omega = -gamepad1.right_stick_x;
         if (omega == 0) omega = -gamepad2.left_stick_x;
 
-        drive.setVelocity(new Vector2D(x, y));
+        // apply quadratic (square) function
+        double radius = Math.pow(Math.hypot(x, y), 2);
+        double theta = Math.atan2(y, x);
+        drive.setVelocity(new Vector2D(radius * Math.cos(theta), radius * Math.sin(theta)));
 
         //collector
         if (stickyGamepad1.right_bumper) {
@@ -73,17 +68,19 @@ public class MainTeleOp extends OpMode {
 
         //launcher
         //trigger
-        if (gamepad2.right_trigger > .95 ) {
+        if (gamepad2.right_bumper) {
             launcher.triggerUp();
         } else {
             launcher.triggerDown();
         }
 
         //wheels
-        if (gamepad2.left_trigger > 0) {
-            launcher.setPower(gamepad2.left_trigger);
-        } else if (gamepad2.left_bumper) {
-            launcher.setPower(0);
+        if (stickyGamepad2.left_bumper) {
+            if (launcher.isRunning()) {
+                launcher.setPower(0);
+            } else {
+                launcher.setPower(1);
+            }
         }
 
      }

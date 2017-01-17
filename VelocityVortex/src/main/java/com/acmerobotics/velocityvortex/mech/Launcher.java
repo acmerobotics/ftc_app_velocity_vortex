@@ -8,9 +8,10 @@ import com.qualcomm.robotcore.util.Range;
 
 /**
  * Created by kelly on 12/6/2016.
- *
+ * @deprecated
  */
 
+@Deprecated
 public class Launcher {
 
     private double velocity;

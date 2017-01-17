@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.util.Range;
 public class EnhancedMecanumDrive {
 
     public static final double MAX_TURN_SPEED = 1;
-    public static final double MAX_TURN_ERROR = 1;
+    public static final double DEFAULT_TURN_ERROR = 1;
 
     private PIDController controller;
     private MecanumDrive drive;
@@ -27,7 +27,8 @@ public class EnhancedMecanumDrive {
     }
 
     /**
-     * Get the robot's heading.
+     * Get the robot's heading. This value is the size in degrees of the angle from the fixed axis
+     * in a clockwise direction.
      * @see BNO055IMU#getAngularOrientation()
      * @return the heading
      */
@@ -39,6 +40,13 @@ public class EnhancedMecanumDrive {
         return targetHeading;
     }
 
+    /**
+     * Move the robot forward a specific distance. Please use the lower-level command
+     * {@link MecanumDrive#move(double, double)} instead.
+     * @deprecated
+     * @param ticks encoder ticks to move forward
+     */
+    @Deprecated
     public void moveForward(int ticks) {
         resetHeading();
         drive.resetEncoders();
@@ -61,8 +69,8 @@ public class EnhancedMecanumDrive {
     }
 
     /**
-     * Set translational velocity of the base. This method does not actually update the underlying
-     * motors; please use in tandem with {@link #update()}.
+     * Set the translational velocity of the base. This method does not actually update the
+     * underlying motors; please use in tandem with {@link #update()}.
      * @param velocity the translational velocity
      */
     public void setVelocity(Vector2D velocity) {
@@ -98,17 +106,17 @@ public class EnhancedMecanumDrive {
     }
 
     /**
-     * Turns the robot synchronously. The epsilon value specifies a satisfactory orientation error.
+     * Turns the robot synchronously.
      * @see #turn(double)
      * @param turnAngle the turn angle
-     * @param epsilon satisfactory orientation error
+     * @param error satisfactory orientation error
      */
-    public void turnSync(double turnAngle, double epsilon) {
+    public void turnSync(double turnAngle, double error) {
         turn(turnAngle);
         do {
             update();
             Thread.yield(); // equivalent to LinearOpMode#idle()
-        } while (Math.abs(getHeadingError()) > epsilon);
+        } while (Math.abs(getHeadingError()) > error);
         stop();
     }
 
@@ -118,14 +126,14 @@ public class EnhancedMecanumDrive {
      * @param turnAngle the turn angle
      */
     public void turnSync(double turnAngle) {
-        turnSync(turnAngle, MAX_TURN_ERROR);
+        turnSync(turnAngle, DEFAULT_TURN_ERROR);
     }
 
     /**
      * Reset the target heading.
      */
     public void resetHeading() {
-        targetHeading = getHeading();
+        setTargetHeading(getHeading());
     }
 
     /**
@@ -140,16 +148,17 @@ public class EnhancedMecanumDrive {
     }
 
     /**
-     * Calculates the difference between the target heading and actual heading. The sign of the
-     * error is positive for a clockwise deviation and negative for a counter-clockwise deviation.
+     * Calculates the difference between the target heading and actual heading. A positive error
+     * represents a clockwise correction, and a negative error represents a counter-clockwise
+     * correction.
      * @return the heading error
      */
     public double getHeadingError() {
-        double error = targetHeading - getHeading();
+        double error = getHeading() - targetHeading;
         while (Math.abs(error) > 180) {
-            error += -Math.signum(error) * 360;
+            error += Math.signum(error) * 360;
         }
-        return -error;
+        return error;
     }
 
 }

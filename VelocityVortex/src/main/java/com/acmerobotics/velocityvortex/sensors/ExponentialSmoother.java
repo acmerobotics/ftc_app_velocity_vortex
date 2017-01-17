@@ -1,7 +1,7 @@
 package com.acmerobotics.velocityvortex.sensors;
 
 /**
- * @author Ryan Brott
+ * This class implements a simple smoother based on an exponential moving average.
  */
 
 public class ExponentialSmoother {
@@ -13,6 +13,11 @@ public class ExponentialSmoother {
         this.exp = exp;
     }
 
+    /**
+     * Update the smoother with a new data value
+     * @param val new data value
+     * @return the smoothed value
+     */
     public double update(double val) {
         if (!hasUpdated) {
             avg = val;

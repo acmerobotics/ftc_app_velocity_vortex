@@ -172,17 +172,17 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
 
     @Override
     public int red() {
-        return read16(Registers.TCS34725_CDATAL);
-    }
-
-    @Override
-    public int green() {
         return read16(Registers.TCS34725_RDATAL);
     }
 
     @Override
-    public int blue() {
+    public int green() {
         return read16(Registers.TCS34725_GDATAL);
+    }
+
+    @Override
+    public int blue() {
+        return read16(Registers.TCS34725_BDATAL);
     }
 
     @Override
@@ -202,7 +202,7 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
 
     @Override
     public void setI2cAddress(I2cAddr newAddress) {
-
+        throw new UnsupportedOperationException("The TCS34725 I2C address is unmodifiable");
     }
 
     @Override

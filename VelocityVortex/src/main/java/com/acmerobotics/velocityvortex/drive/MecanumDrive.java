@@ -53,14 +53,19 @@ public class MecanumDrive {
         resetEncoders();
     }
 
+    /**
+     * Sets the velocity of the mecanum drive system.
+     * @see #setVelocity(Vector2D, double)
+     * @param v translational velocity
+     */
     public void setVelocity(Vector2D v) {
         setVelocity(v, 0);
     }
 
     /**
-     * Sets the angular velocity of the mecanum drive system. This includes both the translational
-     * component and the angular component. Positive angular speeds indicate counter-clockwise
-     * rotation.
+     * Sets the velocity of the mecanum drive system. This includes both the translational
+     * component and the angular component. A positive speed indicates a clockwise rotation, and a
+     * negative speed indicates a counter-clockwise rotation.
      * @param v translational velocity
      * @param angularSpeed angular speed
      */
@@ -73,7 +78,7 @@ public class MecanumDrive {
             speed = v.norm();
         }
 
-        if (Math.abs(speed) > 0.0000001) {
+        if (Math.abs(speed) > 1E-10) {
             v = v.copy().normalize();
         }
 
@@ -92,13 +97,6 @@ public class MecanumDrive {
     public void stop() {
         for (DcMotor motor : motors) {
             motor.setPower(0);
-        }
-    }
-
-    public void log(Telemetry telemetry) {
-        for (int i = 0; i < motors.length; i++) {
-            DcMotor motor = motors[i];
-            telemetry.addData("motor" + i, motor.getPower());
         }
     }
 
@@ -137,6 +135,10 @@ public class MecanumDrive {
         return raw;
     }
 
+    /**
+     * Compute and return the mean encoder position.
+     * @return the mean encoder position
+     */
     public int getMeanPosition() {
         int sum = 0;
         for (int pos : getPositions()) {
@@ -145,10 +147,16 @@ public class MecanumDrive {
         return sum / motors.length;
     }
 
+    /**
+     * Move forward synchronously by a specific amount.
+     * @param inches the distance to travel
+     * @param speed the speed to travel at
+     */
     public void move(double inches, double speed) {
         DcMotor.RunMode[] prevModes = new DcMotor.RunMode[motors.length];
         double rev = inches / (2 * Math.PI * wheelRadius);
         int ticks = (int) Math.round(rev * TICKS_PER_REV);
+
         for (int i = 0; i < motors.length; i++) {
             DcMotor motor = motors[i];
             prevModes[i] = motor.getMode();
@@ -156,6 +164,7 @@ public class MecanumDrive {
             motor.setTargetPosition(motor.getCurrentPosition() + ticks);
             motor.setPower(speed);
         }
+
         boolean done = false;
         while (!done) {
             for (DcMotor motor : motors) {
@@ -163,10 +172,12 @@ public class MecanumDrive {
             }
             Thread.yield();
         }
+
+        stop();
+
         for (int i = 0; i < motors.length; i++) {
             DcMotor motor = motors[i];
             motor.setMode(prevModes[i]);
-            motor.setPower(0);
         }
     }
 
