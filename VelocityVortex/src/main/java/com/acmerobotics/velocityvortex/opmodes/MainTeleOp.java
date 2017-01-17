@@ -18,7 +18,6 @@ import com.qualcomm.robotcore.util.Range;
 public class MainTeleOp extends OpMode {
 
     private MecanumDrive drive;
-    private BNO055IMU imu;
 
     private FixedLauncher launcher;
     private Collector collector;
@@ -59,7 +58,7 @@ public class MainTeleOp extends OpMode {
         // apply quadratic (square) function
         double radius = Math.pow(Math.hypot(x, y), 2);
         double theta = Math.atan2(y, x);
-        drive.setVelocity(new Vector2D(radius * Math.cos(theta), radius * Math.sin(theta)));
+        drive.setVelocity(new Vector2D(radius * Math.cos(theta), radius * Math.sin(theta)), omega);
 
         //collector
         if (stickyGamepad1.right_bumper) {
@@ -79,9 +78,13 @@ public class MainTeleOp extends OpMode {
             if (launcher.isRunning()) {
                 launcher.setPower(0);
             } else {
-                launcher.setPower(1);
+                launcher.setPower(1, 1, 2000);
             }
         }
+        launcher.update();
+
+        telemetry.addData("leftPower", launcher.getLeftPower());
+        telemetry.addData("rightPower", launcher.getRightPower());
 
      }
 }

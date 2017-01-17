@@ -1,5 +1,6 @@
 package com.acmerobotics.velocityvortex.mech;
 
+import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsUsbDcMotorController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
@@ -14,7 +15,7 @@ import com.qualcomm.robotcore.util.Range;
 public class FixedLauncher {
 
     public static final double TRIGGER_UP = 0.66;
-    public static final double TRIGGER_DOWN = 0.95;
+    public static final double TRIGGER_DOWN = 1;
 
     private Servo trigger;
     private boolean triggered;
@@ -22,7 +23,7 @@ public class FixedLauncher {
     private double leftPower, rightPower, trim;
 
     private double leftTarget, rightTarget;
-    private long startTime, lastTime, rampTime;
+    private long stopTime;
     private boolean ramping;
 
     public FixedLauncher(HardwareMap hardwareMap) {
@@ -79,10 +80,6 @@ public class FixedLauncher {
         setPower(power, power);
     }
 
-    public void setPower(double power, long rampTime) {
-        setPower(power, power, rampTime);
-    }
-
     public void setPower(double leftPower, double rightPower) {
         setPower(leftPower, rightPower, 0);
     }
@@ -103,9 +100,7 @@ public class FixedLauncher {
             internalSetPower(leftTarget, rightTarget);
         } else {
             ramping = true;
-            this.rampTime = rampTime;
-            startTime = System.currentTimeMillis();
-            lastTime = startTime;
+            stopTime = System.currentTimeMillis() + rampTime;
             if (leftTarget == 0) {
                 internalSetLeftPower(leftPower);
             }
@@ -118,18 +113,17 @@ public class FixedLauncher {
     public void update() {
         if (!ramping) return;
         long now = System.currentTimeMillis();
-        if ((now - startTime) > rampTime) {
+        if (now >= stopTime) {
             ramping = false;
             internalSetPower(leftTarget, rightTarget);
         } else {
-            long diff = now - lastTime;
+            long dt = stopTime - now;
             if (leftTarget != 0) {
-                internalSetLeftPower(diff * (leftTarget - leftPower) / rampTime);
+                internalSetLeftPower(leftPower + (leftTarget - leftPower) / dt);
             }
             if (rightTarget != 0) {
-                internalSetRightPower(diff * (rightTarget - rightPower) / rampTime);
+                internalSetRightPower(rightPower + (rightTarget - rightPower) / dt);
             }
-            lastTime = now;
         }
     }
 
@@ -146,6 +140,14 @@ public class FixedLauncher {
     private void internalSetRightPower(double power) {
         this.rightPower = Range.clip(power, -1, 1);
         right.setPower(rightPower);
+    }
+
+    public double getLeftPower() {
+        return leftPower;
+    }
+
+    public double getRightPower() {
+        return rightPower;
     }
 
 }
