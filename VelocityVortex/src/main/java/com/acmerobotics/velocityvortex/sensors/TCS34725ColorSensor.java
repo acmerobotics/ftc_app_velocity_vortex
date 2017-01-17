@@ -105,7 +105,7 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
         if (ledChannel != null) ledChannel.setMode(DigitalChannelController.Mode.OUTPUT);
         i2cAddr = addr;
         gain = Gain.GAIN_1X;
-        integrationTime = IntegrationTime.INTEGRATION_TIME_700MS;
+        integrationTime = IntegrationTime.INTEGRATION_TIME_50MS;
     }
 
     public void write8(int reg, int data) {
@@ -172,17 +172,17 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
 
     @Override
     public int red() {
-        return read16(Registers.TCS34725_CDATAL);
-    }
-
-    @Override
-    public int green() {
         return read16(Registers.TCS34725_RDATAL);
     }
 
     @Override
-    public int blue() {
+    public int green() {
         return read16(Registers.TCS34725_GDATAL);
+    }
+
+    @Override
+    public int blue() {
+        return read16(Registers.TCS34725_BDATAL);
     }
 
     @Override
