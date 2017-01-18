@@ -55,32 +55,32 @@ public class WallAuto extends LinearOpMode {
         distanceSensor = new MaxSonarEZ1UltrasonicSensor(hardwareMap.analogInput.get("maxSonar"));
         smoother = new ExponentialSmoother(DISTANCE_SMOOTHER_EXP);
 
-        dataFile = new DataFile("wall_auto_" + System.currentTimeMillis() + ".csv");
-        dataFile.write("distance,targetDistance,heading,targetHeading");
+//        dataFile = new DataFile("wall_auto_" + System.currentTimeMillis() + ".csv");
+//        dataFile.write("distance,targetDistance,heading,targetHeading");
 
         waitForStart();
 
-        DbgLog.msg("[ROBOT] moving forward");
+//        DbgLog.msg("[ROBOT] moving forward");
 
         basicDrive.move((TILE_SIZE - properties.getRobotSize()), 0.6);
 
-        DbgLog.msg("[ROBOT] turning 45");
+//        DbgLog.msg("[ROBOT] turning 45");
 
         drive.turnSync(45);
 
-        DbgLog.msg("[ROBOT] moving forward again");
+//        DbgLog.msg("[ROBOT] moving forward again");
 
         basicDrive.move(2 * TILE_SIZE * Math.sqrt(2) - 8, 0.6);
 
-        DbgLog.msg("[ROBOT] turning -45");
+//        DbgLog.msg("[ROBOT] turning -45");
 
         drive.turnSync(-45);
 
-        DbgLog.msg("[ROBOT] following wall");
+//        DbgLog.msg("[ROBOT] following wall");
 
         followWall();
 
-        dataFile.close();
+//        dataFile.close();
     }
 
     public void followWall() {
@@ -109,9 +109,9 @@ public class WallAuto extends LinearOpMode {
             telemetry.addData("distance", distance);
             telemetry.update();
 
-            dataFile.write(String.format("%f,%f,%f,%f", distance, TARGET_DISTANCE, drive.getHeading(), drive.getTargetHeading()));
+//            dataFile.write(String.format("%f,%f,%f,%f", distance, TARGET_DISTANCE, drive.getHeading(), drive.getTargetHeading()));
 
-            Thread.yield();
+            idle();
         }
     }
 }

@@ -156,7 +156,7 @@ public class EnhancedMecanumDrive {
     public double getHeadingError() {
         double error = getHeading() - targetHeading;
         while (Math.abs(error) > 180) {
-            error += Math.signum(error) * 360;
+            error -= Math.signum(error) * 360;
         }
         return error;
     }

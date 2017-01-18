@@ -26,12 +26,20 @@ public class EnhancedMecanumTest extends OpMode {
         properties = configuration.getRobotType().getProperties();
 
         MecanumDrive basicDrive = new MecanumDrive(hardwareMap, properties.getWheelRadius());
+
         BNO055IMU imu = new AdafruitBNO055IMU(hardwareMap.i2cDeviceSynch.get("imu"));
         BNO055IMU.Parameters params = new BNO055IMU.Parameters();
         params.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         imu.initialize(params);
+
         drive = new EnhancedMecanumDrive(basicDrive, imu, properties.getTurnParameters());
+
         stickyGamepad1 = new StickyGamepad(gamepad1);
+    }
+
+    @Override
+    public void init_loop() {
+        telemetry.addData(">", "in init_loop()");
     }
 
     @Override
