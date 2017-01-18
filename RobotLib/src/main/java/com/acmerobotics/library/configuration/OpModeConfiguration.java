@@ -27,7 +27,7 @@ public class OpModeConfiguration {
     private static final RobotProperties COMP_BOT = new RobotProperties() {
         @Override
         public DifferentialControlLoopCoefficients getTurnParameters() {
-            return new DifferentialControlLoopCoefficients(0, 0, 0);
+            throw new UnsupportedOperationException("this parameter needs to be tuned");
         }
 
         @Override

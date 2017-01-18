@@ -115,7 +115,7 @@ public class EnhancedMecanumDrive {
         turn(turnAngle);
         do {
             update();
-            Thread.yield(); // equivalent to LinearOpMode#idle()
+            Thread.yield();
         } while (Math.abs(getHeadingError()) > error);
         stop();
     }

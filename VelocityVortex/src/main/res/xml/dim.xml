@@ -1,6 +1,0 @@
-<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
-<Robot type="FirstInspires-FTC" name="dimTester">
-    <DeviceInterfaceModule name="dim" serialNumber="AL026BG9">
-        <I2cDeviceSynch name="color" port="1" />
-    </DeviceInterfaceModule>
-</Robot>

@@ -8,6 +8,7 @@ import com.acmerobotics.velocityvortex.drive.MecanumDrive;
 import com.acmerobotics.velocityvortex.drive.Vector2D;
 import com.acmerobotics.velocityvortex.sensors.ExponentialSmoother;
 import com.acmerobotics.velocityvortex.sensors.MaxSonarEZ1UltrasonicSensor;
+import com.qualcomm.ftccommon.DbgLog;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -15,13 +16,15 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Autonomous(name="Wall Auto")
 public class WallAuto extends LinearOpMode {
 
-    public static final double[] TARGET_DISTANCE_RANGE = { 10, 12 };
+    public static final double TARGET_DISTANCE = 12;
+    public static final double DISTANCE_SPREAD = 1;
     public static final double DISTANCE_SMOOTHER_EXP = 0.05;
     public static final double BASE_FORWARD_SPEED = 0.35;
     public static final double SENSOR_OFFSET = 7.625;
@@ -57,13 +60,23 @@ public class WallAuto extends LinearOpMode {
 
         waitForStart();
 
-        basicDrive.move((TILE_SIZE - properties.getRobotSize()) / 2, 0.6);
+        DbgLog.msg("[ROBOT] moving forward");
+
+        basicDrive.move((TILE_SIZE - properties.getRobotSize()), 0.6);
+
+        DbgLog.msg("[ROBOT] turning 45");
 
         drive.turnSync(45);
 
-        basicDrive.move(2 * TILE_SIZE * Math.sqrt(2) - 8, 1);
+        DbgLog.msg("[ROBOT] moving forward again");
+
+        basicDrive.move(2 * TILE_SIZE * Math.sqrt(2) - 8, 0.6);
+
+        DbgLog.msg("[ROBOT] turning -45");
 
         drive.turnSync(-45);
+
+        DbgLog.msg("[ROBOT] following wall");
 
         followWall();
 
@@ -81,8 +94,8 @@ public class WallAuto extends LinearOpMode {
             double forwardSpeed = BASE_FORWARD_SPEED;
             double distanceError = 0;
 
-            if (distance < TARGET_DISTANCE_RANGE[0] || distance > TARGET_DISTANCE_RANGE[1]) {
-                distanceError = distance - (TARGET_DISTANCE_RANGE[0] + TARGET_DISTANCE_RANGE[1]) / 2;
+            if (Math.abs(distance - TARGET_DISTANCE) > DISTANCE_SPREAD) {
+                distanceError = distance - TARGET_DISTANCE;
             }
             double targetHeading = startHeading + Range.clip(2 * distanceError, -15, 15);
             double heading = drive.getHeading();
@@ -96,9 +109,9 @@ public class WallAuto extends LinearOpMode {
             telemetry.addData("distance", distance);
             telemetry.update();
 
-            dataFile.write(String.format("%f,%f,%f,%f", distance, (TARGET_DISTANCE_RANGE[0] + TARGET_DISTANCE_RANGE[1]) / 2, drive.getHeading(), drive.getTargetHeading()));
+            dataFile.write(String.format("%f,%f,%f,%f", distance, TARGET_DISTANCE, drive.getHeading(), drive.getTargetHeading()));
 
-            idle();
+            Thread.yield();
         }
     }
 }
