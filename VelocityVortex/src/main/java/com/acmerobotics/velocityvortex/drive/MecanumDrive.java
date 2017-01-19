@@ -36,8 +36,8 @@ public class MecanumDrive {
         }
 
         rollerDirs = new Vector2D[4];
-        rollerDirs[0] = new Vector2D(1, 1).normalize();
-        rollerDirs[1] = new Vector2D(-1, 1).normalize();
+        rollerDirs[0] = new Vector2D(-1, 1).normalize();
+        rollerDirs[1] = new Vector2D(1, 1).normalize();
         rollerDirs[2] = rollerDirs[0];
         rollerDirs[3] = rollerDirs[1];
 
