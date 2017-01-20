@@ -1,13 +1,20 @@
 package com.acmerobotics.velocityvortex.sensors;
 
+import java.util.Locale;
+
 /**
  * @author kelly
  */
 
 public class ColorAnalyzer {
 
-    public double blueThreshold = 2.5;
+    public double blueThreshold = 3;
     public double redThreshold = .85;
+
+    private double red;
+    private double green;
+    private double blue;
+    private double alpha;
 
     private TCS34725ColorSensor device;
 
@@ -16,9 +23,16 @@ public class ColorAnalyzer {
         device.initialize();
     }
 
+    @Override
+    public String toString() {
+        return String.format(Locale.CANADA, "%s, %f, %f, %f, %f", read().getName(), red, green, blue, alpha);
+    }
+
     public BeaconColor read () {
-        double red = device.red();
-        double blue = device.blue();
+        red = device.red();
+        blue = device.blue();
+        alpha = device.alpha();
+        green = device.green();
         double ratio = blue / red;
 
         BeaconColor color = BeaconColor.UNKNOWN;
@@ -28,7 +42,7 @@ public class ColorAnalyzer {
         return color;
     }
 
-    enum BeaconColor {
+    public enum BeaconColor {
         RED {
             public String getName () {return "red";}
         },
@@ -40,6 +54,7 @@ public class ColorAnalyzer {
         };
 
         public abstract String getName ();
+
     }
 
 }

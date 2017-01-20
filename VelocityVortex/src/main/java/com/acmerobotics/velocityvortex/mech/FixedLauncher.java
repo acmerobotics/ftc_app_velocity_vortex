@@ -23,7 +23,7 @@ public class FixedLauncher {
     private double leftPower, rightPower, trim;
 
     private double leftTarget, rightTarget;
-    private long stopTime;
+    private long stopTime, lastTime;
     private boolean ramping;
 
     public FixedLauncher(HardwareMap hardwareMap) {
@@ -35,6 +35,13 @@ public class FixedLauncher {
 
         left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+    }
+
+    public void delay(int ms) {
+        long startTime = System.currentTimeMillis();
+        while ((System.currentTimeMillis() - startTime) < ms) {
+            Thread.yield();
+        }
     }
 
     public void triggerUp() {
@@ -100,7 +107,8 @@ public class FixedLauncher {
             internalSetPower(leftTarget, rightTarget);
         } else {
             ramping = true;
-            stopTime = System.currentTimeMillis() + rampTime;
+            lastTime = System.currentTimeMillis();
+            stopTime = lastTime + rampTime;
             if (leftTarget == 0) {
                 internalSetLeftPower(leftPower);
             }
@@ -117,13 +125,15 @@ public class FixedLauncher {
             ramping = false;
             internalSetPower(leftTarget, rightTarget);
         } else {
-            long dt = stopTime - now;
+            long smallDelta = now - lastTime;
+            long bigDelta = stopTime - lastTime;
             if (leftTarget != 0) {
-                internalSetLeftPower(leftPower + (leftTarget - leftPower) / dt);
+                internalSetLeftPower(leftPower + smallDelta * (leftTarget - leftPower) / bigDelta);
             }
             if (rightTarget != 0) {
-                internalSetRightPower(rightPower + (rightTarget - rightPower) / dt);
+                internalSetRightPower(rightPower + smallDelta * (rightTarget - rightPower) / bigDelta);
             }
+            lastTime = now;
         }
     }
 
@@ -148,6 +158,26 @@ public class FixedLauncher {
 
     public double getRightPower() {
         return rightPower;
+    }
+
+    public void fireBalls(int numBalls) {
+        setPower(1, 1, 2000);
+
+        while (leftPower < 1 || rightPower < 1) {
+            update();
+            Thread.yield();
+        }
+
+        delay(500);
+
+        for (int i = 0; i < numBalls; i++) {
+            triggerUp();
+            delay(500);
+            triggerDown();
+            delay(1250);
+        }
+
+        setPower(0);
     }
 
 }

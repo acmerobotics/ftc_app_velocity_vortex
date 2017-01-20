@@ -22,12 +22,17 @@ public class OpModeConfiguration {
         public double getRobotSize() {
             return 18;
         }
+
+        @Override
+        public double getSonarSensorOffset() {
+            return 7.625;
+        }
     };
 
     private static final RobotProperties COMP_BOT = new RobotProperties() {
         @Override
         public DifferentialControlLoopCoefficients getTurnParameters() {
-            return new DifferentialControlLoopCoefficients(.0000, 0, 0);
+            return new DifferentialControlLoopCoefficients(0.035, 0, 0);
         }
 
         @Override
@@ -38,6 +43,11 @@ public class OpModeConfiguration {
         @Override
         public double getRobotSize() {
             return 18;
+        }
+
+        @Override
+        public double getSonarSensorOffset() {
+            return 2.5;
         }
     };
 

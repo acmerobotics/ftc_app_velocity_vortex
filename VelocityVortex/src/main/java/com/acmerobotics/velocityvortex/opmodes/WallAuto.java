@@ -6,43 +6,56 @@ import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
 import com.acmerobotics.velocityvortex.drive.Vector2D;
+import com.acmerobotics.velocityvortex.mech.BeaconPusher;
+import com.acmerobotics.velocityvortex.mech.FixedLauncher;
+import com.acmerobotics.velocityvortex.sensors.ColorAnalyzer;
 import com.acmerobotics.velocityvortex.sensors.ExponentialSmoother;
 import com.acmerobotics.velocityvortex.sensors.MaxSonarEZ1UltrasonicSensor;
-import com.qualcomm.ftccommon.DbgLog;
+import com.acmerobotics.velocityvortex.sensors.TCS34725ColorSensor;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.util.RobotLog;
+import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Autonomous(name="Wall Auto")
 public class WallAuto extends LinearOpMode {
 
-    public static final double TARGET_DISTANCE = 12;
-    public static final double DISTANCE_SPREAD = 1;
-    public static final double DISTANCE_SMOOTHER_EXP = 0.05;
+    public static final double TARGET_DISTANCE = 6.75;
+    public static final double DISTANCE_SPREAD = .5;
+    public static final double DISTANCE_SMOOTHER_EXP = 0.1;
     public static final double BASE_FORWARD_SPEED = 0.35;
-    public static final double SENSOR_OFFSET = 7.625;
     public static final double TILE_SIZE = 24;
+    public static final long BEACON_PRESS_DELAY = 3000;//ms
 
     private OpModeConfiguration opModeConfiguration;
     private MecanumDrive basicDrive;
     private EnhancedMecanumDrive drive;
     private BNO055IMU imu;
+    private FixedLauncher launcher;
     private DistanceSensor distanceSensor;
     private ExponentialSmoother smoother;
     private DataFile dataFile;
     private RobotProperties properties;
+    private double allianceModifier;
+    private OpModeConfiguration.AllianceColor allianceColor;
+    private ColorAnalyzer.BeaconColor targetColor;
+    private TCS34725ColorSensor colorSensor;
+    private ColorAnalyzer colorAnalyzer;
+    private BeaconPusher beaconPusher;
+    private int beaconsPressed;
+    private double sensorOffset;
 
     @Override
     public void runOpMode() throws InterruptedException {
         opModeConfiguration = new OpModeConfiguration(hardwareMap.appContext);
         properties = opModeConfiguration.getRobotType().getProperties();
+
+        allianceColor = opModeConfiguration.getAllianceColor();
+        allianceModifier = allianceColor == OpModeConfiguration.AllianceColor.BLUE ? 1 : -1;
 
         imu = new AdafruitBNO055IMU(hardwareMap.i2cDeviceSynch.get("imu"));
         AdafruitBNO055IMU.Parameters parameters = new AdafruitBNO055IMU.Parameters();
@@ -55,63 +68,109 @@ public class WallAuto extends LinearOpMode {
         distanceSensor = new MaxSonarEZ1UltrasonicSensor(hardwareMap.analogInput.get("maxSonar"));
         smoother = new ExponentialSmoother(DISTANCE_SMOOTHER_EXP);
 
-//        dataFile = new DataFile("wall_auto_" + System.currentTimeMillis() + ".csv");
-//        dataFile.write("distance,targetDistance,heading,targetHeading");
+        sensorOffset = properties.getSonarSensorOffset();
+
+        launcher = new FixedLauncher(hardwareMap);
+
+        I2cDeviceSynch i2cDevice = hardwareMap.i2cDeviceSynch.get("color");
+        colorSensor = new TCS34725ColorSensor(i2cDevice, true);
+        colorAnalyzer = new ColorAnalyzer(colorSensor);
+        targetColor = allianceColor == OpModeConfiguration.AllianceColor.BLUE ?
+                ColorAnalyzer.BeaconColor.BLUE : ColorAnalyzer.BeaconColor.RED;
+
+        beaconPusher = new BeaconPusher(hardwareMap);
+        beaconPusher.retract();
+
+        dataFile = new DataFile("wall_auto_" + System.currentTimeMillis() + ".csv");
+        dataFile.write("color, red, green, blue, alpha");
 
         waitForStart();
 
-//        DbgLog.msg("[ROBOT] moving forward");
+        basicDrive.move(-24, 0.6);
 
-        basicDrive.move((TILE_SIZE - properties.getRobotSize()), 0.6);
+        launcher.fireBalls(opModeConfiguration.getNumberOfBalls());
 
-//        DbgLog.msg("[ROBOT] turning 45");
+        drive.turnSync(-110);
 
-        drive.turnSync(45);
+        basicDrive.move(42, 0.6);
 
-//        DbgLog.msg("[ROBOT] moving forward again");
+        drive.setTargetHeading(180);
+        drive.turnSync(0);
 
-        basicDrive.move(2 * TILE_SIZE * Math.sqrt(2) - 8, 0.6);
+        double distanceError;
+        do {
+            distanceError = getDistance() - TARGET_DISTANCE;
+            drive.setVelocity(new Vector2D(0.1 * distanceError, 0));
+            idle();
+        } while (Math.abs(distanceError) > DISTANCE_SPREAD);
 
-//        DbgLog.msg("[ROBOT] turning -45");
+        drive.stop();
 
-        drive.turnSync(-45);
-
-//        DbgLog.msg("[ROBOT] following wall");
-
+        beaconsPressed = 0;
         followWall();
 
-//        dataFile.close();
+        dataFile.close();
     }
 
     public void followWall() {
-        double startHeading = drive.getTargetHeading();
+        colorAnalyzer.read();
+        try {Thread.sleep(2000); }catch (Exception e ) {}
 
         while (opModeIsActive()) {
-            double rawDistance = smoother.update(distanceSensor.getDistance(DistanceUnit.INCH));
-            double headingError = Math.toRadians(drive.getHeadingError());
-            double distance = rawDistance * Math.cos(headingError) - SENSOR_OFFSET * Math.sin(headingError);
+            double distance = getDistance();
 
-            double forwardSpeed = BASE_FORWARD_SPEED;
-            double distanceError = 0;
+            double forwardSpeed = allianceModifier * BASE_FORWARD_SPEED;
 
-            if (Math.abs(distance - TARGET_DISTANCE) > DISTANCE_SPREAD) {
-                distanceError = distance - TARGET_DISTANCE;
+            double distanceError = distance - TARGET_DISTANCE;
+
+            if (Math.abs(distanceError) > DISTANCE_SPREAD) {
+                if (distance > TARGET_DISTANCE + DISTANCE_SPREAD)
+                    drive.setVelocity (new Vector2D(0.1*(-distanceError), forwardSpeed));
+                else if (distance < TARGET_DISTANCE)
+                    drive.setVelocity(new Vector2D(0.1*(-distanceError), forwardSpeed));
+            } else {
+                if(beaconsPressed < 2)
+                    drive.setVelocity(new Vector2D(0, forwardSpeed));
+                else
+                    drive.stop();
             }
-            double targetHeading = startHeading + Range.clip(2 * distanceError, -15, 15);
-            double heading = drive.getHeading();
-            drive.setTargetHeading(targetHeading);
-            drive.setVelocity(new Vector2D(0, forwardSpeed));
+
+            ColorAnalyzer.BeaconColor color = colorAnalyzer.read();
+            if (color == targetColor) {
+                drive.stop();
+                drive.turn(0);
+                pushBeacon ();
+                if (beaconsPressed < 2) basicDrive.move(allianceModifier * TILE_SIZE/2, .6);
+                drive.stop();
+            }
+
             drive.update();
 
             telemetry.addData("pidCoeff", drive.getController().toString());
-            telemetry.addData("targetHeading", targetHeading);
-            telemetry.addData("heading", heading);
             telemetry.addData("distance", distance);
+            telemetry.addData("color", color.getName());
             telemetry.update();
 
-//            dataFile.write(String.format("%f,%f,%f,%f", distance, TARGET_DISTANCE, drive.getHeading(), drive.getTargetHeading()));
+            //dataFile.write(colorAnalyzer.toString());
 
             idle();
         }
+    }
+
+    private void pushBeacon () {
+        long endTime = System.currentTimeMillis() + BEACON_PRESS_DELAY;
+        beaconPusher.extend();
+        try {Thread.sleep(BEACON_PRESS_DELAY); }catch (Exception e ) {}
+        beaconPusher.retract();
+        try {Thread.sleep(2000); }catch (Exception e ) {}
+        beaconsPressed++;
+
+
+    }
+
+    private double getDistance () {
+        double rawDistance = smoother.update(distanceSensor.getDistance(DistanceUnit.INCH));
+        double headingError = Math.toRadians(drive.getHeadingError());
+        return rawDistance * Math.cos(headingError) - sensorOffset * Math.sin(headingError);
     }
 }

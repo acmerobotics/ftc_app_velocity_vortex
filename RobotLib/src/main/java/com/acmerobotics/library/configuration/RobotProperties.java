@@ -8,4 +8,5 @@ public interface RobotProperties {
     double getWheelRadius();
     /** Get robot size in inches */
     double getRobotSize();
+    double getSonarSensorOffset();
 }

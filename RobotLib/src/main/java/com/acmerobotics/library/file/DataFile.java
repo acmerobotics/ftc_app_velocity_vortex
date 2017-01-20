@@ -62,10 +62,12 @@ public class DataFile implements AutoCloseable {
     public void write(String s, boolean newline) {
         try {
             writer.write(s + (newline ? "\r\n" : ""));
+            writer.flush();
         } catch (IOException e) {
             Log.e(TAG, "IO error while attempting to write data to file\n" + e.getMessage());
         }
     }
+
 
     @Override
     public void close() {

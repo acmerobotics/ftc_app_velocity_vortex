@@ -5,8 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 /**
- * Created by kelly on 1/18/2017.
- * 
+ *
  */
 
 public class TankDrive extends OpMode {

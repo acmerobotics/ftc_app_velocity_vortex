@@ -20,7 +20,7 @@ public class BeaconPusher {
 
     public BeaconPusher(HardwareMap hardwareMap) {
         ServoController servoController = hardwareMap.servoController.get("servo");
-        servo = new CRServoImpl(servoController, 1);
+        servo = new CRServoImpl(servoController, 2);
     }
 
     public void extend() {

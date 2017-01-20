@@ -12,7 +12,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
  */
 public class MecanumDrive {
 
-    private static final int TICKS_PER_REV = 1670;
+    private static final int TICKS_PER_REV = 1680 * 2 / 3;
 
     private DcMotor[] motors;
     private Vector2D[] rollerDirs;
@@ -41,14 +41,14 @@ public class MecanumDrive {
         rollerDirs[2] = rollerDirs[0];
         rollerDirs[3] = rollerDirs[1];
 
-        double offX = 1;
-        double offY = 1;
+        //double offX = 1;
+        //double offY = 1;
 
         rotDirs = new Vector2D[4];
-        rotDirs[0] = new Vector2D(-offY, -offX).normalize();
-        rotDirs[1] = new Vector2D(-offY, offX).normalize();
-        rotDirs[2] = new Vector2D(offY, offX).normalize();
-        rotDirs[3] = new Vector2D(offY, -offX).normalize();
+        rotDirs[0] = new Vector2D(0, -1);
+        rotDirs[1] = new Vector2D(0, 1);
+        rotDirs[2] = new Vector2D(0, 1);
+        rotDirs[3] = new Vector2D(0, -1);
 
         resetEncoders();
     }
