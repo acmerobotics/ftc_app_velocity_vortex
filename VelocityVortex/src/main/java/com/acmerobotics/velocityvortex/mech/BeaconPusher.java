@@ -1,5 +1,7 @@
 package com.acmerobotics.velocityvortex.mech;
 
+import android.os.SystemClock;
+
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsUsbServoController;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.CRServoImpl;
@@ -21,6 +23,8 @@ public class BeaconPusher {
     public BeaconPusher(HardwareMap hardwareMap) {
         ServoController servoController = hardwareMap.servoController.get("servo");
         servo = new CRServoImpl(servoController, 2);
+        servo.setPower(-1);
+        extended = false;
     }
 
     public void extend() {
@@ -35,6 +39,13 @@ public class BeaconPusher {
             servo.setPower(-1);
             extended = false;
         }
+    }
+
+    public void autoPush() {
+        extend();
+        SystemClock.sleep(3000);
+        retract();
+        SystemClock.sleep(2000);
     }
 
     public boolean isExtended() {

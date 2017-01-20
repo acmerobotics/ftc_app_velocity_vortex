@@ -1,5 +1,7 @@
 package com.acmerobotics.velocityvortex.opmodes;
 
+import android.os.SystemClock;
+
 import com.acmerobotics.library.configuration.OpModeConfiguration;
 import com.acmerobotics.library.configuration.RobotProperties;
 import com.acmerobotics.library.file.DataFile;
@@ -29,7 +31,6 @@ public class WallAuto extends LinearOpMode {
     public static final double DISTANCE_SMOOTHER_EXP = 0.1;
     public static final double BASE_FORWARD_SPEED = 0.35;
     public static final double TILE_SIZE = 24;
-    public static final long BEACON_PRESS_DELAY = 3000;//ms
 
     private OpModeConfiguration opModeConfiguration;
     private MecanumDrive basicDrive;
@@ -79,10 +80,9 @@ public class WallAuto extends LinearOpMode {
                 ColorAnalyzer.BeaconColor.BLUE : ColorAnalyzer.BeaconColor.RED;
 
         beaconPusher = new BeaconPusher(hardwareMap);
-        beaconPusher.retract();
 
-        dataFile = new DataFile("wall_auto_" + System.currentTimeMillis() + ".csv");
-        dataFile.write("color, red, green, blue, alpha");
+//        dataFile = new DataFile("wall_auto_" + System.currentTimeMillis() + ".csv");
+//        dataFile.write("color, red, green, blue, alpha");
 
         waitForStart();
 
@@ -109,42 +109,39 @@ public class WallAuto extends LinearOpMode {
         beaconsPressed = 0;
         followWall();
 
-        dataFile.close();
+//        dataFile.close();
     }
 
     public void followWall() {
         colorAnalyzer.read();
-        try {Thread.sleep(2000); }catch (Exception e ) {}
+        SystemClock.sleep(2000);
 
         while (opModeIsActive()) {
             double distance = getDistance();
-
-            double forwardSpeed = allianceModifier * BASE_FORWARD_SPEED;
-
             double distanceError = distance - TARGET_DISTANCE;
 
+            double forwardSpeed = allianceModifier * BASE_FORWARD_SPEED;
+            double lateralSpeed;
             if (Math.abs(distanceError) > DISTANCE_SPREAD) {
-                if (distance > TARGET_DISTANCE + DISTANCE_SPREAD)
-                    drive.setVelocity (new Vector2D(0.1*(-distanceError), forwardSpeed));
-                else if (distance < TARGET_DISTANCE)
-                    drive.setVelocity(new Vector2D(0.1*(-distanceError), forwardSpeed));
+                lateralSpeed = 0.1 * -distanceError;
             } else {
-                if(beaconsPressed < 2)
-                    drive.setVelocity(new Vector2D(0, forwardSpeed));
-                else
-                    drive.stop();
+                lateralSpeed = 0;
             }
+            drive.setVelocity(new Vector2D(forwardSpeed, lateralSpeed));
+            drive.update();
 
             ColorAnalyzer.BeaconColor color = colorAnalyzer.read();
             if (color == targetColor) {
                 drive.stop();
                 drive.turn(0);
-                pushBeacon ();
-                if (beaconsPressed < 2) basicDrive.move(allianceModifier * TILE_SIZE/2, .6);
-                drive.stop();
+                pushBeacon();
+                if (beaconsPressed < 2) {
+                    basicDrive.move(allianceModifier * TILE_SIZE / 2, .6);
+                } else {
+                    drive.stop();
+                    return;
+                }
             }
-
-            drive.update();
 
             telemetry.addData("pidCoeff", drive.getController().toString());
             telemetry.addData("distance", distance);
@@ -157,18 +154,12 @@ public class WallAuto extends LinearOpMode {
         }
     }
 
-    private void pushBeacon () {
-        long endTime = System.currentTimeMillis() + BEACON_PRESS_DELAY;
-        beaconPusher.extend();
-        try {Thread.sleep(BEACON_PRESS_DELAY); }catch (Exception e ) {}
-        beaconPusher.retract();
-        try {Thread.sleep(2000); }catch (Exception e ) {}
+    private void pushBeacon() {
+        beaconPusher.autoPush();
         beaconsPressed++;
-
-
     }
 
-    private double getDistance () {
+    private double getDistance() {
         double rawDistance = smoother.update(distanceSensor.getDistance(DistanceUnit.INCH));
         double headingError = Math.toRadians(drive.getHeadingError());
         return rawDistance * Math.cos(headingError) - sensorOffset * Math.sin(headingError);
