@@ -3,6 +3,7 @@ package com.acmerobotics.velocityvortex.mech;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsUsbDcMotorController;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -14,8 +15,8 @@ import com.qualcomm.robotcore.util.Range;
 
 public class FixedLauncher {
 
-    public static final double TRIGGER_UP = 0.66;
-    public static final double TRIGGER_DOWN = 1;
+    public static final double TRIGGER_UP = 0.6;
+    public static final double TRIGGER_DOWN = 0.82;
 
     private Servo trigger;
     private boolean triggered;
@@ -33,6 +34,7 @@ public class FixedLauncher {
         left = hardwareMap.dcMotor.get("launcherLeft");
         right = hardwareMap.dcMotor.get("launcherRight");
 
+        left.setDirection(DcMotorSimple.Direction.REVERSE);
         left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     }
@@ -161,6 +163,8 @@ public class FixedLauncher {
     }
 
     public void fireBalls(int numBalls) {
+        if (numBalls == 0) return;
+
         setPower(1, 1, 2000);
 
         while (leftPower < 1 || rightPower < 1) {
@@ -170,14 +174,16 @@ public class FixedLauncher {
 
         delay(500);
 
-        for (int i = 0; i < numBalls; i++) {
+        for (int i = 1; i <= numBalls; i++) {
             triggerUp();
             delay(500);
             triggerDown();
-            delay(1250);
+            if (i == numBalls) {
+                setPower(0);
+                return;
+            }
+            delay(1750);
         }
-
-        setPower(0);
     }
 
 }

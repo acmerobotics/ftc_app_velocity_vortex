@@ -90,6 +90,8 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
         }
     }
 
+    private static final I2cDeviceSynch.ReadWindow READ_WINDOW = new I2cDeviceSynch.ReadWindow(Registers.TCS34725_CDATAL, 8, I2cDeviceSynch.ReadMode.REPEAT);
+
     private IntegrationTime integrationTime;
     private Gain gain;
     private I2cAddr i2cAddr;
@@ -105,12 +107,15 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
         if (ledChannel != null) ledChannel.setMode(DigitalChannelController.Mode.OUTPUT);
         i2cAddr = addr;
         gain = Gain.GAIN_1X;
-        integrationTime = IntegrationTime.INTEGRATION_TIME_50MS;
-    }
+        integrationTime = IntegrationTime.INTEGRATION_TIME_700MS;}
 
     public void write8(int reg, int data) {
         deviceClient.write8(TCS34725_COMMAND_BIT | reg, data);
         deviceClient.waitForWriteCompletions();
+    }
+
+    public byte[] read(int reg, int creg) {
+        return deviceClient.read(TCS34725_COMMAND_BIT | reg, creg);
     }
 
     public int read8(int reg) {
@@ -120,6 +125,10 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
     public int read16(int reg) {
         byte[] data = deviceClient.read(TCS34725_COMMAND_BIT | reg, 2);
         return TypeConversion.byteArrayToShort(data, ByteOrder.LITTLE_ENDIAN);
+    }
+
+    public int make16(byte lower, byte upper) {
+        return TypeConversion.byteArrayToShort(new byte[] { lower, upper }, ByteOrder.LITTLE_ENDIAN);
     }
 
     private void delay(int ms) {
@@ -161,38 +170,53 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
     }
 
     public void setIntegrationTime(IntegrationTime time) {
-        write8(Registers.TCS34725_ATIME, time.byteVal);
+        if (isInitialized) write8(Registers.TCS34725_ATIME, time.byteVal);
         integrationTime = time;
     }
 
     public void setGain(Gain gain) {
-        write8(Registers.TCS34725_CONTROL, gain.byteVal);
+        if (isInitialized) write8(Registers.TCS34725_CONTROL, gain.byteVal);
         this.gain = gain;
     }
 
     @Override
     public int red() {
+        deviceClient.ensureReadWindow(READ_WINDOW, READ_WINDOW);
         return read16(Registers.TCS34725_RDATAL);
     }
 
     @Override
     public int green() {
+        deviceClient.ensureReadWindow(READ_WINDOW, READ_WINDOW);
         return read16(Registers.TCS34725_GDATAL);
     }
 
     @Override
     public int blue() {
+        deviceClient.ensureReadWindow(READ_WINDOW, READ_WINDOW);
         return read16(Registers.TCS34725_BDATAL);
     }
 
     @Override
     public int alpha() {
+        deviceClient.ensureReadWindow(READ_WINDOW, READ_WINDOW);
         return read16(Registers.TCS34725_CDATAL);
     }
 
     @Override
     public int argb() {
-        return TypeConversion.byteArrayToInt(deviceClient.read(Registers.TCS34725_CDATAL, 8));
+        return 0;
+    }
+
+    public int[] getColors() {
+        deviceClient.ensureReadWindow(READ_WINDOW, READ_WINDOW);
+        byte[] data = read(Registers.TCS34725_CDATAL, 8);
+        return new int[] {
+                make16(data[0], data[1]),
+                make16(data[2], data[3]),
+                make16(data[4], data[5]),
+                make16(data[6], data[7])
+        };
     }
 
     @Override

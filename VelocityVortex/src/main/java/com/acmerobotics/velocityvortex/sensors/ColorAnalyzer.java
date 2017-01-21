@@ -8,8 +8,8 @@ import java.util.Locale;
 
 public class ColorAnalyzer {
 
-    public double blueThreshold = 3;
-    public double redThreshold = .85;
+    public double blueThreshold = 2.5;
+    public double redThreshold = .9;
 
     private double red;
     private double green;
@@ -29,10 +29,11 @@ public class ColorAnalyzer {
     }
 
     public BeaconColor read () {
-        red = device.red();
-        blue = device.blue();
-        alpha = device.alpha();
-        green = device.green();
+        int[] colors = device.getColors();
+        alpha = colors[0];
+        red = colors[1];
+        green = colors[2];
+        blue = colors[3];
         double ratio = blue / red;
 
         BeaconColor color = BeaconColor.UNKNOWN;

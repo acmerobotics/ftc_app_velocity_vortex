@@ -20,16 +20,17 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Autonomous(name="Wall Auto")
 public class WallAuto extends LinearOpMode {
 
-    public static final double TARGET_DISTANCE = 6.75;
-    public static final double DISTANCE_SPREAD = .5;
-    public static final double DISTANCE_SMOOTHER_EXP = 0.1;
-    public static final double BASE_FORWARD_SPEED = 0.35;
+    public static final double TARGET_DISTANCE = 6.5;
+    public static final double DISTANCE_SPREAD = 0.5;
+    public static final double DISTANCE_SMOOTHER_EXP = 1;
+    public static final double BASE_FORWARD_SPEED = 0.25;
     public static final double TILE_SIZE = 24;
 
     private OpModeConfiguration opModeConfiguration;
@@ -49,11 +50,14 @@ public class WallAuto extends LinearOpMode {
     private BeaconPusher beaconPusher;
     private int beaconsPressed;
     private double sensorOffset;
+    private ElapsedTime timer;
 
     @Override
     public void runOpMode() throws InterruptedException {
         opModeConfiguration = new OpModeConfiguration(hardwareMap.appContext);
         properties = opModeConfiguration.getRobotType().getProperties();
+
+        timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
         allianceColor = opModeConfiguration.getAllianceColor();
         allianceModifier = allianceColor == OpModeConfiguration.AllianceColor.BLUE ? 1 : -1;
@@ -75,68 +79,75 @@ public class WallAuto extends LinearOpMode {
 
         I2cDeviceSynch i2cDevice = hardwareMap.i2cDeviceSynch.get("color");
         colorSensor = new TCS34725ColorSensor(i2cDevice, true);
+        colorSensor.setIntegrationTime(TCS34725ColorSensor.IntegrationTime.INTEGRATION_TIME_24MS);
+        colorSensor.setGain(TCS34725ColorSensor.Gain.GAIN_4X);
+
         colorAnalyzer = new ColorAnalyzer(colorSensor);
         targetColor = allianceColor == OpModeConfiguration.AllianceColor.BLUE ?
                 ColorAnalyzer.BeaconColor.BLUE : ColorAnalyzer.BeaconColor.RED;
+        colorAnalyzer.read();
 
         beaconPusher = new BeaconPusher(hardwareMap);
 
-//        dataFile = new DataFile("wall_auto_" + System.currentTimeMillis() + ".csv");
-//        dataFile.write("color, red, green, blue, alpha");
+        dataFile = new DataFile("wall_auto_" + System.currentTimeMillis() + ".csv");
+        dataFile.write("loopTime, color, red, green, blue, alpha");
 
         waitForStart();
 
-        basicDrive.move(-24, 0.6);
+        moveAndShoot();
+
+        followWallAndPressBeacons();
+
+        dataFile.close();
+    }
+
+    public void moveAndShoot() {
+        basicDrive.move(-24, 1);
 
         launcher.fireBalls(opModeConfiguration.getNumberOfBalls());
 
-        drive.turnSync(-110);
+        drive.turnSync(allianceModifier * -110);
 
-        basicDrive.move(42, 0.6);
+        basicDrive.move(45, 1);
 
-        drive.setTargetHeading(180);
+        if (allianceColor == OpModeConfiguration.AllianceColor.BLUE) {
+            drive.setTargetHeading(180);
+        } else {
+            drive.setTargetHeading(0);
+        }
         drive.turnSync(0);
-
-        double distanceError;
-        do {
-            distanceError = getDistance() - TARGET_DISTANCE;
-            drive.setVelocity(new Vector2D(0.1 * distanceError, 0));
-            idle();
-        } while (Math.abs(distanceError) > DISTANCE_SPREAD);
-
-        drive.stop();
-
-        beaconsPressed = 0;
-        followWall();
-
-//        dataFile.close();
     }
 
-    public void followWall() {
-        colorAnalyzer.read();
-        SystemClock.sleep(2000);
-
+    public void followWallAndPressBeacons() throws InterruptedException {
+        beaconsPressed = 0;
         while (opModeIsActive()) {
+            double lastLoopTime = timer.milliseconds();
+            timer.reset();
+
             double distance = getDistance();
-            double distanceError = distance - TARGET_DISTANCE;
+            double distanceError = TARGET_DISTANCE - distance;
 
             double forwardSpeed = allianceModifier * BASE_FORWARD_SPEED;
-            double lateralSpeed;
+            double lateralSpeed = 0;
             if (Math.abs(distanceError) > DISTANCE_SPREAD) {
-                lateralSpeed = 0.1 * -distanceError;
-            } else {
-                lateralSpeed = 0;
+                lateralSpeed = 0.075 * distanceError;
             }
-            drive.setVelocity(new Vector2D(forwardSpeed, lateralSpeed));
+            if (Math.abs(distanceError) > 4) {
+                forwardSpeed = 0;
+            }
+            drive.setVelocity(new Vector2D(lateralSpeed, forwardSpeed));
             drive.update();
 
             ColorAnalyzer.BeaconColor color = colorAnalyzer.read();
             if (color == targetColor) {
                 drive.stop();
                 drive.turn(0);
-                pushBeacon();
+
+                beaconPusher.autoPush();
+                beaconsPressed++;
+
                 if (beaconsPressed < 2) {
-                    basicDrive.move(allianceModifier * TILE_SIZE / 2, .6);
+                    basicDrive.move(3 * allianceModifier * TILE_SIZE / 2, 1);
                 } else {
                     drive.stop();
                     return;
@@ -145,18 +156,14 @@ public class WallAuto extends LinearOpMode {
 
             telemetry.addData("pidCoeff", drive.getController().toString());
             telemetry.addData("distance", distance);
+            telemetry.addData("distanceError", distanceError);
             telemetry.addData("color", color.getName());
             telemetry.update();
 
-            //dataFile.write(colorAnalyzer.toString());
+            dataFile.write(lastLoopTime + "," + colorAnalyzer.toString());
 
             idle();
         }
-    }
-
-    private void pushBeacon() {
-        beaconPusher.autoPush();
-        beaconsPressed++;
     }
 
     private double getDistance() {
