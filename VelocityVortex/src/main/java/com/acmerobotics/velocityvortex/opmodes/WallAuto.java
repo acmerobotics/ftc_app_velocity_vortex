@@ -1,6 +1,6 @@
 package com.acmerobotics.velocityvortex.opmodes;
 
-import android.os.SystemClock;
+import android.annotation.SuppressLint;
 
 import com.acmerobotics.library.configuration.OpModeConfiguration;
 import com.acmerobotics.library.configuration.RobotProperties;
@@ -9,6 +9,7 @@ import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
 import com.acmerobotics.velocityvortex.drive.Vector2D;
 import com.acmerobotics.velocityvortex.mech.BeaconPusher;
+import com.acmerobotics.velocityvortex.mech.BeaconRam;
 import com.acmerobotics.velocityvortex.mech.FixedLauncher;
 import com.acmerobotics.velocityvortex.sensors.ColorAnalyzer;
 import com.acmerobotics.velocityvortex.sensors.ExponentialSmoother;
@@ -23,6 +24,8 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
+import java.util.Date;
 
 @Autonomous(name="Wall Auto")
 public class WallAuto extends LinearOpMode {
@@ -51,6 +54,7 @@ public class WallAuto extends LinearOpMode {
     private int beaconsPressed;
     private double sensorOffset;
     private ElapsedTime timer;
+    private BeaconRam beaconRam;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -88,11 +92,22 @@ public class WallAuto extends LinearOpMode {
         colorAnalyzer.read();
 
         beaconPusher = new BeaconPusher(hardwareMap);
+        beaconRam = new BeaconRam(hardwareMap);
 
         dataFile = new DataFile("wall_auto_" + System.currentTimeMillis() + ".csv");
-        dataFile.write("loopTime, color, red, green, blue, alpha");
+        dataFile.write("Wall Autonomous");
+        dataFile.write(new Date().toString());
+        dataFile.write("loopTime, targetDistance, distance, targetHeading, heading, color, red, blue");
+
+        telemetry.addData("robot_type", opModeConfiguration.getRobotType());
+        telemetry.addData("alliance_color", allianceColor);
+        telemetry.addData("delay", opModeConfiguration.getDelay());
+        telemetry.addData("num_balls", opModeConfiguration.getNumberOfBalls());
+        telemetry.update();
 
         waitForStart();
+
+        Thread.sleep(1000 * opModeConfiguration.getDelay());
 
         moveAndShoot();
 
@@ -118,6 +133,7 @@ public class WallAuto extends LinearOpMode {
         drive.turnSync(0);
     }
 
+    @SuppressLint("DefaultLocale")
     public void followWallAndPressBeacons() throws InterruptedException {
         beaconsPressed = 0;
         while (opModeIsActive()) {
@@ -159,8 +175,9 @@ public class WallAuto extends LinearOpMode {
             telemetry.addData("distanceError", distanceError);
             telemetry.addData("color", color.getName());
             telemetry.update();
+            dataFile.write("loopTime, targetDistance, distance, targetHeading, heading, color, red, blue");
 
-            dataFile.write(lastLoopTime + "," + colorAnalyzer.toString());
+            dataFile.write(String.format("%f,%f,%f,%f,%f,%s,%f,%f", lastLoopTime, TARGET_DISTANCE, distance, drive.getTargetHeading(), drive.getHeading(), color, colorAnalyzer.getRed(), colorAnalyzer.getBlue()));
 
             idle();
         }

@@ -43,6 +43,14 @@ public class ColorAnalyzer {
         return color;
     }
 
+    public double getRed() {
+        return red;
+    }
+
+    public double getBlue() {
+        return blue;
+    }
+
     public enum BeaconColor {
         RED {
             public String getName () {return "red";}

@@ -5,6 +5,8 @@ import com.acmerobotics.library.configuration.RobotProperties;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
 import com.acmerobotics.velocityvortex.drive.Vector2D;
+import com.acmerobotics.velocityvortex.mech.BeaconPusher;
+import com.acmerobotics.velocityvortex.mech.BeaconRam;
 import com.acmerobotics.velocityvortex.mech.Collector;
 import com.acmerobotics.velocityvortex.mech.FixedLauncher;
 import com.acmerobotics.velocityvortex.mech.Launcher;
@@ -21,6 +23,8 @@ public class MainTeleOp extends OpMode {
 
     private FixedLauncher launcher;
     private Collector collector;
+    private BeaconRam beaconRam;
+    private BeaconPusher beaconPusher;
 
     private StickyGamepad stickyGamepad1, stickyGamepad2;
 
@@ -36,6 +40,8 @@ public class MainTeleOp extends OpMode {
 
         launcher = new FixedLauncher(hardwareMap);
         collector = new Collector(hardwareMap);
+        beaconRam = new BeaconRam(hardwareMap);
+        beaconPusher = new BeaconPusher(hardwareMap);
 
         stickyGamepad1 = new StickyGamepad(gamepad1);
         stickyGamepad2 = new StickyGamepad(gamepad2);
@@ -63,6 +69,11 @@ public class MainTeleOp extends OpMode {
         //collector
         if (stickyGamepad1.right_bumper) {
             collector.toggle();
+        }
+
+        // beacon ram
+        if (stickyGamepad1.left_bumper) {
+            beaconRam.toggle();
         }
 
         //launcher
