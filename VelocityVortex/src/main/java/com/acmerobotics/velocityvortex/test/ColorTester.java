@@ -28,6 +28,7 @@ public class ColorTester extends OpMode {
     }
 
     public void loop () {
+
         double red = device.red();
         double green = device.green();
         double blue = device.blue();

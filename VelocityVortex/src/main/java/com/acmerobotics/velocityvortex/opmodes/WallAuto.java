@@ -21,7 +21,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
@@ -30,11 +32,12 @@ import java.util.Date;
 @Autonomous(name="Wall Auto")
 public class WallAuto extends LinearOpMode {
 
-    public static final double TARGET_DISTANCE = 6.5;
-    public static final double DISTANCE_SPREAD = 0.5;
+    public static final double TARGET_DISTANCE = 6.4;
+    public static final double DISTANCE_SPREAD = 0.4;
     public static final double DISTANCE_SMOOTHER_EXP = 1;
     public static final double BASE_FORWARD_SPEED = 0.25;
     public static final double TILE_SIZE = 24;
+    public static final double STRAFE_P = .1;
 
     private OpModeConfiguration opModeConfiguration;
     private MecanumDrive basicDrive;
@@ -55,6 +58,9 @@ public class WallAuto extends LinearOpMode {
     private double sensorOffset;
     private ElapsedTime timer;
     private BeaconRam beaconRam;
+    private VoltageSensor voltageSensor;
+    private double voltage;
+    private double fireDistance;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -89,7 +95,30 @@ public class WallAuto extends LinearOpMode {
         colorAnalyzer = new ColorAnalyzer(colorSensor);
         targetColor = allianceColor == OpModeConfiguration.AllianceColor.BLUE ?
                 ColorAnalyzer.BeaconColor.BLUE : ColorAnalyzer.BeaconColor.RED;
+
         colorAnalyzer.read();
+        Thread.sleep(100);
+
+        int goodValsCnt = 0;
+        while (opModeIsActive()) {
+            colorAnalyzer.read();
+            double red = colorAnalyzer.getRed();
+            double blue = colorAnalyzer.getBlue();
+            telemetry.addData("red", red);
+            telemetry.addData("blue", blue);
+            telemetry.update();
+            Thread.yield();
+            if (red == 0 && blue == 0) {
+                Thread.sleep(50);
+                goodValsCnt = 0;
+//                colorSensor.disable();
+//                Thread.sleep(50);
+//                colorSensor.enable();
+            } else {
+                goodValsCnt++;
+            }
+            if (goodValsCnt > 2) break;
+        }
 
         beaconPusher = new BeaconPusher(hardwareMap);
         beaconRam = new BeaconRam(hardwareMap);
@@ -97,12 +126,19 @@ public class WallAuto extends LinearOpMode {
         dataFile = new DataFile("wall_auto_" + System.currentTimeMillis() + ".csv");
         dataFile.write("Wall Autonomous");
         dataFile.write(new Date().toString());
-        dataFile.write("loopTime, targetDistance, distance, targetHeading, heading, color, red, blue");
+        dataFile.write("loopTime, targetDistance, distance, targetHeading, heading, color, ratio, red, blue");
+
+        voltageSensor = hardwareMap.voltageSensor.get("launcher");
+        voltage = voltageSensor.getVoltage();
+        double voltageError = Range.clip(12.0 - voltage, -5, 0);
+        double correction = voltageError * -2.6;
+        fireDistance = 24-correction;
 
         telemetry.addData("robot_type", opModeConfiguration.getRobotType());
         telemetry.addData("alliance_color", allianceColor);
         telemetry.addData("delay", opModeConfiguration.getDelay());
         telemetry.addData("num_balls", opModeConfiguration.getNumberOfBalls());
+        telemetry.addData("fire_distance", fireDistance);
         telemetry.update();
 
         waitForStart();
@@ -117,7 +153,8 @@ public class WallAuto extends LinearOpMode {
     }
 
     public void moveAndShoot() {
-        basicDrive.move(-24, 1);
+
+        basicDrive.move (-fireDistance, 1);
 
         launcher.fireBalls(opModeConfiguration.getNumberOfBalls());
 
@@ -146,7 +183,7 @@ public class WallAuto extends LinearOpMode {
             double forwardSpeed = allianceModifier * BASE_FORWARD_SPEED;
             double lateralSpeed = 0;
             if (Math.abs(distanceError) > DISTANCE_SPREAD) {
-                lateralSpeed = 0.075 * distanceError;
+                lateralSpeed = STRAFE_P * distanceError;
             }
             if (Math.abs(distanceError) > 4) {
                 forwardSpeed = 0;
@@ -155,8 +192,21 @@ public class WallAuto extends LinearOpMode {
             drive.update();
 
             ColorAnalyzer.BeaconColor color = colorAnalyzer.read();
+            dataFile.write(String.format("%f,%f,%f,%f,%f,%s,%f, %f,%f", lastLoopTime, TARGET_DISTANCE, distance, drive.getTargetHeading(), drive.getHeading(), color, colorAnalyzer.getRatio(), colorAnalyzer.getRed(), colorAnalyzer.getBlue()));
             if (color == targetColor) {
                 drive.stop();
+
+                basicDrive.move(-1.5 * allianceModifier, BASE_FORWARD_SPEED);
+
+                while (Math.abs(distanceError) > DISTANCE_SPREAD) {
+                    distance = getDistance();
+                    distanceError = TARGET_DISTANCE - distance;
+                    lateralSpeed = STRAFE_P * distanceError;
+                    drive.setVelocity(new Vector2D(lateralSpeed, 0));
+                    drive.update();
+                    idle();
+                }
+
                 drive.turn(0);
 
                 beaconPusher.autoPush();
@@ -175,9 +225,9 @@ public class WallAuto extends LinearOpMode {
             telemetry.addData("distanceError", distanceError);
             telemetry.addData("color", color.getName());
             telemetry.update();
-            dataFile.write("loopTime, targetDistance, distance, targetHeading, heading, color, red, blue");
+            //dataFile.write("loopTime, targetDistance, distance, targetHeading, heading, color, red, blue");
 
-            dataFile.write(String.format("%f,%f,%f,%f,%f,%s,%f,%f", lastLoopTime, TARGET_DISTANCE, distance, drive.getTargetHeading(), drive.getHeading(), color, colorAnalyzer.getRed(), colorAnalyzer.getBlue()));
+            dataFile.write(String.format("%f,%f,%f,%f,%f,%s,%f, %f,%f", lastLoopTime, TARGET_DISTANCE, distance, drive.getTargetHeading(), drive.getHeading(), color, colorAnalyzer.getRatio(), colorAnalyzer.getRed(), colorAnalyzer.getBlue()));
 
             idle();
         }

@@ -182,7 +182,7 @@ public class FixedLauncher {
                 setPower(0);
                 return;
             }
-            delay(1750);
+            delay(2500);
         }
     }
 

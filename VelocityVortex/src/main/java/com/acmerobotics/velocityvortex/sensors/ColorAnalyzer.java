@@ -8,8 +8,8 @@ import java.util.Locale;
 
 public class ColorAnalyzer {
 
-    public double blueThreshold = 2.5;
-    public double redThreshold = .9;
+    public double blueThreshold = 2.25;
+    public double redThreshold = .75;
 
     private double red;
     private double green;
@@ -50,6 +50,8 @@ public class ColorAnalyzer {
     public double getBlue() {
         return blue;
     }
+
+    public double getRatio () {return blue/red; }
 
     public enum BeaconColor {
         RED {

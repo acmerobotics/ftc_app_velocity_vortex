@@ -155,16 +155,18 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
 
         enable();
 
+        deviceClient.setReadWindow(READ_WINDOW);
+
         return true;
     }
 
-    private void enable() {
+    public void enable() {
         write8(Registers.TCS34725_ENABLE, Registers.TCS34725_ENABLE_PON);
         delay(3);
         write8(Registers.TCS34725_ENABLE, Registers.TCS34725_ENABLE_PON | Registers.TCS34725_ENABLE_AEN);
     }
 
-    private void disable() {
+    public void disable() {
         int data = read8(Registers.TCS34725_ENABLE);
         write8(Registers.TCS34725_ENABLE, data & ~(Registers.TCS34725_ENABLE_PON | Registers.TCS34725_ENABLE_AEN));
     }
@@ -181,25 +183,21 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
 
     @Override
     public int red() {
-        deviceClient.ensureReadWindow(READ_WINDOW, READ_WINDOW);
         return read16(Registers.TCS34725_RDATAL);
     }
 
     @Override
     public int green() {
-        deviceClient.ensureReadWindow(READ_WINDOW, READ_WINDOW);
         return read16(Registers.TCS34725_GDATAL);
     }
 
     @Override
     public int blue() {
-        deviceClient.ensureReadWindow(READ_WINDOW, READ_WINDOW);
         return read16(Registers.TCS34725_BDATAL);
     }
 
     @Override
     public int alpha() {
-        deviceClient.ensureReadWindow(READ_WINDOW, READ_WINDOW);
         return read16(Registers.TCS34725_CDATAL);
     }
 
@@ -209,7 +207,6 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
     }
 
     public int[] getColors() {
-        deviceClient.ensureReadWindow(READ_WINDOW, READ_WINDOW);
         byte[] data = read(Registers.TCS34725_CDATAL, 8);
         return new int[] {
                 make16(data[0], data[1]),
