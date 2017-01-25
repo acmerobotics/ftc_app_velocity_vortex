@@ -1,5 +1,7 @@
 package com.acmerobotics.velocityvortex.sensors;
 
+import com.qualcomm.robotcore.hardware.ColorSensor;
+
 import java.util.Locale;
 
 /**
@@ -12,28 +14,22 @@ public class ColorAnalyzer {
     public double redThreshold = .9;
 
     private double red;
-    private double green;
     private double blue;
-    private double alpha;
 
-    private TCS34725ColorSensor device;
+    private ColorSensor device;
 
-    public ColorAnalyzer (TCS34725ColorSensor sensor) {
+    public ColorAnalyzer (ColorSensor sensor) {
         device = sensor;
-        device.initialize();
     }
 
     @Override
     public String toString() {
-        return String.format(Locale.CANADA, "%s, %f, %f, %f, %f", read().getName(), red, green, blue, alpha);
+        return String.format(Locale.CANADA, "%s, %f, %f", read().getName(), red, blue);
     }
 
     public BeaconColor read () {
-        int[] colors = device.getColors();
-        alpha = colors[0];
-        red = colors[1];
-        green = colors[2];
-        blue = colors[3];
+        red = device.red();
+        blue = device.blue();
         double ratio = blue / red;
 
         BeaconColor color = BeaconColor.UNKNOWN;

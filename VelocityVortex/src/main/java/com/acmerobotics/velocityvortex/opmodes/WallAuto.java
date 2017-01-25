@@ -19,7 +19,9 @@ import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -48,7 +50,7 @@ public class WallAuto extends LinearOpMode {
     private double allianceModifier;
     private OpModeConfiguration.AllianceColor allianceColor;
     private ColorAnalyzer.BeaconColor targetColor;
-    private TCS34725ColorSensor colorSensor;
+    private ColorSensor colorSensor;
     private ColorAnalyzer colorAnalyzer;
     private BeaconPusher beaconPusher;
     private int beaconsPressed;
@@ -81,10 +83,14 @@ public class WallAuto extends LinearOpMode {
 
         launcher = new FixedLauncher(hardwareMap);
 
-        I2cDeviceSynch i2cDevice = hardwareMap.i2cDeviceSynch.get("color");
-        colorSensor = new TCS34725ColorSensor(i2cDevice, true);
-        colorSensor.setIntegrationTime(TCS34725ColorSensor.IntegrationTime.INTEGRATION_TIME_24MS);
-        colorSensor.setGain(TCS34725ColorSensor.Gain.GAIN_4X);
+//        I2cDeviceSynch i2cDevice = hardwareMap.i2cDeviceSynch.get("color");
+//        colorSensor = new TCS34725ColorSensor(i2cDevice, true);
+//        colorSensor.setIntegrationTime(TCS34725ColorSensor.IntegrationTime.INTEGRATION_TIME_24MS);
+//        colorSensor.setGain(TCS34725ColorSensor.Gain.GAIN_4X);
+
+        colorSensor = hardwareMap.colorSensor.get("color");
+        colorSensor.setI2cAddress(I2cAddr.create8bit(0x3e));
+        colorSensor.enableLed(false);
 
         colorAnalyzer = new ColorAnalyzer(colorSensor);
         targetColor = allianceColor == OpModeConfiguration.AllianceColor.BLUE ?
@@ -94,7 +100,7 @@ public class WallAuto extends LinearOpMode {
         beaconPusher = new BeaconPusher(hardwareMap);
         beaconRam = new BeaconRam(hardwareMap);
 
-        dataFile = new DataFile("wall_auto_" + System.currentTimeMillis() + ".csv");
+        dataFile = new DataFile("wall_auto3_" + System.currentTimeMillis() + ".csv");
         dataFile.write("Wall Autonomous");
         dataFile.write(new Date().toString());
         dataFile.write("loopTime, targetDistance, distance, targetHeading, heading, color, red, blue");
@@ -155,27 +161,26 @@ public class WallAuto extends LinearOpMode {
             drive.update();
 
             ColorAnalyzer.BeaconColor color = colorAnalyzer.read();
-            if (color == targetColor) {
-                drive.stop();
-                drive.turn(0);
-
-                beaconPusher.autoPush();
-                beaconsPressed++;
-
-                if (beaconsPressed < 2) {
-                    basicDrive.move(3 * allianceModifier * TILE_SIZE / 2, 1);
-                } else {
-                    drive.stop();
-                    return;
-                }
-            }
+//            if (color == targetColor) {
+//                drive.stop();
+//                drive.turn(0);
+//
+//                beaconPusher.autoPush();
+//                beaconsPressed++;
+//
+//                if (beaconsPressed < 2) {
+//                    basicDrive.move(3 * allianceModifier * TILE_SIZE / 2, 1);
+//                } else {
+//                    drive.stop();
+//                    return;
+//                }
+//            }
 
             telemetry.addData("pidCoeff", drive.getController().toString());
             telemetry.addData("distance", distance);
             telemetry.addData("distanceError", distanceError);
             telemetry.addData("color", color.getName());
             telemetry.update();
-            dataFile.write("loopTime, targetDistance, distance, targetHeading, heading, color, red, blue");
 
             dataFile.write(String.format("%f,%f,%f,%f,%f,%s,%f,%f", lastLoopTime, TARGET_DISTANCE, distance, drive.getTargetHeading(), drive.getHeading(), color, colorAnalyzer.getRed(), colorAnalyzer.getBlue()));
 

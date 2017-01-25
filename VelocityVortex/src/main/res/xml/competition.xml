@@ -22,7 +22,7 @@
     </ServoController>
     <DeviceInterfaceModule name="dim" serialNumber="AI02RLOW">
         <I2cDeviceSynch name="imu" port="0" />
-        <I2cDeviceSynch name="color" port="3" />
+        <ColorSensor name="color" port="3" />
         <AnalogInput name="maxSonar" port="0" />
     </DeviceInterfaceModule>
 </Robot>
