@@ -1,10 +1,6 @@
 package com.acmerobotics.velocityvortex.test;
 
-import android.provider.ContactsContract;
-
 import com.acmerobotics.library.file.DataFile;
-import com.acmerobotics.velocityvortex.sensors.ColorAnalyzer;
-import com.acmerobotics.velocityvortex.sensors.ExponentialSmoother;
 import com.acmerobotics.velocityvortex.sensors.TCS34725ColorSensor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -28,6 +24,7 @@ public class ColorTester extends OpMode {
     }
 
     public void loop () {
+
         double red = device.red();
         double green = device.green();
         double blue = device.blue();
