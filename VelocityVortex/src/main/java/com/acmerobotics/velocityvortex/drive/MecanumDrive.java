@@ -1,5 +1,6 @@
 package com.acmerobotics.velocityvortex.drive;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -147,12 +148,16 @@ public class MecanumDrive {
         return sum / motors.length;
     }
 
+    public void move(double inches, double speed) {
+        move(inches, speed, null);
+    }
+
     /**
      * Move forward synchronously by a specific amount.
      * @param inches the distance to travel
      * @param speed the speed to travel at
      */
-    public void move(double inches, double speed) {
+    public void move(double inches, double speed, LinearOpMode opMode) {
         DcMotor.RunMode[] prevModes = new DcMotor.RunMode[motors.length];
         double rev = inches / (2 * Math.PI * wheelRadius);
         int ticks = (int) Math.round(rev * TICKS_PER_REV);
@@ -166,7 +171,7 @@ public class MecanumDrive {
         }
 
         boolean done = false;
-        while (!done) {
+        while (!done && (opMode == null || opMode.opModeIsActive())) {
             for (DcMotor motor : motors) {
                 if (!motor.isBusy()) done = true;
             }

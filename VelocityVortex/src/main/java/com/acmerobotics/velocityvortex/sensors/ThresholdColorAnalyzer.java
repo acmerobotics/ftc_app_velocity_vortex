@@ -24,7 +24,7 @@ public class ThresholdColorAnalyzer implements ColorAnalyzer {
         double blue = sensor.blue();
         if (red >= redThreshold) {
             return BeaconColor.RED;
-        } else if (red >= blueThreshold) {
+        } else if (blue >= blueThreshold) {
             return BeaconColor.BLUE;
         } else {
             return BeaconColor.UNKNOWN;

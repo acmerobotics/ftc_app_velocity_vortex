@@ -35,6 +35,20 @@ public class OpModeConfigurationActivity extends Activity {
             }
         });
 
+        Spinner parkDestSpinner = (Spinner) findViewById(R.id.park_dest_spinner);
+        parkDestSpinner.setSelection(configuration.getParkDest().getIndex());
+        parkDestSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                configuration.setParkDest(OpModeConfiguration.ParkDest.fromIndex(position));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         final TextView delayValueTextView = (TextView) findViewById(R.id.delay_value_text_view);
 
         SeekBar delaySeekBar = (SeekBar) findViewById(R.id.delay_seek_bar);

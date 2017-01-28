@@ -8,32 +8,18 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 @Autonomous(name="Cap Ball Auto")
-public class CapBallAuto extends LinearOpMode {
+public class CapBallAuto extends Auto {
 
     public static final double TILE_SIZE = 24;
 
-    private OpModeConfiguration opModeConfiguration;
-    private MecanumDrive basicDrive;
-    private FixedLauncher launcher;
-    private RobotProperties properties;
+    @Override
+    public void initOpMode() {
+
+    }
 
     @Override
     public void runOpMode() throws InterruptedException {
-        opModeConfiguration = new OpModeConfiguration(hardwareMap.appContext);
-        properties = opModeConfiguration.getRobotType().getProperties();
-
-        basicDrive = new MecanumDrive(hardwareMap, properties.getWheelRadius());
-
-        launcher = new FixedLauncher(hardwareMap);
-
-        telemetry.addData("robot_type", opModeConfiguration.getRobotType());
-        telemetry.addData("delay", opModeConfiguration.getDelay());
-        telemetry.addData("num_balls", opModeConfiguration.getNumberOfBalls());
-        telemetry.update();
-
-        waitForStart();
-
-        Thread.sleep(1000 * opModeConfiguration.getDelay());
+        super.runOpMode();
 
         moveAndShoot();
 
@@ -42,17 +28,12 @@ public class CapBallAuto extends LinearOpMode {
     }
 
     public void moveAndShoot() {
+        basicDrive.move(-((Math.sqrt(2) * TILE_SIZE) + 3), .5, this);
 
-        basicDrive.move (-((Math.sqrt(2) * TILE_SIZE) + 3), .5);
-
-        launcher.fireBalls(opModeConfiguration.getNumberOfBalls());
-
-
+        launcher.fireBalls(numBalls);
     }
 
-    public void pushAndPark () {
-
-        basicDrive.move (Math.sqrt(2) * -TILE_SIZE, .5);
-
+    public void pushAndPark() {
+        basicDrive.move(Math.sqrt(2) * -TILE_SIZE, .5, this);
     }
 }

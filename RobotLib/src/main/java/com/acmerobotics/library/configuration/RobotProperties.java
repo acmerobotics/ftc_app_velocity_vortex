@@ -9,4 +9,5 @@ public interface RobotProperties {
     /** Get robot size in inches */
     double getRobotSize();
     double getSonarSensorOffset();
+
 }

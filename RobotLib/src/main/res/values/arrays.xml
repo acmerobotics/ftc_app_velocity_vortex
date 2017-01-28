@@ -13,4 +13,9 @@
         <item>Competition</item>
         <item>Software</item>
     </string-array>
+    <string-array name="park_dests">
+        <item>None</item>
+        <item>Center</item>
+        <item>Corner</item>
+    </string-array>
 </resources>

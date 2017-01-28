@@ -53,9 +53,11 @@ public class OpModeConfiguration {
 
     private static final String PREFS_NAME = "opmode";
     private static final String PREF_ALLIANCE_COLOR = "alliance_color";
+    private static final String PREF_PARK_DEST = "park_dest";
     private static final String PREF_DELAY = "delay";
     private static final String PREF_NUM_BALLS = "num_balls";
     private static final String PREF_ROBOT_TYPE = "robot_type";
+    private static final String PREF_ORIENTATION = "orientation";
 
     public enum AllianceColor {
         RED(0),
@@ -102,6 +104,24 @@ public class OpModeConfiguration {
         }
     }
 
+    public enum ParkDest {
+        NONE (0),
+        CENTER (1),
+        CORNER (2);
+        private int index;
+        ParkDest (int i) {
+            index = i;
+        }
+        public int getIndex () { return index; }
+        public static ParkDest fromIndex (int i) {
+            for (ParkDest destination : ParkDest.values()) {
+                if (destination.getIndex() == i )
+                    return destination;
+            }
+            return null;
+        }
+    }
+
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
 
@@ -116,6 +136,14 @@ public class OpModeConfiguration {
 
     public void setAllianceColor(AllianceColor color) {
         editor.putInt(PREF_ALLIANCE_COLOR, color.getIndex());
+    }
+
+    public ParkDest getParkDest() {
+        return ParkDest.fromIndex(preferences.getInt(PREF_PARK_DEST, 0));
+    }
+
+    public void setParkDest(ParkDest dest) {
+        editor.putInt(PREF_PARK_DEST, dest.getIndex());
     }
 
     public int getDelay() {
@@ -143,6 +171,14 @@ public class OpModeConfiguration {
 
     public void setRobotType(RobotType type) {
         editor.putInt(PREF_ROBOT_TYPE, type.getIndex());
+    }
+
+    public double getOrientation() {
+        return preferences.getFloat(PREF_ORIENTATION, 0);
+    }
+
+    public void setOrientation(double orientation) {
+        editor.putFloat(PREF_ORIENTATION, (float) orientation);
     }
 
     public boolean commit() {

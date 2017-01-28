@@ -22,7 +22,7 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/pref_item_height">
+        android:layout_height="wrap_content">
 
         <TextView
             android:text="@string/alliance_color_text"
@@ -46,6 +46,32 @@
     </LinearLayout>
 
     <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:text="@string/park_dest_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="8dp"
+            android:gravity="center_vertical"
+            android:textSize="18sp"
+            android:id="@+id/park_dest_text_view"
+            android:layout_weight="1"/>
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/park_dest_spinner"
+            android:layout_margin="@dimen/pref_item_margin"
+            android:gravity="center_vertical"
+            android:layout_weight="1"
+            android:entries="@array/park_dests"/>
+
+    </LinearLayout>
+
+    <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -53,7 +79,7 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/pref_item_height">
+            android:layout_height="wrap_content">
 
             <TextView
                 android:text="@string/delay_text"
@@ -87,7 +113,7 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/pref_item_height">
+        android:layout_height="wrap_content">
 
         <TextView
             android:text="@string/num_balls_text"
@@ -113,7 +139,7 @@
     <LinearLayout
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/pref_item_height">
+    android:layout_height="wrap_content">
 
         <TextView
             android:text="@string/robot_type_text"

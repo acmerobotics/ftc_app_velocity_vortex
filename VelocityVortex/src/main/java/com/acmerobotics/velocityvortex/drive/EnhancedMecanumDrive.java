@@ -17,13 +17,19 @@ public class EnhancedMecanumDrive {
     private BNO055IMU imu;
     private Vector2D velocity;
     private double targetHeading;
+    private double initialHeading;
 
     public EnhancedMecanumDrive(MecanumDrive drive, BNO055IMU imu, DifferentialControlLoopCoefficients pid) {
         this.drive = drive;
         this.imu = imu;
         controller = new PIDController(pid);
         velocity = new Vector2D(0, 0);
+        initialHeading = 0;
         resetHeading();
+    }
+
+    public void setInitialHeading (double heading) {
+        initialHeading = heading;
     }
 
     /**
@@ -33,7 +39,7 @@ public class EnhancedMecanumDrive {
      * @return the heading
      */
     public double getHeading() {
-        return -imu.getAngularOrientation().firstAngle;
+        return -imu.getAngularOrientation().firstAngle - initialHeading;
     }
 
     public double getTargetHeading() {
