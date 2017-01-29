@@ -26,6 +26,7 @@ import com.qualcomm.robotcore.util.Range;
 import static com.acmerobotics.velocityvortex.sensors.ColorAnalyzer.BeaconColor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import static com.acmerobotics.library.configuration.OpModeConfiguration.AllianceColor;
 
@@ -49,7 +50,6 @@ public class WallAuto extends Auto {
     private double sensorOffset;
 
     private DataFile dataFile;
-    private DataFile orientationFile;
 
     private BeaconColor targetColor;
     private ColorSensor colorSensor;
@@ -57,7 +57,6 @@ public class WallAuto extends Auto {
 
     private BeaconPusher beaconPusher;
     private int beaconsPressed;
-    private BeaconRam beaconRam;
 
     private ElapsedTime timer;
 
@@ -71,7 +70,17 @@ public class WallAuto extends Auto {
 
         timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
-        imu = new AdafruitBNO055IMU(hardwareMap.i2cDeviceSynch.get("imu"));
+        // TODO should we keep this?
+        imu = new AdafruitBNO055IMU(hardwareMap.i2cDeviceSynch.get("imu")) {
+
+            @Override
+            public synchronized Orientation getAngularOrientation() {
+                Orientation o = super.getAngularOrientation();
+                opModeConfiguration.setLastHeading(-o.firstAngle);
+                return o;
+            }
+
+        };
         AdafruitBNO055IMU.Parameters parameters = new AdafruitBNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         imu.initialize(parameters);
@@ -91,9 +100,7 @@ public class WallAuto extends Auto {
         colorAnalyzer = new ThresholdColorAnalyzer(colorSensor, 5, 5);
 
         beaconPusher = new BeaconPusher(hardwareMap);
-        beaconRam = new BeaconRam(hardwareMap);
 
-//        orientationFile = new DataFile("orientation.txt");
         dataFile = new DataFile("wall_auto4_" + System.currentTimeMillis() + ".csv");
         dataFile.write("loopTime, targetDistance, distance, targetHeading, heading, color, red, blue");
 
@@ -124,10 +131,7 @@ public class WallAuto extends Auto {
 
         dataFile.close();
 
-        opModeConfiguration.setOrientation(drive.getHeading());
         opModeConfiguration.commit();
-//        orientationFile.write(Double.toString(drive.getHeading()));
-//        orientationFile.close();
     }
 
     public void moveAndFire() {
@@ -136,7 +140,7 @@ public class WallAuto extends Auto {
 
         launcher.fireBalls(opModeConfiguration.getNumberOfBalls());
 
-        drive.turnSync(allianceModifier * -110);
+        drive.turnSync(allianceModifier * -110, 1, this);
 
         basicDrive.move(52, 1, this);
 
@@ -145,7 +149,7 @@ public class WallAuto extends Auto {
         } else {
             drive.setTargetHeading(0);
         }
-        drive.turnSync(0);
+        drive.turnSync(0, 1, this);
     }
 
     @SuppressLint("DefaultLocale")
@@ -171,7 +175,7 @@ public class WallAuto extends Auto {
 
                 moveToLateralPosition(TARGET_DISTANCE, DISTANCE_SPREAD, STRAFE_P);
 
-                drive.turnSync(0, 3);
+                drive.turnSync(0, 3, this);
 
                 beaconPusher.autoPush();
                 beaconsPressed++;
@@ -202,9 +206,9 @@ public class WallAuto extends Auto {
     private void pushBallAndCentralPark() {
         moveToLateralPosition(20, 2 * DISTANCE_SPREAD, 2 * STRAFE_P);
 
-        drive.turnSync(0);
+        drive.turnSync(0, 1, this);
         basicDrive.move(-2 * allianceModifier * TILE_SIZE, 1, this);
-        drive.turnSync(90);
+        drive.turnSync(90, 1, this);
         basicDrive.move(-TILE_SIZE * 1.3, 1, this);
     }
 
@@ -212,7 +216,7 @@ public class WallAuto extends Auto {
         moveToLateralPosition(15, 2 * DISTANCE_SPREAD, 2 * STRAFE_P);
 
         if (allianceColor == AllianceColor.RED) {
-            drive.turnSync(180);
+            drive.turnSync(180, 1, this);
         }
 
         drive.setVelocity(new Vector2D(0, -1));

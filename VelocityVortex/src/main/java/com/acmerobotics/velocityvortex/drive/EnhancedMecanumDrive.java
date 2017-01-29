@@ -1,6 +1,7 @@
 package com.acmerobotics.velocityvortex.drive;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.DifferentialControlLoopCoefficients;
 import com.qualcomm.robotcore.util.Range;
 
@@ -24,11 +25,11 @@ public class EnhancedMecanumDrive {
         this.imu = imu;
         controller = new PIDController(pid);
         velocity = new Vector2D(0, 0);
-        initialHeading = 0;
+        initialHeading = getHeading();
         resetHeading();
     }
 
-    public void setInitialHeading (double heading) {
+    public void setInitialHeading(double heading) {
         initialHeading = heading;
     }
 
@@ -39,7 +40,7 @@ public class EnhancedMecanumDrive {
      * @return the heading
      */
     public double getHeading() {
-        return -imu.getAngularOrientation().firstAngle - initialHeading;
+        return sanitizeHeading(-imu.getAngularOrientation().firstAngle - initialHeading) % 360;
     }
 
     public double getTargetHeading() {
@@ -104,11 +105,15 @@ public class EnhancedMecanumDrive {
 
     /**
      * Turns the robot. Like {@link #setVelocity(Vector2D)}}, this method does not actually update
-     * the underlying motors, so please use {@link #update()} or {@link #turnSync(double, double)}.
+     * the underlying motors, so please use {@link #update()} or {@link #turnSync(double, double, LinearOpMode)}.
      * @param turnAngle the turn angle (right is positive, left is negative)
      */
     public void turn(double turnAngle) {
         setTargetHeading(targetHeading + turnAngle);
+    }
+
+    public void turnSync(double turnAngle, double error) {
+        turnSync(turnAngle, error, null);
     }
 
     /**
@@ -117,18 +122,18 @@ public class EnhancedMecanumDrive {
      * @param turnAngle the turn angle
      * @param error satisfactory orientation error
      */
-    public void turnSync(double turnAngle, double error) {
+    public void turnSync(double turnAngle, double error, LinearOpMode opMode) {
         turn(turnAngle);
         do {
             update();
             Thread.yield();
-        } while (Math.abs(getHeadingError()) > error);
+        } while (Math.abs(getHeadingError()) > error && (opMode == null || opMode.opModeIsActive()));
         stop();
     }
 
     /**
      * Turns the robot synchronously.
-     * @see #turnSync(double, double)
+     * @see #turnSync(double, double, LinearOpMode)
      * @param turnAngle the turn angle
      */
     public void turnSync(double turnAngle) {
@@ -147,10 +152,7 @@ public class EnhancedMecanumDrive {
      * @param targetHeading the target heading
      */
     public void setTargetHeading(double targetHeading) {
-        this.targetHeading = targetHeading % 360;
-        if (this.targetHeading < 0) {
-            this.targetHeading += 360;
-        }
+        this.targetHeading = sanitizeHeading(targetHeading);
     }
 
     /**
@@ -165,6 +167,14 @@ public class EnhancedMecanumDrive {
             error -= Math.signum(error) * 360;
         }
         return error;
+    }
+
+    private static double sanitizeHeading(double h) {
+        double heading = h % 360;
+        if (heading < 0) {
+            heading += 360;
+        }
+        return heading;
     }
 
 }

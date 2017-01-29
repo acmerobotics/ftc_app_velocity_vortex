@@ -8,6 +8,8 @@ import com.acmerobotics.velocityvortex.opmodes.tester.MRDeviceInterfaceModuleTes
 import com.acmerobotics.velocityvortex.opmodes.tester.MRMotorControllerTester;
 import com.acmerobotics.velocityvortex.opmodes.tester.MRServoControllerTester;
 import com.acmerobotics.velocityvortex.opmodes.tester.TCS34725ColorSensorTester;
+import com.acmerobotics.velocityvortex.opmodes.tester.Tester;
+import com.acmerobotics.velocityvortex.opmodes.tester.TesterBinding;
 import com.acmerobotics.velocityvortex.opmodes.tester.UltrasonicSensorTester;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsUsbDcMotorController;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsUsbDeviceInterfaceModule;

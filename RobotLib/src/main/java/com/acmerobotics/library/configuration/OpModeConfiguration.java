@@ -57,7 +57,7 @@ public class OpModeConfiguration {
     private static final String PREF_DELAY = "delay";
     private static final String PREF_NUM_BALLS = "num_balls";
     private static final String PREF_ROBOT_TYPE = "robot_type";
-    private static final String PREF_ORIENTATION = "orientation";
+    private static final String PREF_LAST_HEADING = "last_heading";
 
     public enum AllianceColor {
         RED(0),
@@ -173,12 +173,12 @@ public class OpModeConfiguration {
         editor.putInt(PREF_ROBOT_TYPE, type.getIndex());
     }
 
-    public double getOrientation() {
-        return preferences.getFloat(PREF_ORIENTATION, 0);
+    public double getLastHeading() {
+        return preferences.getFloat(PREF_LAST_HEADING, 0);
     }
 
-    public void setOrientation(double orientation) {
-        editor.putFloat(PREF_ORIENTATION, (float) orientation);
+    public void setLastHeading(double heading) {
+        editor.putFloat(PREF_LAST_HEADING, (float) heading);
     }
 
     public boolean commit() {

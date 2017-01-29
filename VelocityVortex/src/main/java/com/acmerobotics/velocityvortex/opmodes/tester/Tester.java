@@ -1,6 +1,7 @@
-package com.acmerobotics.velocityvortex.opmodes;
+package com.acmerobotics.velocityvortex.opmodes.tester;
 
 import com.acmerobotics.library.logging.Logger;
+import com.acmerobotics.velocityvortex.opmodes.StickyGamepad;
 import com.qualcomm.hardware.ArmableUsbDevice;
 import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.hardware.Engagable;

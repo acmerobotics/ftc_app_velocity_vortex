@@ -1,4 +1,4 @@
-package com.acmerobotics.velocityvortex.opmodes;
+package com.acmerobotics.velocityvortex.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;

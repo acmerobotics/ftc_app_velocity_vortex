@@ -1,5 +1,6 @@
-package com.acmerobotics.velocityvortex.opmodes;
+package com.acmerobotics.velocityvortex.opmodes.tester;
 
+import com.acmerobotics.velocityvortex.opmodes.tester.Tester;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
 
 import java.lang.reflect.InvocationTargetException;

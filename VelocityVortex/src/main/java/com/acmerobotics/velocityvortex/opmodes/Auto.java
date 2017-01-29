@@ -74,6 +74,7 @@ public abstract class Auto extends LinearOpMode {
         waitForStart();
 
         resetStartTime();
+
         Thread.sleep(1000 * delay);
     }
 

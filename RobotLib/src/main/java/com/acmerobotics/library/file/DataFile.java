@@ -1,6 +1,7 @@
 package com.acmerobotics.library.file;
 
 import android.os.Environment;
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -19,17 +20,24 @@ public class DataFile implements AutoCloseable {
     private BufferedWriter writer;
 
     public DataFile(String filename) {
-        openFile(filename);
+        this(filename, false);
     }
 
-    protected void openFile(String filename) {
+    public DataFile(String filename, boolean read) {
+        openFile(filename, read);
+    }
+
+    protected void openFile(String filename, boolean read) {
         File dir = getStorageDir();
         dir.mkdirs();
         this.file = new File(dir, filename);
         try {
-            this.file.createNewFile();
-            this.reader = new BufferedReader(new FileReader(file));
-            this.writer = new BufferedWriter(new FileWriter(file));
+            if (read) {
+                this.reader = new BufferedReader(new FileReader(file));
+            } else {
+                this.file.createNewFile();
+                this.writer = new BufferedWriter(new FileWriter(file));
+            }
         } catch (IOException e) {
             Log.e(TAG, "IO error while trying to open data file " + file.getPath() + "\n" + e.getMessage());
         }
@@ -49,6 +57,16 @@ public class DataFile implements AutoCloseable {
 
     public File getFile() {
         return file;
+    }
+
+    public String readLine() {
+        String line = null;
+        try {
+            line = reader.readLine();
+        } catch (IOException e) {
+            Log.e(TAG, "IO error while attempting to read data from file\n" + e.getMessage());
+        }
+        return line;
     }
 
     public void write() {

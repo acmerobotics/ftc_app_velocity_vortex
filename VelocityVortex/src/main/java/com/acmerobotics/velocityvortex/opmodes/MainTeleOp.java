@@ -2,12 +2,10 @@ package com.acmerobotics.velocityvortex.opmodes;
 
 import com.acmerobotics.library.configuration.OpModeConfiguration;
 import com.acmerobotics.library.configuration.RobotProperties;
-import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
 import com.acmerobotics.velocityvortex.drive.Vector2D;
 import com.acmerobotics.velocityvortex.mech.BeaconPusher;
-import com.acmerobotics.velocityvortex.mech.BeaconRam;
 import com.acmerobotics.velocityvortex.mech.Collector;
 import com.acmerobotics.velocityvortex.mech.FixedLauncher;
 import com.acmerobotics.velocityvortex.sensors.ColorAnalyzer;
@@ -24,8 +22,6 @@ import com.qualcomm.robotcore.hardware.I2cAddr;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-import java.io.IOException;
-
 @TeleOp(name="TeleOp")
 public class MainTeleOp extends OpMode {
 
@@ -33,7 +29,6 @@ public class MainTeleOp extends OpMode {
 
     private FixedLauncher launcher;
     private Collector collector;
-    private BeaconRam beaconRam;
     private BeaconPusher beaconPusher;
 
     private StickyGamepad stickyGamepad1, stickyGamepad2;
@@ -54,28 +49,16 @@ public class MainTeleOp extends OpMode {
 
     private double sideModifier;
 
-    private DataFile orientationFile;
-    private double initialOrientation;
-
     private enum State {
         DRIVER,
-        BEACON,
-        LATERAL,
-        TURN
+        BEACON_FORWARD,
+        BEACON_LATERAL,
+        BEACON_ALIGN,
+        BEACON_PUSH
     }
 
     @Override
     public void init() {
-//        try {
-////            orientationFile = new DataFile("orientation.txt");
-////            initialOrientation = Double.parseDouble(orientationFile.getReader().readLine());
-//            initialOrientation =
-//            telemetry.addData("orientation", initialOrientation);
-//        } catch (IOException ioe) {
-//            telemetry.addData("orientation", "unknown");
-//            initialOrientation = 0;
-//        }
-
         configuration = new OpModeConfiguration(hardwareMap.appContext);
         properties = configuration.getRobotType().getProperties();
 
@@ -87,7 +70,7 @@ public class MainTeleOp extends OpMode {
         imu.initialize(parameters);
 
         drive = new EnhancedMecanumDrive(basicDrive, imu, properties.getTurnParameters());
-        drive.setInitialHeading(configuration.getOrientation());
+        drive.setInitialHeading(configuration.getLastHeading());
 
         distanceSensor = new MaxSonarEZ1UltrasonicSensor(hardwareMap.analogInput.get("maxSonar"));
         smoother = new ExponentialSmoother(WallAuto.DISTANCE_SMOOTHER_EXP);
@@ -95,7 +78,6 @@ public class MainTeleOp extends OpMode {
 
         launcher = new FixedLauncher(hardwareMap);
         collector = new Collector(hardwareMap);
-        beaconRam = new BeaconRam(hardwareMap);
         beaconPusher = new BeaconPusher(hardwareMap);
         beaconPusher = new BeaconPusher(hardwareMap);
 
@@ -117,13 +99,20 @@ public class MainTeleOp extends OpMode {
 
     @Override
     public void loop() {
+        // update gamepads
+        stickyGamepad1.update();
+        stickyGamepad2.update();
+
+        telemetry.addData("state", state);
+
+        // abort
+        if (gamepad1.a) {
+            drive.stop();
+            state = State.DRIVER;
+        }
 
         switch (state) {
             case DRIVER:
-                // update gamepads
-                stickyGamepad1.update();
-                stickyGamepad2.update();
-
                 //driver
                 double x = -gamepad1.left_stick_x;
                 double y = -gamepad1.left_stick_y;
@@ -148,11 +137,6 @@ public class MainTeleOp extends OpMode {
                     collector.toggle();
                 }
 
-                // beacon ram
-                if (stickyGamepad1.left_bumper) {
-                    beaconRam.toggle();
-                }
-
                 //launcher
                 //trigger
                 if (gamepad2.right_bumper) {
@@ -174,30 +158,30 @@ public class MainTeleOp extends OpMode {
                 //beacons
                 if (stickyGamepad1.x) {
                     sideModifier = 1;
-                    state = State.BEACON;
-                }
-                else if (stickyGamepad1.b) {
+                    state = State.BEACON_FORWARD;
+                } else if (stickyGamepad1.b) {
                     sideModifier = -1;
-                    state = State.BEACON;
+                    state = State.BEACON_FORWARD;
                 }
-                if (gamepad1.right_trigger > .95) {
+
+                if (gamepad1.left_bumper) {
                     beaconPusher.extend();
-                }else {
+                } else {
                     beaconPusher.retract();
                 }
 
                 telemetry.addData("leftPower", launcher.getLeftPower());
                 telemetry.addData("rightPower", launcher.getRightPower());
+
                 break;
 
-            case BEACON:
+            case BEACON_FORWARD:
+                // align to the nearest 90-degree orientation
                 drive.setTargetHeading(Math.round(drive.getHeading() / 90.0) * 90);
-                double distance = getDistance();
-                double distanceError = WallAuto.TARGET_DISTANCE - distance;
 
-                ColorAnalyzer.BeaconColor color = colorAnalyzer.getBeaconColor();
-
-                if (color == ColorAnalyzer.BeaconColor.UNKNOWN) {
+                if (colorAnalyzer.getBeaconColor() == ColorAnalyzer.BeaconColor.UNKNOWN) {
+                    distance = getDistance();
+                    distanceError = WallAuto.TARGET_DISTANCE - distance;
                     double forwardSpeed = sideModifier * WallAuto.FORWARD_SPEED;
                     double lateralSpeed = 0;
                     if (Math.abs(distanceError) > WallAuto.DISTANCE_SPREAD) {
@@ -208,42 +192,43 @@ public class MainTeleOp extends OpMode {
                     }
                     drive.setVelocity(new Vector2D(lateralSpeed, forwardSpeed));
                     drive.update();
-                }
-                else {
+                } else {
                     drive.stop();
-
-                    state = State.LATERAL;
-                    drive.turn(0);
-                    state = State.TURN;
-
-                    beaconPusher.autoPush();
-                    state = State.DRIVER;
-                }
-
-                if (gamepad1.a) {
-                    state = State.DRIVER;
-                    drive.stop();
+                    state = State.BEACON_LATERAL;
                 }
 
                 break;
 
-            case LATERAL:
+            case BEACON_LATERAL:
                 distance = getDistance();
                 distanceError = WallAuto.TARGET_DISTANCE - distance;
-                double lateralSpeed = WallAuto.STRAFE_P * distanceError;
-                drive.setVelocity(new Vector2D(lateralSpeed, 0));
-                drive.update();
 
                 if (Math.abs(distanceError) < WallAuto.DISTANCE_SPREAD) {
-                    returnToPreviousState();
+                    drive.stop();
+                    state = State.BEACON_ALIGN;
+                } else {
+                    double lateralSpeed = WallAuto.STRAFE_P * distanceError;
+                    drive.setVelocity(new Vector2D(lateralSpeed, 0));
+                    drive.update();
                 }
+
                 break;
 
-            case TURN:
-                drive.update();
-                if(drive.getHeadingError() < drive.DEFAULT_TURN_ERROR) {
-                    returnToPreviousState();
+            case BEACON_ALIGN:
+                if (drive.getHeadingError() < EnhancedMecanumDrive.DEFAULT_TURN_ERROR) {
+                    drive.stop();
+                    state = State.BEACON_PUSH;
                 }
+                drive.update();
+
+                break;
+
+            case BEACON_PUSH:
+                beaconPusher.autoPush();
+
+                state = State.DRIVER;
+
+                break;
 
         }
      }
@@ -253,13 +238,5 @@ public class MainTeleOp extends OpMode {
         double headingError = Math.toRadians(drive.getHeadingError());
         return rawDistance * Math.cos(headingError) - sensorOffset * Math.sin(headingError);
     }
-
-    private void returnToPreviousState () {
-        State tempState = state;
-        state = previousState;
-        previousState = tempState;
-        drive.stop();
-    }
-
 
 }

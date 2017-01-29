@@ -2,7 +2,6 @@ package com.acmerobotics.velocityvortex.opmodes.tester;
 
 import com.acmerobotics.library.logging.Logger;
 import com.acmerobotics.velocityvortex.opmodes.StickyGamepad;
-import com.acmerobotics.velocityvortex.opmodes.Tester;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 

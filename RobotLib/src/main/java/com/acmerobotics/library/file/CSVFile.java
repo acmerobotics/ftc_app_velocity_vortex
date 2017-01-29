@@ -13,6 +13,8 @@ public class CSVFile<T> extends DataFile {
     private Field[] fields;
     private String[] fieldNames;
 
+    private String lastReadRow;
+
     public CSVFile(String filename, Class<? extends T> impl) {
         super(filename);
 
@@ -49,6 +51,10 @@ public class CSVFile<T> extends DataFile {
             }
         }
         write(TextUtils.join(",", values));
+    }
+
+    public String[] read() {
+        return TextUtils.split(readLine(), ",");
     }
 
 }
