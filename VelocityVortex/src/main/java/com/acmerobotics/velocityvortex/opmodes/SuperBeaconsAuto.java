@@ -132,7 +132,7 @@ public class SuperBeaconsAuto extends Auto {
 
     public void go() throws InterruptedException{
         drive.turnSync (90 * allianceModifier);
-        basicDrive.move(-.5 * TILE_SIZE, .8);
+        basicDrive.move(allianceModifier * -.5 * TILE_SIZE, .8);
         followWallAndPressBeacons();
     }
 

@@ -25,7 +25,6 @@ public class EnhancedMecanumDrive {
         this.imu = imu;
         controller = new PIDController(pid);
         velocity = new Vector2D(0, 0);
-        initialHeading = getHeading();
         resetHeading();
     }
 
@@ -40,7 +39,11 @@ public class EnhancedMecanumDrive {
      * @return the heading
      */
     public double getHeading() {
-        return sanitizeHeading(-imu.getAngularOrientation().firstAngle - initialHeading) % 360;
+        return sanitizeHeading(getRawHeading() - initialHeading);
+    }
+
+    private double getRawHeading() {
+        return -imu.getAngularOrientation().firstAngle;
     }
 
     public double getTargetHeading() {
@@ -116,6 +119,10 @@ public class EnhancedMecanumDrive {
         turnSync(turnAngle, error, null);
     }
 
+    public void turnSync(double turnAngle, LinearOpMode opMode) {
+        turnSync(turnAngle, DEFAULT_TURN_ERROR, opMode);
+    }
+
     /**
      * Turns the robot synchronously.
      * @see #turn(double)
@@ -144,7 +151,7 @@ public class EnhancedMecanumDrive {
      * Reset the target heading.
      */
     public void resetHeading() {
-        setTargetHeading(getHeading());
+        setInitialHeading(getRawHeading());
     }
 
     /**

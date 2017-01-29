@@ -70,17 +70,7 @@ public class WallAuto extends Auto {
 
         timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
-        // TODO should we keep this?
-        imu = new AdafruitBNO055IMU(hardwareMap.i2cDeviceSynch.get("imu")) {
-
-            @Override
-            public synchronized Orientation getAngularOrientation() {
-                Orientation o = super.getAngularOrientation();
-                opModeConfiguration.setLastHeading(-o.firstAngle);
-                return o;
-            }
-
-        };
+        imu = new AdafruitBNO055IMU(hardwareMap.i2cDeviceSynch.get("imu"));
         AdafruitBNO055IMU.Parameters parameters = new AdafruitBNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         imu.initialize(parameters);
@@ -130,8 +120,6 @@ public class WallAuto extends Auto {
         }
 
         dataFile.close();
-
-        opModeConfiguration.commit();
     }
 
     public void moveAndFire() {
@@ -140,7 +128,7 @@ public class WallAuto extends Auto {
 
         launcher.fireBalls(opModeConfiguration.getNumberOfBalls());
 
-        drive.turnSync(allianceModifier * -110, 1, this);
+        drive.turnSync(allianceModifier * -110, this);
 
         basicDrive.move(52, 1, this);
 
@@ -149,7 +137,7 @@ public class WallAuto extends Auto {
         } else {
             drive.setTargetHeading(0);
         }
-        drive.turnSync(0, 1, this);
+        drive.turnSync(0, this);
     }
 
     @SuppressLint("DefaultLocale")
@@ -206,9 +194,9 @@ public class WallAuto extends Auto {
     private void pushBallAndCentralPark() {
         moveToLateralPosition(20, 2 * DISTANCE_SPREAD, 2 * STRAFE_P);
 
-        drive.turnSync(0, 1, this);
+        drive.turnSync(0, this);
         basicDrive.move(-2 * allianceModifier * TILE_SIZE, 1, this);
-        drive.turnSync(90, 1, this);
+        drive.turnSync(90, this);
         basicDrive.move(-TILE_SIZE * 1.3, 1, this);
     }
 
@@ -216,7 +204,7 @@ public class WallAuto extends Auto {
         moveToLateralPosition(15, 2 * DISTANCE_SPREAD, 2 * STRAFE_P);
 
         if (allianceColor == AllianceColor.RED) {
-            drive.turnSync(180, 1, this);
+            drive.turnSync(180, this);
         }
 
         drive.setVelocity(new Vector2D(0, -1));

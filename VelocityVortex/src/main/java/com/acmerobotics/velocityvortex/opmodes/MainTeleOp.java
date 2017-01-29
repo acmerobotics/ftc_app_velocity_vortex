@@ -70,7 +70,7 @@ public class MainTeleOp extends OpMode {
         imu.initialize(parameters);
 
         drive = new EnhancedMecanumDrive(basicDrive, imu, properties.getTurnParameters());
-        drive.setInitialHeading(configuration.getLastHeading());
+//        drive.setInitialHeading(configuration.getLastHeading());
 
         distanceSensor = new MaxSonarEZ1UltrasonicSensor(hardwareMap.analogInput.get("maxSonar"));
         smoother = new ExponentialSmoother(WallAuto.DISTANCE_SMOOTHER_EXP);
