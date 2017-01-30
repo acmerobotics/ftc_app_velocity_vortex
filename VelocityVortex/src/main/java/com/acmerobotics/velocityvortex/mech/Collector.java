@@ -19,16 +19,20 @@ public class Collector {
         motor = hardwareMap.dcMotor.get("collector");
     }
 
-    public void setVelocity(double velocity) {
-        this.velocity = velocity;
-        running = velocity > 0;
-        motor.setPower(velocity);
-    }
-
-    public void run() {
+    public void forward() {
         velocity = 1;
         running = true;
         motor.setPower(1);
+    }
+
+    public void reverse() {
+        velocity = -1;
+        running = true;
+        motor.setPower(-1);
+    }
+
+    public boolean isRunning() {
+        return running;
     }
 
     public void stop() {
@@ -39,6 +43,6 @@ public class Collector {
 
     public void toggle() {
         if (running) stop();
-        else run();
+        else forward();
     }
 }

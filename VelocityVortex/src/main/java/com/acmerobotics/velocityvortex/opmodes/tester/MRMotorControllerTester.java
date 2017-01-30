@@ -39,7 +39,7 @@ public class MRMotorControllerTester extends Tester<ModernRoboticsUsbDcMotorCont
         runMode = device.getMotorMode(port);
         if (stickyGamepad.x) {
             runMode = DcMotor.RunMode.values()[cycleForward(runMode.ordinal(), 0, 2)];
-            logger.msg("motor_controller: run mode change: %s", runMode);
+            logger.msg("motor_controller: forward mode change: %s", runMode);
         }
         device.setMotorMode(port, runMode);
 

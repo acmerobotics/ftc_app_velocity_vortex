@@ -106,6 +106,10 @@ public class SuperBeaconsAuto extends Auto {
         super.runOpMode();
 
         moveAndShoot();
+
+        ready();
+        set();
+        go();
     }
 
     public void moveAndShoot() throws InterruptedException{
@@ -113,9 +117,6 @@ public class SuperBeaconsAuto extends Auto {
 
         launcher.fireBalls(numBalls);
 
-        ready();
-        set ();
-        go ();
     }
 
     public void ready () {
@@ -131,8 +132,8 @@ public class SuperBeaconsAuto extends Auto {
     }
 
     public void go() throws InterruptedException{
-        drive.turnSync (90 * allianceModifier);
-        basicDrive.move(allianceModifier * -.5 * TILE_SIZE, .8);
+        drive.turnSync (90);
+        basicDrive.move(-.5 * TILE_SIZE, .8);
         followWallAndPressBeacons();
     }
 

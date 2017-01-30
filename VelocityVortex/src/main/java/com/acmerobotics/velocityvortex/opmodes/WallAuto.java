@@ -34,7 +34,7 @@ import static com.acmerobotics.library.configuration.OpModeConfiguration.Allianc
 public class WallAuto extends Auto {
 
     public static final double TARGET_DISTANCE = 6.4;
-    public static final double DISTANCE_SPREAD = 0.4;
+    public static final double DISTANCE_SPREAD = 0.3;
     public static final double DISTANCE_SMOOTHER_EXP = 1;
     public static final double FORWARD_SPEED = 0.6;
     public static final double TILE_SIZE = 24;
@@ -82,6 +82,7 @@ public class WallAuto extends Auto {
         sensorOffset = properties.getSonarSensorOffset();
 
         launcher = new FixedLauncher(hardwareMap);
+        launcher.setTrim(-.05);
 
         colorSensor = hardwareMap.colorSensor.get("color");
         colorSensor.setI2cAddress(I2cAddr.create8bit(0x3e));
@@ -94,10 +95,10 @@ public class WallAuto extends Auto {
         dataFile = new DataFile("wall_auto4_" + System.currentTimeMillis() + ".csv");
         dataFile.write("loopTime, targetDistance, distance, targetHeading, heading, color, red, blue");
 
-        voltageSensor = hardwareMap.voltageSensor.get("launcher");
-        voltage = voltageSensor.getVoltage();
-        double voltageError = Range.clip(voltage - 12, 0, 5);
-        fireDistance = 24 - 2.6 * voltageError;
+//        voltageSensor = hardwareMap.voltageSensor.get("launcher");
+//        voltage = voltageSensor.getVoltage();
+//        double voltageError = Range.clip(voltage - 12, 0, 5);
+        fireDistance = 24;
     }
 
     @Override
@@ -130,13 +131,14 @@ public class WallAuto extends Auto {
 
         drive.turnSync(allianceModifier * -110, this);
 
-        basicDrive.move(52, 1, this);
+        basicDrive.move(50, 1, this);
 
         if (allianceColor == OpModeConfiguration.AllianceColor.BLUE) {
             drive.setTargetHeading(180);
         } else {
             drive.setTargetHeading(0);
         }
+
         drive.turnSync(0, this);
     }
 
@@ -163,13 +165,13 @@ public class WallAuto extends Auto {
 
                 moveToLateralPosition(TARGET_DISTANCE, DISTANCE_SPREAD, STRAFE_P);
 
-                drive.turnSync(0, 3, this);
+                drive.turnSync(0, 2, this);
 
                 beaconPusher.autoPush();
                 beaconsPressed++;
 
                 if (beaconsPressed < 2) {
-                    basicDrive.move(3 * allianceModifier * TILE_SIZE / 2, .8, this);
+                    basicDrive.move(allianceModifier * TILE_SIZE, .8, this);
                 } else {
                     drive.stop();
                     return;
@@ -180,7 +182,7 @@ public class WallAuto extends Auto {
                 if (Math.abs(distanceError) > DISTANCE_SPREAD) {
                     lateralSpeed = STRAFE_P * distanceError;
                 }
-                if (Math.abs(distanceError) > 2) {
+                if (Math.abs(distanceError) > 1) {
                     forwardSpeed = 0;
                 }
                 drive.setVelocity(new Vector2D(lateralSpeed, forwardSpeed));

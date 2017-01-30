@@ -132,9 +132,34 @@ public class MainTeleOp extends OpMode {
                 double theta = Math.atan2(y, x);
                 basicDrive.setVelocity(new Vector2D(radius * Math.cos(theta), radius * Math.sin(theta)), omega);
 
-                //collector
-                if (stickyGamepad1.right_bumper) {
-                    collector.toggle();
+                if (gamepad1.left_bumper && gamepad1.right_bumper) {
+                    drive.resetHeading();
+                } else {
+                    //collector
+                    if (stickyGamepad1.right_bumper) {
+                        if (collector.isRunning()) {
+                            collector.stop();
+                        } else {
+                            collector.forward();
+                        }
+                    } else if (gamepad1.right_trigger > 0.95) {
+                        collector.reverse();
+                    }
+
+                    //beacons
+                    if (stickyGamepad1.x) {
+                        sideModifier = 1;
+                        state = State.BEACON_FORWARD;
+                    } else if (stickyGamepad1.b) {
+                        sideModifier = -1;
+                        state = State.BEACON_FORWARD;
+                    }
+
+                    if (gamepad1.left_bumper) {
+                        beaconPusher.extend();
+                    } else {
+                        beaconPusher.retract();
+                    }
                 }
 
                 //launcher
@@ -154,21 +179,6 @@ public class MainTeleOp extends OpMode {
                     }
                 }
                 launcher.update();
-
-                //beacons
-                if (stickyGamepad1.x) {
-                    sideModifier = 1;
-                    state = State.BEACON_FORWARD;
-                } else if (stickyGamepad1.b) {
-                    sideModifier = -1;
-                    state = State.BEACON_FORWARD;
-                }
-
-                if (gamepad1.left_bumper) {
-                    beaconPusher.extend();
-                } else {
-                    beaconPusher.retract();
-                }
 
                 telemetry.addData("leftPower", launcher.getLeftPower());
                 telemetry.addData("rightPower", launcher.getRightPower());

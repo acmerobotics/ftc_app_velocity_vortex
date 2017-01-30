@@ -167,12 +167,11 @@ public class FixedLauncher {
 
         setPower(1, 1, 2000);
 
-        while (leftPower < 1 || rightPower < 1) {
+        long startTime = System.currentTimeMillis();
+        while ((System.currentTimeMillis() - startTime) < 2500) {
             update();
             Thread.yield();
         }
-
-        delay(500);
 
         for (int i = 1; i <= numBalls; i++) {
             triggerUp();

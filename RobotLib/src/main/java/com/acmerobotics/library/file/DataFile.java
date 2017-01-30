@@ -32,10 +32,10 @@ public class DataFile implements AutoCloseable {
         dir.mkdirs();
         this.file = new File(dir, filename);
         try {
+            this.file.createNewFile();
             if (read) {
                 this.reader = new BufferedReader(new FileReader(file));
             } else {
-                this.file.createNewFile();
                 this.writer = new BufferedWriter(new FileWriter(file));
             }
         } catch (IOException e) {
@@ -90,8 +90,8 @@ public class DataFile implements AutoCloseable {
     @Override
     public void close() {
         try {
-            reader.close();
-            writer.close();
+            if (reader != null) reader.close();
+            if (writer != null) writer.close();
         } catch (IOException e) {
             Log.e(TAG, "IO error while trying to close the data file\n" + e.getMessage());
         }

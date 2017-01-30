@@ -43,7 +43,7 @@ public class BeaconPusher {
 
     public void autoPush() {
         extend();
-        SystemClock.sleep(1000);
+        SystemClock.sleep(1500);
         retract();
         SystemClock.sleep(800);
     }
