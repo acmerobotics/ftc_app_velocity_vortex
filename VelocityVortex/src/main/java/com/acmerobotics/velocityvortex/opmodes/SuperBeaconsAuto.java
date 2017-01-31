@@ -166,7 +166,7 @@ public class SuperBeaconsAuto extends Auto {
                 return;
 
             } else {
-                double forwardSpeed = allianceModifier * FORWARD_SPEED;
+                double forwardSpeed = FORWARD_SPEED;
                 double lateralSpeed = 0;
                 if (Math.abs(distanceError) > DISTANCE_SPREAD) {
                     lateralSpeed = STRAFE_P * distanceError;

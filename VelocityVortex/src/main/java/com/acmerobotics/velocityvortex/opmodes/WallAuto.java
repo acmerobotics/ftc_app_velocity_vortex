@@ -165,7 +165,7 @@ public class WallAuto extends Auto {
 
                 moveToLateralPosition(TARGET_DISTANCE, DISTANCE_SPREAD, STRAFE_P);
 
-                drive.turnSync(0, 2, this);
+                drive.turnSync(0, 1, this);
 
                 beaconPusher.autoPush();
                 beaconsPressed++;
