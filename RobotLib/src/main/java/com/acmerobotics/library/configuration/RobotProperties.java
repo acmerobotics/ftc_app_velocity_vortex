@@ -4,8 +4,7 @@ import com.qualcomm.robotcore.util.DifferentialControlLoopCoefficients;
 
 public interface RobotProperties {
     DifferentialControlLoopCoefficients getTurnParameters();
-    /** Get wheel radius in inches */
-    double getWheelRadius();
+    WheelType[] getWheelTypes();
     /** Get robot size in inches */
     double getRobotSize();
     double getSonarSensorOffset();

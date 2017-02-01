@@ -7,4 +7,6 @@
     <string name="robot_type_text">Robot Type</string>
     <string name="num_balls_text">Number of Balls</string>
     <string name="park_dest_text">Parking Destination</string>
+    <string name="match_type_text">Match Type</string>
+    <string name="match_number_text">Match Number</string>
 </resources>

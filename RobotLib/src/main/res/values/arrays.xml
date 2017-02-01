@@ -18,4 +18,10 @@
         <item>Center</item>
         <item>Corner</item>
     </string-array>
+    <string-array name="match_types">
+        <item>Practice</item>
+        <item>Qualifying</item>
+        <item>Semifinal</item>
+        <item>Final</item>
+    </string-array>
 </resources>

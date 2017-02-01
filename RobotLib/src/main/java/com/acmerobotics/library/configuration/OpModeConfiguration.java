@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 
 import com.qualcomm.robotcore.util.DifferentialControlLoopCoefficients;
 
+import org.opencv.core.Mat;
+
 public class OpModeConfiguration {
 
     private static final RobotProperties SOFTWARE_BOT = new RobotProperties() {
@@ -14,8 +16,13 @@ public class OpModeConfiguration {
         }
 
         @Override
-        public double getWheelRadius() {
-            return 2;
+        public WheelType[] getWheelTypes() {
+            return new WheelType[] {
+                    new WheelType(MotorType.ANDYMARK_60, 1, 2),
+                    new WheelType(MotorType.ANDYMARK_60, 1, 2),
+                    new WheelType(MotorType.ANDYMARK_60, 1, 2),
+                    new WheelType(MotorType.ANDYMARK_60, 1, 2)
+            };
         }
 
         @Override
@@ -36,8 +43,13 @@ public class OpModeConfiguration {
         }
 
         @Override
-        public double getWheelRadius() {
-            return 2;
+        public WheelType[] getWheelTypes() {
+            return new WheelType[] {
+                    new WheelType(MotorType.ANDYMARK_40, 1, 2),
+                    new WheelType(MotorType.ANDYMARK_40, 1, 2),
+                    new WheelType(MotorType.ANDYMARK_40, 1, 2),
+                    new WheelType(MotorType.ANDYMARK_40, 1, 2)
+            };
         }
 
         @Override
@@ -57,6 +69,8 @@ public class OpModeConfiguration {
     private static final String PREF_DELAY = "delay";
     private static final String PREF_NUM_BALLS = "num_balls";
     private static final String PREF_ROBOT_TYPE = "robot_type";
+    private static final String PREF_MATCH_TYPE = "match_type";
+    private static final String PREF_MATCH_NUMBER = "match_number";
     private static final String PREF_LAST_HEADING = "last_heading";
 
     public enum AllianceColor {
@@ -122,6 +136,28 @@ public class OpModeConfiguration {
         }
     }
 
+    public enum MatchType {
+        PRACTICE (0),
+        QUALIFYING (1),
+        SEMIFINAL (2),
+        FINAL (3);
+        private int index;
+        MatchType(int i) {
+            index = i;
+        }
+        public int getIndex() {
+            return index;
+        }
+        public static MatchType fromIndex(int i) {
+            for (MatchType type : MatchType.values()) {
+                if (type.getIndex() == i) {
+                    return type;
+                }
+            }
+            return null;
+        }
+    }
+
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
 
@@ -171,6 +207,22 @@ public class OpModeConfiguration {
 
     public void setRobotType(RobotType type) {
         editor.putInt(PREF_ROBOT_TYPE, type.getIndex());
+    }
+
+    public MatchType getMatchType() {
+        return MatchType.fromIndex(preferences.getInt(PREF_MATCH_TYPE, 0));
+    }
+
+    public void setMatchType(MatchType type) {
+        editor.putInt(PREF_MATCH_TYPE, type.getIndex());
+    }
+
+    public int getMatchNumber() {
+        return preferences.getInt(PREF_MATCH_NUMBER, 1);
+    }
+
+    public void setMatchNumber(int num) {
+        editor.putInt(PREF_MATCH_NUMBER, num);
     }
 
     public double getLastHeading() {

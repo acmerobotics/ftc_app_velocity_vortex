@@ -65,7 +65,7 @@ public abstract class Auto extends LinearOpMode {
 
         launcher = new FixedLauncher(hardwareMap);
 
-        basicDrive = new MecanumDrive(hardwareMap, properties.getWheelRadius());
+        basicDrive = new MecanumDrive(hardwareMap, properties);
 
         initOpMode();
 

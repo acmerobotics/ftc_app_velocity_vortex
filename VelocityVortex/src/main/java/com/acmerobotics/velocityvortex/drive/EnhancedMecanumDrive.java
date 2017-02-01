@@ -1,5 +1,6 @@
 package com.acmerobotics.velocityvortex.drive;
 
+import com.acmerobotics.library.configuration.RobotProperties;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.DifferentialControlLoopCoefficients;
@@ -20,10 +21,10 @@ public class EnhancedMecanumDrive {
     private double targetHeading;
     private double initialHeading;
 
-    public EnhancedMecanumDrive(MecanumDrive drive, BNO055IMU imu, DifferentialControlLoopCoefficients pid) {
+    public EnhancedMecanumDrive(MecanumDrive drive, BNO055IMU imu, RobotProperties properties) {
         this.drive = drive;
         this.imu = imu;
-        controller = new PIDController(pid);
+        controller = new PIDController(properties.getTurnParameters());
         velocity = new Vector2D(0, 0);
         resetHeading();
     }

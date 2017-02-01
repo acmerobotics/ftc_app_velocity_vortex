@@ -20,7 +20,7 @@ public class MecanumTest extends OpMode {
         configuration = new OpModeConfiguration(hardwareMap.appContext);
         properties = configuration.getRobotType().getProperties();
 
-        mecanumDrive = new MecanumDrive(hardwareMap, 2);
+        mecanumDrive = new MecanumDrive(hardwareMap, properties);
     }
 
     @Override

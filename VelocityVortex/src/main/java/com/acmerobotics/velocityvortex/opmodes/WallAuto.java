@@ -75,7 +75,7 @@ public class WallAuto extends Auto {
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         imu.initialize(parameters);
 
-        drive = new EnhancedMecanumDrive(basicDrive, imu, properties.getTurnParameters());
+        drive = new EnhancedMecanumDrive(basicDrive, imu, properties);
 
         distanceSensor = new MaxSonarEZ1UltrasonicSensor(hardwareMap.analogInput.get("maxSonar"));
         smoother = new ExponentialSmoother(DISTANCE_SMOOTHER_EXP);
@@ -92,7 +92,8 @@ public class WallAuto extends Auto {
 
         beaconPusher = new BeaconPusher(hardwareMap);
 
-        dataFile = new DataFile("wall_auto4_" + System.currentTimeMillis() + ".csv");
+        OpModeConfiguration.MatchType type = opModeConfiguration.getMatchType();
+        dataFile = new DataFile("BeaconAuto_" + type + "_" + ((type == OpModeConfiguration.MatchType.PRACTICE) ? System.currentTimeMillis() : opModeConfiguration.getMatchNumber()) + ".csv");
         dataFile.write("loopTime, targetDistance, distance, targetHeading, heading, color, red, blue");
 
 //        voltageSensor = hardwareMap.voltageSensor.get("launcher");

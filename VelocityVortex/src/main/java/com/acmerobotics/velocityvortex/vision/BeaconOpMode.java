@@ -48,8 +48,10 @@ public abstract class BeaconOpMode extends OpMode {
 
                     Imgproc.cvtColor(image, image, Imgproc.COLOR_RGB2BGR);
 
-                    beacons.clear();
-                    BeaconAnalyzer.analyzeImage(image, beacons);
+                    synchronized (beacons) {
+                        beacons.clear();
+                        BeaconAnalyzer.analyzeImage(image, beacons);
+                    }
 
                     for (Beacon beacon : beacons) {
                         beacon.draw(image);

@@ -1,5 +1,8 @@
 package com.acmerobotics.velocityvortex.drive;
 
+import com.acmerobotics.library.configuration.MotorType;
+import com.acmerobotics.library.configuration.RobotProperties;
+import com.acmerobotics.library.configuration.WheelType;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -13,16 +16,23 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
  */
 public class MecanumDrive {
 
-    private static final int TICKS_PER_REV = 1680 * 2 / 3;
-
     private DcMotor[] motors;
+    private WheelType[] wheelTypes;
+    private double smallestCps;
     private Vector2D[] rollerDirs;
     private Vector2D[] rotDirs;
-    private double wheelRadius;
     private int[] offsets;
 
-    public MecanumDrive(HardwareMap map, double wheelRadius) {
-        this.wheelRadius = wheelRadius;
+    public MecanumDrive(HardwareMap map, RobotProperties properties) {
+        wheelTypes = properties.getWheelTypes();
+
+        smallestCps = wheelTypes[0].getCps();
+        for (int i = 1; i < 4; i++) {
+            double cps = wheelTypes[i].getCps();
+            if (cps < smallestCps) {
+                smallestCps = cps;
+            }
+        }
 
         motors = new DcMotor[4];
         motors[0] = map.dcMotor.get("leftFront");
@@ -87,7 +97,7 @@ public class MecanumDrive {
             Vector2D angularVelocity = rotDirs[i].copy().multiply(angularSpeed);
             Vector2D transVelocity = v.copy().multiply(Math.min(1 - angularSpeed, speed));
             transVelocity.add(angularVelocity);
-            motors[i].setPower(transVelocity.dot(rollerDirs[i]));
+            motors[i].setPower(transVelocity.dot(rollerDirs[i]) * (smallestCps / wheelTypes[i].getCps()));
         }
 
     }
@@ -159,14 +169,13 @@ public class MecanumDrive {
      */
     public void move(double inches, double speed, LinearOpMode opMode) {
         DcMotor.RunMode[] prevModes = new DcMotor.RunMode[motors.length];
-        double rev = inches / (2 * Math.PI * wheelRadius);
-        int ticks = (int) Math.round(rev * TICKS_PER_REV);
 
         for (int i = 0; i < motors.length; i++) {
             DcMotor motor = motors[i];
             prevModes[i] = motor.getMode();
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            motor.setTargetPosition(motor.getCurrentPosition() + ticks);
+            int counts = wheelTypes[i].getCounts(inches);
+            motor.setTargetPosition(motor.getCurrentPosition() + counts);
             motor.setPower(speed);
         }
 

@@ -7,6 +7,7 @@ import com.acmerobotics.velocityvortex.drive.MecanumDrive;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
@@ -14,6 +15,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
  * @author Ryan Brott
  */
 
+@Disabled
 @Autonomous(name="Turn Test")
 public class TurnTest extends LinearOpMode {
 
@@ -34,8 +36,8 @@ public class TurnTest extends LinearOpMode {
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         imu.initialize(parameters);
 
-        basicDrive = new MecanumDrive(hardwareMap, properties.getWheelRadius());
-        drive = new EnhancedMecanumDrive(basicDrive, imu, properties.getTurnParameters());
+        basicDrive = new MecanumDrive(hardwareMap, properties);
+        drive = new EnhancedMecanumDrive(basicDrive, imu, properties);
 
         waitForStart();
 

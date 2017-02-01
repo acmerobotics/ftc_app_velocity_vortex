@@ -25,7 +25,7 @@ public class CapBallAuto extends Auto {
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         imu.initialize(parameters);
 
-        drive = new EnhancedMecanumDrive(basicDrive, imu, properties.getTurnParameters());
+        drive = new EnhancedMecanumDrive(basicDrive, imu, properties);
     }
 
     @Override

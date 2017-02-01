@@ -62,14 +62,14 @@ public class MainTeleOp extends OpMode {
         configuration = new OpModeConfiguration(hardwareMap.appContext);
         properties = configuration.getRobotType().getProperties();
 
-        basicDrive = new MecanumDrive(hardwareMap, properties.getWheelRadius());
+        basicDrive = new MecanumDrive(hardwareMap, properties);
 
         imu = new AdafruitBNO055IMU(hardwareMap.i2cDeviceSynch.get("imu"));
         AdafruitBNO055IMU.Parameters parameters = new AdafruitBNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         imu.initialize(parameters);
 
-        drive = new EnhancedMecanumDrive(basicDrive, imu, properties.getTurnParameters());
+        drive = new EnhancedMecanumDrive(basicDrive, imu, properties);
 //        drive.setInitialHeading(configuration.getLastHeading());
 
         distanceSensor = new MaxSonarEZ1UltrasonicSensor(hardwareMap.analogInput.get("maxSonar"));

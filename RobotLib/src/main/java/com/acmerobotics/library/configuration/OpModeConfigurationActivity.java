@@ -35,16 +35,40 @@ public class OpModeConfigurationActivity extends Activity {
             }
         });
 
-        Spinner parkDestSpinner = (Spinner) findViewById(R.id.park_dest_spinner);
-        parkDestSpinner.setSelection(configuration.getParkDest().getIndex());
-        parkDestSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        Spinner matchTypeSpinner = (Spinner) findViewById(R.id.match_type_spinner);
+        matchTypeSpinner.setSelection(configuration.getMatchType().getIndex());
+        matchTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                configuration.setParkDest(OpModeConfiguration.ParkDest.fromIndex(position));
+                configuration.setMatchType(OpModeConfiguration.MatchType.fromIndex(position));
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        final TextView matchNumberValueTextView = (TextView) findViewById(R.id.match_number_value_text_view);
+
+        SeekBar matchNumberSeekBar = (SeekBar) findViewById(R.id.match_number_seek_bar);
+        int matchNumber = configuration.getMatchNumber();
+        matchNumberSeekBar.setProgress(matchNumber - 1);
+        matchNumberValueTextView.setText("#" + (matchNumber - 1));
+        matchNumberSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                configuration.setMatchNumber(progress + 1);
+                matchNumberValueTextView.setText("#" + (progress + 1));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
 
             }
         });
@@ -79,6 +103,20 @@ public class OpModeConfigurationActivity extends Activity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 configuration.setNumberOfBalls(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        Spinner parkDestSpinner = (Spinner) findViewById(R.id.park_dest_spinner);
+        parkDestSpinner.setSelection(configuration.getParkDest().getIndex());
+        parkDestSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                configuration.setParkDest(OpModeConfiguration.ParkDest.fromIndex(position));
             }
 
             @Override
