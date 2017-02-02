@@ -1,6 +1,5 @@
 package com.acmerobotics.velocityvortex.drive;
 
-import com.acmerobotics.library.configuration.MotorType;
 import com.acmerobotics.library.configuration.RobotProperties;
 import com.acmerobotics.library.configuration.WheelType;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -9,16 +8,17 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-
 /**
  * This class implements the basic functionality of an omnidirectional mecanum wheel drive system.
  */
 public class MecanumDrive {
 
+    public static final double RUN_TO_POSITION_MAX_SPEED = 0.65;
+    public static final double RUN_WITH_ENCODER_MAX_SPEED = 0.85;
+
     private DcMotor[] motors;
     private WheelType[] wheelTypes;
-    private double smallestCps;
+    private double smallestRPM;
     private Vector2D[] rollerDirs;
     private Vector2D[] rotDirs;
     private int[] offsets;
@@ -26,11 +26,11 @@ public class MecanumDrive {
     public MecanumDrive(HardwareMap map, RobotProperties properties) {
         wheelTypes = properties.getWheelTypes();
 
-        smallestCps = wheelTypes[0].getCps();
+        smallestRPM = wheelTypes[0].getRPM();
         for (int i = 1; i < 4; i++) {
-            double cps = wheelTypes[i].getCps();
-            if (cps < smallestCps) {
-                smallestCps = cps;
+            double RPM = wheelTypes[i].getRPM();
+            if (RPM < smallestRPM) {
+                smallestRPM = RPM;
             }
         }
 
@@ -97,7 +97,7 @@ public class MecanumDrive {
             Vector2D angularVelocity = rotDirs[i].copy().multiply(angularSpeed);
             Vector2D transVelocity = v.copy().multiply(Math.min(1 - angularSpeed, speed));
             transVelocity.add(angularVelocity);
-            motors[i].setPower(transVelocity.dot(rollerDirs[i]) * (smallestCps / wheelTypes[i].getCps()));
+            motors[i].setPower(RUN_WITH_ENCODER_MAX_SPEED * transVelocity.dot(rollerDirs[i]) * (smallestRPM / wheelTypes[i].getRPM()));
         }
 
     }
@@ -176,7 +176,7 @@ public class MecanumDrive {
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             int counts = wheelTypes[i].getCounts(inches);
             motor.setTargetPosition(motor.getCurrentPosition() + counts);
-            motor.setPower(speed);
+            motor.setPower(RUN_TO_POSITION_MAX_SPEED * speed);
         }
 
         boolean done = false;

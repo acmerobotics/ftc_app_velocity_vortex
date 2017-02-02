@@ -26,14 +26,17 @@ public class WheelType {
         return wheelRadius;
     }
 
-    public double getCps() {
-        return Math.round(gearRatio * motorType.getCps());
+    public double getCPR() {
+        return motorType.getCPR() * gearRatio;
+    }
+
+    public double getRPM() {
+        return motorType.getRPM() / gearRatio;
     }
 
     public int getCounts(double inches) {
-        double cps = Math.round(gearRatio * motorType.getCps());
         double circum = 2 * Math.PI * wheelRadius;
-        int counts = (int) Math.round((inches * cps) / circum);
+        int counts = (int) Math.round((inches * getCPR()) / circum);
         return counts;
     }
 }
