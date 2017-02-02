@@ -9,7 +9,6 @@ import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 /**
  * @author Ryan Brott
@@ -42,7 +41,7 @@ public class TurnTest extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            drive.turnSync(90);
+            drive.turnSync(90, this);
 
             Thread.sleep(10000);
         }

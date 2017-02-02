@@ -31,7 +31,7 @@ public class OpModeConfiguration {
         }
 
         @Override
-        public double getSonarSensorOffset() {
+        public double getDistanceSensorOffset() {
             return 7.625;
         }
     };
@@ -58,7 +58,7 @@ public class OpModeConfiguration {
         }
 
         @Override
-        public double getSonarSensorOffset() {
+        public double getDistanceSensorOffset() {
             return 2.5;
         }
     };

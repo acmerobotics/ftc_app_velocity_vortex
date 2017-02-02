@@ -1,14 +1,9 @@
 package com.acmerobotics.velocityvortex.opmodes;
 
-import com.acmerobotics.library.configuration.OpModeConfiguration;
-import com.acmerobotics.library.configuration.RobotProperties;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
-import com.acmerobotics.velocityvortex.drive.MecanumDrive;
-import com.acmerobotics.velocityvortex.mech.FixedLauncher;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 @Autonomous(name="Cap Ball Auto")
 public class CapBallAuto extends Auto {
@@ -42,7 +37,7 @@ public class CapBallAuto extends Auto {
     public void moveAndShoot() {
         basicDrive.move(-((Math.sqrt(2) * TILE_SIZE) + 3), .5, this);
 
-        launcher.fireBalls(numBalls);
+        launcher.fireBalls(numBalls, this);
     }
 
     public void pushAndPark() {

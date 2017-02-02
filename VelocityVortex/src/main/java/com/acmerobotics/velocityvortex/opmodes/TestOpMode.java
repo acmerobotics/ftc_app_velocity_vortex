@@ -164,7 +164,7 @@ public class TestOpMode extends OpMode {
 
                 telemetry.addData("name", currentTester.getName());
                 telemetry.addData("type", currentTester.getType());
-                if (currentTester.getId() != "") telemetry.addData("id", currentTester.getId());
+                if (currentTester.getId().length() > 0) telemetry.addData("id", currentTester.getId());
                 currentTester.loop(gamepad1, stickyGamepad1, telemetry, logger);
         }
     }

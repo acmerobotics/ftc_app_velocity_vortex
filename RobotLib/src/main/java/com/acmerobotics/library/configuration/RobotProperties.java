@@ -7,6 +7,6 @@ public interface RobotProperties {
     WheelType[] getWheelTypes();
     /** Get robot size in inches */
     double getRobotSize();
-    double getSonarSensorOffset();
+    double getDistanceSensorOffset();
 
 }

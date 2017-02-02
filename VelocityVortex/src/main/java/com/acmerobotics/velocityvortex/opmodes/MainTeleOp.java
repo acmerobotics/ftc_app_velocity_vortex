@@ -73,8 +73,8 @@ public class MainTeleOp extends OpMode {
 //        drive.setInitialHeading(configuration.getLastHeading());
 
         distanceSensor = new MaxSonarEZ1UltrasonicSensor(hardwareMap.analogInput.get("maxSonar"));
-        smoother = new ExponentialSmoother(WallAuto.DISTANCE_SMOOTHER_EXP);
-        sensorOffset = properties.getSonarSensorOffset();
+        smoother = new ExponentialSmoother(BeaconAuto.DISTANCE_SMOOTHER_EXP);
+        sensorOffset = properties.getDistanceSensorOffset();
 
         launcher = new FixedLauncher(hardwareMap);
         collector = new Collector(hardwareMap);
@@ -191,11 +191,11 @@ public class MainTeleOp extends OpMode {
 
                 if (colorAnalyzer.getBeaconColor() == ColorAnalyzer.BeaconColor.UNKNOWN) {
                     distance = getDistance();
-                    distanceError = WallAuto.TARGET_DISTANCE - distance;
-                    double forwardSpeed = sideModifier * WallAuto.FORWARD_SPEED;
+                    distanceError = BeaconAuto.TARGET_DISTANCE - distance;
+                    double forwardSpeed = sideModifier * BeaconAuto.FORWARD_SPEED;
                     double lateralSpeed = 0;
-                    if (Math.abs(distanceError) > WallAuto.DISTANCE_SPREAD) {
-                        lateralSpeed = WallAuto.STRAFE_P * distanceError;
+                    if (Math.abs(distanceError) > BeaconAuto.DISTANCE_SPREAD) {
+                        lateralSpeed = BeaconAuto.STRAFE_P * distanceError;
                     }
                     if (Math.abs(distanceError) > 2) {
                         forwardSpeed = 0;
@@ -211,13 +211,13 @@ public class MainTeleOp extends OpMode {
 
             case BEACON_LATERAL:
                 distance = getDistance();
-                distanceError = WallAuto.TARGET_DISTANCE - distance;
+                distanceError = BeaconAuto.TARGET_DISTANCE - distance;
 
-                if (Math.abs(distanceError) < WallAuto.DISTANCE_SPREAD) {
+                if (Math.abs(distanceError) < BeaconAuto.DISTANCE_SPREAD) {
                     drive.stop();
                     state = State.BEACON_ALIGN;
                 } else {
-                    double lateralSpeed = WallAuto.STRAFE_P * distanceError;
+                    double lateralSpeed = BeaconAuto.STRAFE_P * distanceError;
                     drive.setVelocity(new Vector2D(lateralSpeed, 0));
                     drive.update();
                 }

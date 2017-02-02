@@ -1,6 +1,5 @@
 package com.acmerobotics.velocityvortex.test;
 
-import com.acmerobotics.library.file.CSVFile;
 import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.sensors.ExponentialSmoother;
 import com.acmerobotics.velocityvortex.sensors.MaxSonarEZ1UltrasonicSensor;

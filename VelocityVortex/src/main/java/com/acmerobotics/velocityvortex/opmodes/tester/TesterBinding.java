@@ -18,7 +18,7 @@ public class TesterBinding<T extends HardwareDevice> {
     }
 
     public boolean matches(String name, HardwareDevice device) {
-        return ((nameRegex == "" || name.matches(nameRegex)) && deviceClass.isInstance(device));
+        return ((nameRegex.length() == 0 || name.matches(nameRegex)) && deviceClass.isInstance(device));
     }
 
     public Tester<T> newTester(String name, HardwareDevice device) {

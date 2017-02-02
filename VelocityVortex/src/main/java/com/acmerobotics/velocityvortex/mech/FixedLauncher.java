@@ -1,13 +1,13 @@
 package com.acmerobotics.velocityvortex.mech;
 
-import com.qualcomm.hardware.adafruit.BNO055IMU;
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsUsbDcMotorController;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 /**
  * @author Ryan Brott
@@ -162,13 +162,13 @@ public class FixedLauncher {
         return rightPower;
     }
 
-    public void fireBalls(int numBalls) {
+    public void fireBalls(int numBalls, LinearOpMode opMode) {
         if (numBalls == 0) return;
 
         setPower(1, 1, 2000);
 
         long startTime = System.currentTimeMillis();
-        while ((System.currentTimeMillis() - startTime) < 2500) {
+        while ((opMode == null || opMode.opModeIsActive()) && (System.currentTimeMillis() - startTime) < 2500) {
             update();
             Thread.yield();
         }

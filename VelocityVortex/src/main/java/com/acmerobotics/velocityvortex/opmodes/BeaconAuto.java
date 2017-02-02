@@ -6,11 +6,10 @@ import com.acmerobotics.library.configuration.OpModeConfiguration;
 import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.Vector2D;
+import com.acmerobotics.velocityvortex.drive.WallFollower;
 import com.acmerobotics.velocityvortex.mech.BeaconPusher;
-import com.acmerobotics.velocityvortex.mech.BeaconRam;
 import com.acmerobotics.velocityvortex.mech.FixedLauncher;
 import com.acmerobotics.velocityvortex.sensors.ColorAnalyzer;
-import com.acmerobotics.velocityvortex.sensors.ExponentialSmoother;
 import com.acmerobotics.velocityvortex.sensors.MaxSonarEZ1UltrasonicSensor;
 import com.acmerobotics.velocityvortex.sensors.ThresholdColorAnalyzer;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
@@ -21,17 +20,13 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
 import static com.acmerobotics.velocityvortex.sensors.ColorAnalyzer.BeaconColor;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-
 import static com.acmerobotics.library.configuration.OpModeConfiguration.AllianceColor;
 
-@Autonomous(name="Wall Auto")
-public class WallAuto extends Auto {
+@Autonomous(name="Beacon Auto")
+public class BeaconAuto extends Auto {
 
     public static final double TARGET_DISTANCE = 6.4;
     public static final double DISTANCE_SPREAD = 0.3;
@@ -45,9 +40,7 @@ public class WallAuto extends Auto {
     private EnhancedMecanumDrive drive;
     private BNO055IMU imu;
 
-    private DistanceSensor distanceSensor;
-    private ExponentialSmoother smoother;
-    private double sensorOffset;
+    private WallFollower wallFollower;
 
     private DataFile dataFile;
 
@@ -77,9 +70,8 @@ public class WallAuto extends Auto {
 
         drive = new EnhancedMecanumDrive(basicDrive, imu, properties);
 
-        distanceSensor = new MaxSonarEZ1UltrasonicSensor(hardwareMap.analogInput.get("maxSonar"));
-        smoother = new ExponentialSmoother(DISTANCE_SMOOTHER_EXP);
-        sensorOffset = properties.getSonarSensorOffset();
+        DistanceSensor distanceSensor = new MaxSonarEZ1UltrasonicSensor(hardwareMap.analogInput.get("maxSonar"));
+        wallFollower = new WallFollower(drive, distanceSensor, properties);
 
         launcher = new FixedLauncher(hardwareMap);
         launcher.setTrim(-.05);
@@ -93,7 +85,6 @@ public class WallAuto extends Auto {
         beaconPusher = new BeaconPusher(hardwareMap);
 
         OpModeConfiguration.MatchType type = opModeConfiguration.getMatchType();
-        dataFile = new DataFile("BeaconAuto_" + type + "_" + ((type == OpModeConfiguration.MatchType.PRACTICE) ? System.currentTimeMillis() : opModeConfiguration.getMatchNumber()) + ".csv");
         dataFile.write("loopTime, targetDistance, distance, targetHeading, heading, color, red, blue");
 
 //        voltageSensor = hardwareMap.voltageSensor.get("launcher");
@@ -114,7 +105,7 @@ public class WallAuto extends Auto {
             case NONE:
                 break;
             case CENTER:
-                pushBallAndCentralPark();
+                centerPark();
                 break;
             case CORNER:
                 cornerPark();
@@ -125,10 +116,9 @@ public class WallAuto extends Auto {
     }
 
     public void moveAndFire() {
-
         basicDrive.move(-fireDistance, 1, this);
 
-        launcher.fireBalls(opModeConfiguration.getNumberOfBalls());
+        launcher.fireBalls(numBalls, this);
 
         drive.turnSync(allianceModifier * -110, this);
 
@@ -149,22 +139,16 @@ public class WallAuto extends Auto {
             double lastLoopTime = timer.milliseconds();
             timer.reset();
 
-            double distance = getDistance();
-            double distanceError = TARGET_DISTANCE - distance;
-
             BeaconColor color = colorAnalyzer.getBeaconColor();
 
-            telemetry.addData("pidCoeff", drive.getController().toString());
-            telemetry.addData("distance", distance);
-            telemetry.addData("distanceError", distanceError);
             telemetry.addData("color", color.toString());
             telemetry.update();
 
-            dataFile.write(String.format("%f,%f,%f,%f,%f,%s,%d,%d", lastLoopTime, TARGET_DISTANCE, distance, drive.getTargetHeading(), drive.getHeading(), color, colorSensor.red(), colorSensor.blue()));
+            dataFile.write(String.format("%f,%s,%d,%d", lastLoopTime, color, colorSensor.red(), colorSensor.blue()));
             if (color == targetColor) {
                 drive.stop();
 
-                moveToLateralPosition(TARGET_DISTANCE, DISTANCE_SPREAD, STRAFE_P);
+                wallFollower.moveToDistance(TARGET_DISTANCE, DISTANCE_SPREAD, this);
 
                 drive.turnSync(0, 1, this);
 
@@ -178,24 +162,17 @@ public class WallAuto extends Auto {
                     return;
                 }
             } else {
-                double forwardSpeed = allianceModifier * FORWARD_SPEED;
-                double lateralSpeed = 0;
-                if (Math.abs(distanceError) > DISTANCE_SPREAD) {
-                    lateralSpeed = STRAFE_P * distanceError;
-                }
-                if (Math.abs(distanceError) > 1) {
-                    forwardSpeed = 0;
-                }
-                drive.setVelocity(new Vector2D(lateralSpeed, forwardSpeed));
-                drive.update();
+                wallFollower.setForwardSpeed(allianceModifier * FORWARD_SPEED);
+                wallFollower.setTargetDistance(TARGET_DISTANCE, DISTANCE_SPREAD);
+                wallFollower.update();
             }
 
             idle();
         }
     }
 
-    private void pushBallAndCentralPark() {
-        moveToLateralPosition(20, 2 * DISTANCE_SPREAD, 2 * STRAFE_P);
+    private void centerPark() {
+        wallFollower.moveToDistance(20, 2 * DISTANCE_SPREAD, this);
 
         drive.turnSync(0, this);
         basicDrive.move(-2 * allianceModifier * TILE_SIZE, 1, this);
@@ -204,7 +181,7 @@ public class WallAuto extends Auto {
     }
 
     private void cornerPark() {
-        moveToLateralPosition(15, 2 * DISTANCE_SPREAD, 2 * STRAFE_P);
+        wallFollower.moveToDistance(15, 2 * DISTANCE_SPREAD, this);
 
         if (allianceColor == AllianceColor.RED) {
             drive.turnSync(180, this);
@@ -212,38 +189,9 @@ public class WallAuto extends Auto {
 
         drive.setVelocity(new Vector2D(0, -1));
 
-        // might be other angle
         while (opModeIsActive() && Math.abs(imu.getAngularOrientation().thirdAngle) < 7) {
             drive.update();
             idle();
         }
-    }
-
-    private void moveToLateralPosition(double target, double spread, double p) {
-        double distance, distanceError;
-        do {
-            distance = getDistance();
-            distanceError = target - distance;
-            double lateralSpeed = p * distanceError;
-            drive.setVelocity(new Vector2D(lateralSpeed, 0));
-            drive.update();
-
-            idle();
-        } while(opModeIsActive() && Math.abs(distanceError) > spread);
-    }
-
-    private double getDistance() {
-        double rawDistance = smoother.update(distanceSensor.getDistance(DistanceUnit.INCH));
-        double headingError = Math.toRadians(drive.getHeadingError());
-        return rawDistance * Math.cos(headingError) - sensorOffset * Math.sin(headingError);
-    }
-
-    private void updateLateralSpeed(double distanceError, double forwardSpeed) {
-        double lateralSpeed = 0;
-        if (Math.abs(distanceError) > DISTANCE_SPREAD) {
-            lateralSpeed = STRAFE_P * distanceError;
-        }
-        drive.setVelocity(new Vector2D(lateralSpeed, forwardSpeed));
-        drive.update();
     }
 }

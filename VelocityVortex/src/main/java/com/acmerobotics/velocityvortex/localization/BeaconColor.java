@@ -1,7 +1,7 @@
 package com.acmerobotics.velocityvortex.localization;
 
 /**
- * Created by kelly on 10/26/2016.
+ * @author kelly
  */
 
 public enum BeaconColor {

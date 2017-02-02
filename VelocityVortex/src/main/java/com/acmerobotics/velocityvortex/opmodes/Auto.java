@@ -3,22 +3,10 @@ package com.acmerobotics.velocityvortex.opmodes;
 import com.acmerobotics.library.configuration.OpModeConfiguration;
 import com.acmerobotics.library.configuration.RobotProperties;
 import com.acmerobotics.library.file.DataFile;
-import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
-import com.acmerobotics.velocityvortex.mech.BeaconPusher;
-import com.acmerobotics.velocityvortex.mech.BeaconRam;
 import com.acmerobotics.velocityvortex.mech.FixedLauncher;
-import com.acmerobotics.velocityvortex.sensors.ColorAnalyzer;
-import com.acmerobotics.velocityvortex.sensors.ExponentialSmoother;
-import com.acmerobotics.velocityvortex.sensors.RatioColorAnalyzer;
-import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
-import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import static com.acmerobotics.library.configuration.OpModeConfiguration.*;
 
@@ -35,7 +23,8 @@ public abstract class Auto extends LinearOpMode {
     protected AllianceColor allianceColor;
     protected ParkDest parkDest;
     protected double allianceModifier;
-    protected int delay, numBalls;
+    protected int delay, numBalls, matchNumber;
+    protected MatchType matchType;
     protected RobotProperties properties;
 
     protected MecanumDrive basicDrive;
@@ -44,6 +33,8 @@ public abstract class Auto extends LinearOpMode {
 
     protected DeviceInterfaceModule dim;
 
+    protected DataFile dataFile;
+
     @Override
     public void runOpMode() throws InterruptedException {
         opModeConfiguration = new OpModeConfiguration(hardwareMap.appContext);
@@ -51,6 +42,8 @@ public abstract class Auto extends LinearOpMode {
         delay = opModeConfiguration.getDelay();
         numBalls = opModeConfiguration.getNumberOfBalls();
         parkDest = opModeConfiguration.getParkDest();
+        matchType = opModeConfiguration.getMatchType();
+        matchNumber = opModeConfiguration.getMatchNumber();
         allianceModifier = (allianceColor == AllianceColor.BLUE) ? 1 : -1;
         properties = opModeConfiguration.getRobotType().getProperties();
 
@@ -67,6 +60,8 @@ public abstract class Auto extends LinearOpMode {
 
         basicDrive = new MecanumDrive(hardwareMap, properties);
 
+        dataFile = new DataFile(getClass().getSimpleName() + "_" + matchType + "_" + ((matchType == OpModeConfiguration.MatchType.PRACTICE) ? System.currentTimeMillis() : matchNumber) + ".csv");
+
         initOpMode();
 
         displayConfigSummary();
@@ -82,6 +77,8 @@ public abstract class Auto extends LinearOpMode {
 
     public void displayConfigSummary() {
         telemetry.addData("robot_type", opModeConfiguration.getRobotType());
+        telemetry.addData("match_type", matchType);
+        if (matchType != MatchType.PRACTICE) telemetry.addData("match_number", matchNumber);
         telemetry.addData("alliance_color", allianceColor);
         telemetry.addData("delay", delay);
         telemetry.addData("num_balls", numBalls);
