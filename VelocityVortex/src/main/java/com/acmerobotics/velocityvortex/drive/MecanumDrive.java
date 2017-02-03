@@ -64,10 +64,19 @@ public class MecanumDrive {
         resetEncoders();
     }
 
+    public DcMotor[] getMotors() {
+        return motors;
+    }
+
+    public WheelType[] getWheelTypes() {
+        return wheelTypes;
+    }
+
     /**
      * Sets the velocity of the mecanum drive system.
-     * @see #setVelocity(Vector2D, double)
+     *
      * @param v translational velocity
+     * @see #setVelocity(Vector2D, double)
      */
     public void setVelocity(Vector2D v) {
         setVelocity(v, 0);
@@ -77,7 +86,8 @@ public class MecanumDrive {
      * Sets the velocity of the mecanum drive system. This includes both the translational
      * component and the angular component. A positive speed indicates a clockwise rotation, and a
      * negative speed indicates a counter-clockwise rotation.
-     * @param v translational velocity
+     *
+     * @param v            translational velocity
      * @param angularSpeed angular speed
      */
     public void setVelocity(Vector2D v, double angularSpeed) {
@@ -111,10 +121,6 @@ public class MecanumDrive {
         }
     }
 
-    public DcMotor[] getMotors() {
-        return motors;
-    }
-
     /**
      * Reset the encoder positions. This will reset the value of {@link #getPositions()}.
      */
@@ -124,6 +130,7 @@ public class MecanumDrive {
 
     /**
      * Get the adjusted positions for each motor
+     *
      * @return an array of positions
      */
     public int[] getPositions() {
@@ -136,6 +143,7 @@ public class MecanumDrive {
 
     /**
      * Get the raw encoder positions for each motor
+     *
      * @return an array of the positions
      */
     public int[] getRawPositions() {
@@ -148,6 +156,7 @@ public class MecanumDrive {
 
     /**
      * Compute and return the mean encoder position.
+     *
      * @return the mean encoder position
      */
     public int getMeanPosition() {
@@ -164,8 +173,9 @@ public class MecanumDrive {
 
     /**
      * Move forward synchronously by a specific amount.
+     *
      * @param inches the distance to travel
-     * @param speed the speed to travel at
+     * @param speed  the speed to travel at
      */
     public void move(double inches, double speed, LinearOpMode opMode) {
         DcMotor.RunMode[] prevModes = new DcMotor.RunMode[motors.length];

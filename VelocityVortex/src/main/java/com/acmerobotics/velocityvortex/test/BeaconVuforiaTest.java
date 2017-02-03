@@ -30,7 +30,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Disabled
-@Autonomous(name="Beacon Vuforia")
+@Autonomous(name = "Beacon Vuforia")
 public class BeaconVuforiaTest extends OpMode {
 
     private AppUtil appUtil = AppUtil.getInstance();

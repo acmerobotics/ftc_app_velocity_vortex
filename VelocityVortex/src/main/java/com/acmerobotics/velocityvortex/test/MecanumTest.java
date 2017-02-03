@@ -7,7 +7,7 @@ import com.acmerobotics.velocityvortex.drive.Vector2D;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name="Mecanum Test")
+@TeleOp(name = "Mecanum Test")
 public class MecanumTest extends OpMode {
 
     protected MecanumDrive mecanumDrive;

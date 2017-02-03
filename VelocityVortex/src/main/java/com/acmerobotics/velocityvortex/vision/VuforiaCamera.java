@@ -34,7 +34,7 @@ public class VuforiaCamera extends VisionCamera {
     @Override
     public void setCameraType(CameraType type) {
         throw new RuntimeException("setCameraType() is currently not supported with VuforiaCamera" +
-            " instances. Please use VuforiaLocalizer.Parameters instead.");
+                " instances. Please use VuforiaLocalizer.Parameters instead.");
     }
 
     @Override

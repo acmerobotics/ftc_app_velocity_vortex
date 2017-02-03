@@ -5,11 +5,11 @@ import com.acmerobotics.library.configuration.RobotProperties;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
 import com.acmerobotics.velocityvortex.drive.Vector2D;
+import com.acmerobotics.velocityvortex.drive.WallFollower;
 import com.acmerobotics.velocityvortex.mech.BeaconPusher;
 import com.acmerobotics.velocityvortex.mech.Collector;
 import com.acmerobotics.velocityvortex.mech.FixedLauncher;
 import com.acmerobotics.velocityvortex.sensors.ColorAnalyzer;
-import com.acmerobotics.velocityvortex.sensors.ExponentialSmoother;
 import com.acmerobotics.velocityvortex.sensors.MaxSonarEZ1UltrasonicSensor;
 import com.acmerobotics.velocityvortex.sensors.ThresholdColorAnalyzer;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
@@ -20,9 +20,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
-@TeleOp(name="TeleOp")
+@TeleOp(name = "TeleOp")
 public class MainTeleOp extends OpMode {
 
     private MecanumDrive basicDrive;
@@ -36,16 +34,16 @@ public class MainTeleOp extends OpMode {
     private OpModeConfiguration configuration;
     private RobotProperties properties;
 
-    private State state, previousState;
+    private State state;
 
     private AdafruitBNO055IMU imu;
     private EnhancedMecanumDrive drive;
-    private DistanceSensor distanceSensor;
-    private ExponentialSmoother smoother;
-    private double sensorOffset, distance, distanceError;
+
+    private WallFollower wallFollower;
 
     private ColorSensor colorSensor;
     private ColorAnalyzer colorAnalyzer;
+    private ColorAnalyzer.BeaconColor targetColor;
 
     private double sideModifier;
 
@@ -72,9 +70,9 @@ public class MainTeleOp extends OpMode {
         drive = new EnhancedMecanumDrive(basicDrive, imu, properties);
 //        drive.setInitialHeading(configuration.getLastHeading());
 
-        distanceSensor = new MaxSonarEZ1UltrasonicSensor(hardwareMap.analogInput.get("maxSonar"));
-        smoother = new ExponentialSmoother(BeaconAuto.DISTANCE_SMOOTHER_EXP);
-        sensorOffset = properties.getDistanceSensorOffset();
+        DistanceSensor distanceSensor = new MaxSonarEZ1UltrasonicSensor(hardwareMap.analogInput.get("maxSonar"));
+        wallFollower = new WallFollower(drive, distanceSensor, properties);
+        wallFollower.setTargetDistance(Auto.BEACON_DISTANCE, Auto.BEACON_SPREAD);
 
         launcher = new FixedLauncher(hardwareMap);
         collector = new Collector(hardwareMap);
@@ -87,13 +85,14 @@ public class MainTeleOp extends OpMode {
 
         colorAnalyzer = new ThresholdColorAnalyzer(colorSensor, 5, 5);
 
+        targetColor = configuration.getAllianceColor() == OpModeConfiguration.AllianceColor.BLUE ? ColorAnalyzer.BeaconColor.BLUE : ColorAnalyzer.BeaconColor.RED;
+
         stickyGamepad1 = new StickyGamepad(gamepad1);
         stickyGamepad2 = new StickyGamepad(gamepad2);
 
         sideModifier = 1;
 
         state = State.DRIVER;
-        previousState = state;
 
     }
 
@@ -189,19 +188,9 @@ public class MainTeleOp extends OpMode {
                 // align to the nearest 90-degree orientation
                 drive.setTargetHeading(Math.round(drive.getHeading() / 90.0) * 90);
 
-                if (colorAnalyzer.getBeaconColor() == ColorAnalyzer.BeaconColor.UNKNOWN) {
-                    distance = getDistance();
-                    distanceError = BeaconAuto.TARGET_DISTANCE - distance;
-                    double forwardSpeed = sideModifier * BeaconAuto.FORWARD_SPEED;
-                    double lateralSpeed = 0;
-                    if (Math.abs(distanceError) > BeaconAuto.DISTANCE_SPREAD) {
-                        lateralSpeed = BeaconAuto.STRAFE_P * distanceError;
-                    }
-                    if (Math.abs(distanceError) > 2) {
-                        forwardSpeed = 0;
-                    }
-                    drive.setVelocity(new Vector2D(lateralSpeed, forwardSpeed));
-                    drive.update();
+                if (colorAnalyzer.getBeaconColor() != targetColor) {
+                    wallFollower.setForwardSpeed(sideModifier * Auto.BEACON_SEARCH_SPEED);
+                    wallFollower.update();
                 } else {
                     drive.stop();
                     state = State.BEACON_LATERAL;
@@ -210,16 +199,10 @@ public class MainTeleOp extends OpMode {
                 break;
 
             case BEACON_LATERAL:
-                distance = getDistance();
-                distanceError = BeaconAuto.TARGET_DISTANCE - distance;
-
-                if (Math.abs(distanceError) < BeaconAuto.DISTANCE_SPREAD) {
+                wallFollower.setForwardSpeed(0);
+                if (wallFollower.update()) {
                     drive.stop();
                     state = State.BEACON_ALIGN;
-                } else {
-                    double lateralSpeed = BeaconAuto.STRAFE_P * distanceError;
-                    drive.setVelocity(new Vector2D(lateralSpeed, 0));
-                    drive.update();
                 }
 
                 break;
@@ -241,12 +224,5 @@ public class MainTeleOp extends OpMode {
                 break;
 
         }
-     }
-
-    private double getDistance() {
-        double rawDistance = smoother.update(distanceSensor.getDistance(DistanceUnit.INCH));
-        double headingError = Math.toRadians(drive.getHeadingError());
-        return rawDistance * Math.cos(headingError) - sensorOffset * Math.sin(headingError);
     }
-
 }

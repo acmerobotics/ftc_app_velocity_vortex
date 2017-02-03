@@ -15,6 +15,7 @@ public class ExponentialSmoother {
 
     /**
      * Update the smoother with a new data value
+     *
      * @param val new data value
      * @return the smoothed value
      */

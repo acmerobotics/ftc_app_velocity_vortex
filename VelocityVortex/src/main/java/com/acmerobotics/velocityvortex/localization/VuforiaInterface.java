@@ -16,7 +16,7 @@ import java.util.concurrent.BlockingQueue;
  * Created by kelly on 10/24/2016.
  */
 
-public class VuforiaInterface extends LocalizationInterface{
+public class VuforiaInterface extends LocalizationInterface {
 
     private VuforiaLocalizer vuforia;
     private OpenGLMatrix locationTransform = RobotLocation.ORIGIN.toMatrix();
@@ -24,12 +24,12 @@ public class VuforiaInterface extends LocalizationInterface{
 
     private BlockingQueue<VuforiaLocalizer.CloseableFrame> frameQueue;
 
-    public VuforiaInterface (String name, int priority) {
+    public VuforiaInterface(String name, int priority) {
         super(name, priority);
         init();
     }
 
-    public OpenGLMatrix getLocationTransform () {
+    public OpenGLMatrix getLocationTransform() {
         return locationTransform;
     }
 
@@ -47,7 +47,7 @@ public class VuforiaInterface extends LocalizationInterface{
              * getRobotLocation() will return null if the trackable is not currently visible.
              */
             OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
-            if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()){
+            if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
                 if (robotLocationTransform != null) {
                     location = RobotLocation.matrixToLocation(robotLocationTransform);
                     locationTransform = robotLocationTransform;
@@ -85,10 +85,10 @@ public class VuforiaInterface extends LocalizationInterface{
         wheelsTarget.setLocation(Field.wheelsLocation.toMatrix());
         gearsTarget.setLocation(Field.gearsLocation.toMatrix());
 
-        ((VuforiaTrackableDefaultListener)toolsTarget.getListener()).setPhoneInformation(RobotLocation.ORIGIN.toMatrix(), parameters.cameraDirection);
-        ((VuforiaTrackableDefaultListener)legoesTarget.getListener()).setPhoneInformation(RobotLocation.ORIGIN.toMatrix(), parameters.cameraDirection);
-        ((VuforiaTrackableDefaultListener)wheelsTarget.getListener()).setPhoneInformation(RobotLocation.ORIGIN.toMatrix(), parameters.cameraDirection);
-        ((VuforiaTrackableDefaultListener)gearsTarget.getListener()).setPhoneInformation(RobotLocation.ORIGIN.toMatrix(), parameters.cameraDirection);
+        ((VuforiaTrackableDefaultListener) toolsTarget.getListener()).setPhoneInformation(RobotLocation.ORIGIN.toMatrix(), parameters.cameraDirection);
+        ((VuforiaTrackableDefaultListener) legoesTarget.getListener()).setPhoneInformation(RobotLocation.ORIGIN.toMatrix(), parameters.cameraDirection);
+        ((VuforiaTrackableDefaultListener) wheelsTarget.getListener()).setPhoneInformation(RobotLocation.ORIGIN.toMatrix(), parameters.cameraDirection);
+        ((VuforiaTrackableDefaultListener) gearsTarget.getListener()).setPhoneInformation(RobotLocation.ORIGIN.toMatrix(), parameters.cameraDirection);
 
         images.activate();
     }

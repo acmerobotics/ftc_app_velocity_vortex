@@ -32,7 +32,8 @@ public class DifferentialDrive {
     /**
      * Set the raw powers of the motors. Note that this method
      * doesn't actually write to the motor controllers ({@link #updateMotors()}
-     * @param left left power
+     *
+     * @param left  left power
      * @param right right power
      */
     public void setMotorPowers(double left, double right) {
@@ -53,6 +54,7 @@ public class DifferentialDrive {
     /**
      * Sets the motor speeds according to the values of the gamepad
      * joystick. This method set the motor powers and updates them.
+     *
      * @param gamepad the gamepad
      */
     public void arcadeDrive(Gamepad gamepad) {

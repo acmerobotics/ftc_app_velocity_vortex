@@ -18,6 +18,7 @@ public class PIDController {
     /**
      * Run a single iteration of the feedback update with the provided
      * error.
+     *
      * @param error calculated error
      * @return the calculated correction (update)
      */

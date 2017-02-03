@@ -40,6 +40,7 @@ public class FastCamera extends VisionCamera {
     /**
      * Get the initialization parameters for the camera view. These parameters must be modified
      * before {@link #start()}} to take effect.
+     *
      * @return the camera view parameters
      */
     public FastCameraView.Parameters getParameters() {
@@ -48,6 +49,7 @@ public class FastCamera extends VisionCamera {
 
     /**
      * Set the camera view listener
+     *
      * @param listener camera view listener
      */
     public void setCameraViewListener(FastCameraView.CameraViewListener listener) {

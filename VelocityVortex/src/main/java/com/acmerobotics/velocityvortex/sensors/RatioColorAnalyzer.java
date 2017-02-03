@@ -27,7 +27,7 @@ public class RatioColorAnalyzer implements ColorAnalyzer {
             return BeaconColor.BLUE;
         } else if (blueRedRatio <= redThreshold) {
             return BeaconColor.RED;
-        } else  {
+        } else {
             return BeaconColor.UNKNOWN;
         }
     }

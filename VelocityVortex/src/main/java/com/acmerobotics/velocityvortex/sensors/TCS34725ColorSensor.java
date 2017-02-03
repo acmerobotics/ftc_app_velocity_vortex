@@ -74,6 +74,7 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
         INTEGRATION_TIME_154MS(0xC0),
         INTEGRATION_TIME_700MS(0x00);
         public final byte byteVal;
+
         IntegrationTime(int val) {
             byteVal = (byte) val;
         }
@@ -85,6 +86,7 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
         GAIN_16X(0x02),
         GAIN_60X(0x03);
         public final byte byteVal;
+
         Gain(int val) {
             byteVal = (byte) val;
         }
@@ -101,13 +103,14 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
         this(I2CADDR_DEFAULT, deviceClient, null, isOwned);
     }
 
-    public TCS34725ColorSensor(I2cAddr addr,  I2cDeviceSynch deviceClient, DigitalChannel digitalChannel, boolean isOwned) {
+    public TCS34725ColorSensor(I2cAddr addr, I2cDeviceSynch deviceClient, DigitalChannel digitalChannel, boolean isOwned) {
         super(deviceClient, isOwned);
         ledChannel = digitalChannel;
         if (ledChannel != null) ledChannel.setMode(DigitalChannelController.Mode.OUTPUT);
         i2cAddr = addr;
         gain = Gain.GAIN_1X;
-        integrationTime = IntegrationTime.INTEGRATION_TIME_700MS;}
+        integrationTime = IntegrationTime.INTEGRATION_TIME_700MS;
+    }
 
     public void write8(int reg, int data) {
         deviceClient.write8(TCS34725_COMMAND_BIT | reg, data);
@@ -128,7 +131,7 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
     }
 
     public int make16(byte lower, byte upper) {
-        return TypeConversion.byteArrayToShort(new byte[] { lower, upper }, ByteOrder.LITTLE_ENDIAN);
+        return TypeConversion.byteArrayToShort(new byte[]{lower, upper}, ByteOrder.LITTLE_ENDIAN);
     }
 
     private void delay(int ms) {
@@ -208,7 +211,7 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
 
     public int[] getColors() {
         byte[] data = read(Registers.TCS34725_CDATAL, 8);
-        return new int[] {
+        return new int[]{
                 make16(data[0], data[1]),
                 make16(data[2], data[3]),
                 make16(data[4], data[5]),

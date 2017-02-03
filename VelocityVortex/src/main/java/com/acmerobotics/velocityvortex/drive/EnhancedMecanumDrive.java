@@ -3,6 +3,7 @@ package com.acmerobotics.velocityvortex.drive;
 import com.acmerobotics.library.configuration.RobotProperties;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
 /**
@@ -35,8 +36,9 @@ public class EnhancedMecanumDrive {
     /**
      * Get the robot's heading. This value is the size in degrees of the angle from the fixed axis
      * in a clockwise direction.
-     * @see BNO055IMU#getAngularOrientation()
+     *
      * @return the heading
+     * @see BNO055IMU#getAngularOrientation()
      */
     public double getHeading() {
         return sanitizeHeading(getRawHeading() - initialHeading);
@@ -50,26 +52,6 @@ public class EnhancedMecanumDrive {
         return targetHeading;
     }
 
-    /**
-     * Move the robot forward a specific distance. Please use the lower-level command
-     * {@link MecanumDrive#move(double, double)} instead.
-     * @deprecated
-     * @param ticks encoder ticks to move forward
-     */
-    @Deprecated
-    public void moveForward(int ticks) {
-        resetHeading();
-        drive.resetEncoders();
-        int error = ticks;
-        while (error > 0) {
-            error = ticks - drive.getMeanPosition();
-            setVelocity(new Vector2D(0, 0.0003 * error + 0.1));
-            update();
-            Thread.yield();
-        }
-        stop();
-    }
-
     public PIDController getController() {
         return controller;
     }
@@ -81,6 +63,7 @@ public class EnhancedMecanumDrive {
     /**
      * Set the translational velocity of the base. This method does not actually update the
      * underlying motors; please use in tandem with {@link #update()}.
+     *
      * @param velocity the translational velocity
      */
     public void setVelocity(Vector2D velocity) {
@@ -89,6 +72,7 @@ public class EnhancedMecanumDrive {
 
     /**
      * Updates the drive system using the latest PID controller feedback.
+     *
      * @return the angular velocity
      */
     public double update() {
@@ -109,6 +93,7 @@ public class EnhancedMecanumDrive {
     /**
      * Turns the robot. Like {@link #setVelocity(Vector2D)}}, this method does not actually update
      * the underlying motors, so please use {@link #update()} or {@link #turnSync(double, double, LinearOpMode)}.
+     *
      * @param turnAngle the turn angle (right is positive, left is negative)
      */
     public void turn(double turnAngle) {
@@ -126,23 +111,26 @@ public class EnhancedMecanumDrive {
 
     /**
      * Turns the robot synchronously.
-     * @see #turn(double)
+     *
      * @param turnAngle the turn angle
-     * @param error satisfactory orientation error
+     * @param error     satisfactory orientation error
+     * @see #turn(double)
      */
     public void turnSync(double turnAngle, double error, LinearOpMode opMode) {
         turn(turnAngle);
         do {
             update();
             Thread.yield();
-        } while (Math.abs(getHeadingError()) > error && (opMode == null || opMode.opModeIsActive()));
+        }
+        while (Math.abs(getHeadingError()) > error && (opMode == null || opMode.opModeIsActive()));
         stop();
     }
 
     /**
      * Turns the robot synchronously.
-     * @see #turnSync(double, double, LinearOpMode)
+     *
      * @param turnAngle the turn angle
+     * @see #turnSync(double, double, LinearOpMode)
      * @deprecated
      */
     @Deprecated
@@ -159,6 +147,7 @@ public class EnhancedMecanumDrive {
 
     /**
      * Set the target heading.
+     *
      * @param targetHeading the target heading
      */
     public void setTargetHeading(double targetHeading) {
@@ -169,6 +158,7 @@ public class EnhancedMecanumDrive {
      * Calculates the difference between the target heading and actual heading. A positive error
      * represents a clockwise correction, and a negative error represents a counter-clockwise
      * correction.
+     *
      * @return the heading error
      */
     public double getHeadingError() {
@@ -185,6 +175,18 @@ public class EnhancedMecanumDrive {
             heading += 360;
         }
         return heading;
+    }
+
+    public void move(double inches, double power, LinearOpMode opMode) {
+        int counts = drive.getWheelTypes()[0].getCounts(inches);
+        DcMotor motor = drive.getMotors()[0];
+        int startPos = motor.getCurrentPosition();
+        setVelocity(new Vector2D(0, power));
+        while ((opMode == null || opMode.opModeIsActive()) && (motor.getCurrentPosition() - startPos) < counts) {
+            update();
+            Thread.yield();
+        }
+        stop();
     }
 
 }

@@ -16,12 +16,11 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 /**
- *
  * Created by kelly on 10/18/2016.
  */
 
-@Autonomous(name="Concept: Vuforia Navigation", group ="Concept")
-public class VuforiaTest extends OpMode{
+@Autonomous(name = "Concept: Vuforia Navigation", group = "Concept")
+public class VuforiaTest extends OpMode {
 
     public static final String TAG = "Target Test";
 
@@ -54,17 +53,17 @@ public class VuforiaTest extends OpMode{
         allTrackables.addAll(images);
 
         //only used for testing, just carring about position relative to target
-        OpenGLMatrix noTransform = OpenGLMatrix.translation(0,0,0);
+        OpenGLMatrix noTransform = OpenGLMatrix.translation(0, 0, 0);
 
         toolsTarget.setLocation(noTransform);
         legoesTarget.setLocation(noTransform);
         wheelsTarget.setLocation(noTransform);
         gearsTarget.setLocation(noTransform);
 
-        ((VuforiaTrackableDefaultListener)toolsTarget.getListener()).setPhoneInformation(noTransform, parameters.cameraDirection);
-        ((VuforiaTrackableDefaultListener)legoesTarget.getListener()).setPhoneInformation(noTransform, parameters.cameraDirection);
-        ((VuforiaTrackableDefaultListener)wheelsTarget.getListener()).setPhoneInformation(noTransform, parameters.cameraDirection);
-        ((VuforiaTrackableDefaultListener)gearsTarget.getListener()).setPhoneInformation(noTransform, parameters.cameraDirection);
+        ((VuforiaTrackableDefaultListener) toolsTarget.getListener()).setPhoneInformation(noTransform, parameters.cameraDirection);
+        ((VuforiaTrackableDefaultListener) legoesTarget.getListener()).setPhoneInformation(noTransform, parameters.cameraDirection);
+        ((VuforiaTrackableDefaultListener) wheelsTarget.getListener()).setPhoneInformation(noTransform, parameters.cameraDirection);
+        ((VuforiaTrackableDefaultListener) gearsTarget.getListener()).setPhoneInformation(noTransform, parameters.cameraDirection);
 
         /** Wait for the game to begin */
         telemetry.addData(">", "Press Play to start tracking");
@@ -89,7 +88,8 @@ public class VuforiaTest extends OpMode{
 
             try {
                 frame = queue.remove();
-            } catch (Exception ie) {}
+            } catch (Exception ie) {
+            }
 
         }
 
@@ -101,7 +101,7 @@ public class VuforiaTest extends OpMode{
              * getRobotLocation() will return null if the trackable is not currently visible.
              */
             OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
-            if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()){
+            if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
                 if (robotLocationTransform != null) {
                     lastLocation = robotLocationTransform;
                 }

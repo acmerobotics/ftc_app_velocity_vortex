@@ -38,11 +38,11 @@ public class BeaconRam {
         }
     }
 
-    public void toggle () {
-        setExtended (!extended);
+    public void toggle() {
+        setExtended(!extended);
     }
 
-    public void setExtended (boolean isExtended) {
+    public void setExtended(boolean isExtended) {
         if (isExtended) extend();
         else retract();
     }

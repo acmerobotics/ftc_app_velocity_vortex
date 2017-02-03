@@ -1,9 +1,6 @@
 package com.acmerobotics.velocityvortex.opmodes;
 
-import android.annotation.SuppressLint;
-
 import com.acmerobotics.library.configuration.OpModeConfiguration;
-import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.Vector2D;
 import com.acmerobotics.velocityvortex.drive.WallFollower;
@@ -21,19 +18,11 @@ import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import static com.acmerobotics.library.configuration.OpModeConfiguration.AllianceColor;
 import static com.acmerobotics.velocityvortex.sensors.ColorAnalyzer.BeaconColor;
 
-import static com.acmerobotics.library.configuration.OpModeConfiguration.AllianceColor;
-
-@Autonomous(name="Beacon Auto")
+@Autonomous(name = "Beacon Auto")
 public class BeaconAuto extends Auto {
-
-    public static final double TARGET_DISTANCE = 6.4;
-    public static final double DISTANCE_SPREAD = 0.3;
-    public static final double DISTANCE_SMOOTHER_EXP = 1;
-    public static final double FORWARD_SPEED = 0.6;
-    public static final double TILE_SIZE = 24;
-    public static final double STRAFE_P = .15;
 
     private FixedLauncher launcher;
 
@@ -41,8 +30,6 @@ public class BeaconAuto extends Auto {
     private BNO055IMU imu;
 
     private WallFollower wallFollower;
-
-    private DataFile dataFile;
 
     private BeaconColor targetColor;
     private ColorSensor colorSensor;
@@ -99,7 +86,7 @@ public class BeaconAuto extends Auto {
 
         moveAndFire();
 
-        followWallAndPressBeacons();
+        searchForBeacons();
 
         switch (parkDest) {
             case NONE:
@@ -133,8 +120,7 @@ public class BeaconAuto extends Auto {
         drive.turnSync(0, this);
     }
 
-    @SuppressLint("DefaultLocale")
-    public void followWallAndPressBeacons() throws InterruptedException {
+    public void searchForBeacons() throws InterruptedException {
         while (opModeIsActive()) {
             double lastLoopTime = timer.milliseconds();
             timer.reset();
@@ -148,7 +134,7 @@ public class BeaconAuto extends Auto {
             if (color == targetColor) {
                 drive.stop();
 
-                wallFollower.moveToDistance(TARGET_DISTANCE, DISTANCE_SPREAD, this);
+                wallFollower.moveToDistance(BEACON_DISTANCE, BEACON_SPREAD, this);
 
                 drive.turnSync(0, 1, this);
 
@@ -156,14 +142,14 @@ public class BeaconAuto extends Auto {
                 beaconsPressed++;
 
                 if (beaconsPressed < 2) {
-                    basicDrive.move(allianceModifier * TILE_SIZE, .8, this);
+                    drive.move(allianceModifier * TILE_SIZE, 1, this);
                 } else {
                     drive.stop();
                     return;
                 }
             } else {
-                wallFollower.setForwardSpeed(allianceModifier * FORWARD_SPEED);
-                wallFollower.setTargetDistance(TARGET_DISTANCE, DISTANCE_SPREAD);
+                wallFollower.setForwardSpeed(allianceModifier * BEACON_SEARCH_SPEED);
+                wallFollower.setTargetDistance(BEACON_DISTANCE, BEACON_SPREAD);
                 wallFollower.update();
             }
 
@@ -172,7 +158,7 @@ public class BeaconAuto extends Auto {
     }
 
     private void centerPark() {
-        wallFollower.moveToDistance(20, 2 * DISTANCE_SPREAD, this);
+        wallFollower.moveToDistance(20, 2 * BEACON_SPREAD, this);
 
         drive.turnSync(0, this);
         basicDrive.move(-2 * allianceModifier * TILE_SIZE, 1, this);
@@ -181,7 +167,7 @@ public class BeaconAuto extends Auto {
     }
 
     private void cornerPark() {
-        wallFollower.moveToDistance(15, 2 * DISTANCE_SPREAD, this);
+        wallFollower.moveToDistance(15, 2 * BEACON_SPREAD, this);
 
         if (allianceColor == AllianceColor.RED) {
             drive.turnSync(180, this);

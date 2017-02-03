@@ -11,7 +11,7 @@ import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name="Enhanced Mecanum Test")
+@TeleOp(name = "Enhanced Mecanum Test")
 public class EnhancedMecanumTest extends OpMode {
 
     private EnhancedMecanumDrive drive;

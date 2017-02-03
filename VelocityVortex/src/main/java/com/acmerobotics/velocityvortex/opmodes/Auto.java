@@ -8,7 +8,9 @@ import com.acmerobotics.velocityvortex.mech.FixedLauncher;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
 
-import static com.acmerobotics.library.configuration.OpModeConfiguration.*;
+import static com.acmerobotics.library.configuration.OpModeConfiguration.AllianceColor;
+import static com.acmerobotics.library.configuration.OpModeConfiguration.MatchType;
+import static com.acmerobotics.library.configuration.OpModeConfiguration.ParkDest;
 
 /**
  * @author Ryan Brott
@@ -18,6 +20,12 @@ public abstract class Auto extends LinearOpMode {
 
     public static final int BLUE_LED_CHANNEL = 0;
     public static final int RED_LED_CHANNEL = 1;
+
+    public static final double BEACON_DISTANCE = 6.4;
+    public static final double BEACON_SPREAD = 0.3;
+    public static final double BEACON_SEARCH_SPEED = 0.6;
+
+    public static final double TILE_SIZE = 24;
 
     protected OpModeConfiguration opModeConfiguration;
     protected AllianceColor allianceColor;

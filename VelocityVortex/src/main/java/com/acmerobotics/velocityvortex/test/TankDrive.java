@@ -12,7 +12,7 @@ public class TankDrive extends OpMode {
 
     private DcMotor[] motors;
 
-    public void init () {
+    public void init() {
         motors = new DcMotor[4];
         motors[0] = hardwareMap.dcMotor.get("leftFront");
         motors[1] = hardwareMap.dcMotor.get("rightFront");
@@ -26,7 +26,7 @@ public class TankDrive extends OpMode {
         }
     }
 
-    public void loop () {
+    public void loop() {
         double left = gamepad1.left_stick_y;
         double right = gamepad1.right_stick_x;
         motors[0].setPower(left);

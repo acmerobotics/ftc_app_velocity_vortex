@@ -44,7 +44,7 @@ public class StickyGamepad {
             dpad_up = false;
             dpad_up_down = false;
         }
-        
+
         if (gamepad.dpad_left) {
             if (dpad_left_down) {
                 dpad_left = false;
@@ -56,7 +56,7 @@ public class StickyGamepad {
             dpad_left = false;
             dpad_left_down = false;
         }
-        
+
         if (gamepad.dpad_right) {
             if (dpad_right_down) {
                 dpad_right = false;

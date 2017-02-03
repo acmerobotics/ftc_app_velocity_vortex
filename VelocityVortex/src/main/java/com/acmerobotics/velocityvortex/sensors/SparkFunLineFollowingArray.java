@@ -133,7 +133,9 @@ public class SparkFunLineFollowingArray extends I2cDeviceSynchDevice<I2cDeviceSy
      * and is configured
      */
     public class Parameters {
-        /** the I2C address of the device */
+        /**
+         * the I2C address of the device
+         */
         public I2cAddr i2cAddr = I2CADDR_DEFAULT;
         /**
          * This boolean describes line illumination behavior. If true, the
@@ -141,7 +143,9 @@ public class SparkFunLineFollowingArray extends I2cDeviceSynchDevice<I2cDeviceSy
          * line is illuminated constantly.
          */
         public boolean barStrobe = false;
-        /** if true, the input readings are inverted */
+        /**
+         * if true, the input readings are inverted
+         */
         public boolean invertBits = false;
     }
 

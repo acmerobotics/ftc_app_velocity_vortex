@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
  * @author Ryan
  */
 
-@Autonomous(name="Motor Speed Test")
+@Autonomous(name = "Motor Speed Test")
 public class MotorSpeedTest extends LinearOpMode {
 
     private DcMotor motor;

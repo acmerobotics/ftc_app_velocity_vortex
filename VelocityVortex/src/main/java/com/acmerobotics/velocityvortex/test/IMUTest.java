@@ -19,7 +19,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
  * @author Ryan Brott
  */
 
-@TeleOp(name="IMU Test")
+@TeleOp(name = "IMU Test")
 public class IMUTest extends OpMode {
 
     private static final String XYZ_FORMAT_STRING = "%5.2f,%5.2f,%5.2f";
@@ -92,8 +92,8 @@ public class IMUTest extends OpMode {
         if (recording) {
             recordFile.write(
                     o.thirdAngle + "," + o.secondAngle + "," + (-o.firstAngle) + ","
-                    + a.xAccel + "," + a.yAccel + "," + a.zAccel + ","
-                    + v.xRotationRate + "," + v.yRotationRate + "," + v.zRotationRate
+                            + a.xAccel + "," + a.yAccel + "," + a.zAccel + ","
+                            + v.xRotationRate + "," + v.yRotationRate + "," + v.zRotationRate
             );
         }
     }

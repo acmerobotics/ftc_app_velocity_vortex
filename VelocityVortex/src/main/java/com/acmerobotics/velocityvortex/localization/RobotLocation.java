@@ -31,7 +31,7 @@ public class RobotLocation {
         matrixToLocation(matrix);
     }
 
-    public static RobotLocation matrixToLocation (OpenGLMatrix matrix) {
+    public static RobotLocation matrixToLocation(OpenGLMatrix matrix) {
         VectorF translation = matrix.getTranslation();
         Orientation orientation = Orientation.getOrientation(matrix, AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
         float x = translation.get(0);
@@ -40,11 +40,11 @@ public class RobotLocation {
         return new RobotLocation(x, y, heading);
     }
 
-    public OpenGLMatrix toMatrix () {
+    public OpenGLMatrix toMatrix() {
         return locationToMatrix(this);
     }
 
-    public static OpenGLMatrix locationToMatrix (RobotLocation location) {
+    public static OpenGLMatrix locationToMatrix(RobotLocation location) {
         return OpenGLMatrix
                 .translation(location.x, location.y, 0)
                 .multiplied(Orientation.getRotationMatrix(
@@ -53,15 +53,15 @@ public class RobotLocation {
                         AngleUnit.DEGREES, -90, location.heading, 0));
     }
 
-    public float getHeading () {
+    public float getHeading() {
         return heading;
     }
 
-    public void setHeading (float heading) {
+    public void setHeading(float heading) {
         this.heading = degreeify(heading);
     }
 
-    public String asString () {
+    public String asString() {
         return MessageFormat.format("({0}, {1}) {2}", x, y, heading);
     }
 

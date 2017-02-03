@@ -24,6 +24,7 @@ public class VuforiaFrameGrabber {
         /**
          * This method is called every time a new frame is available. New frames will not be
          * processed until this callback returns.
+         *
          * @param frame the image
          */
         void onFrame(Image frame);
@@ -65,6 +66,7 @@ public class VuforiaFrameGrabber {
 
     /**
      * Gets the latest frame synchronously
+     *
      * @return the frame
      */
     public VuforiaLocalizer.CloseableFrame getLatestVuforiaFrame() {

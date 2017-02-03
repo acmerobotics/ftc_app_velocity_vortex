@@ -25,6 +25,7 @@ public abstract class LocalizationInterface {
 
     /**
      * Create LocalizationInterface with the robot at a specified position
+     *
      * @param name
      * @param priority
      * @param location

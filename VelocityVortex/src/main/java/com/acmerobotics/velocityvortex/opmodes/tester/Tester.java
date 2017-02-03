@@ -86,6 +86,8 @@ public abstract class Tester<T extends HardwareDevice> {
     }
 
     public abstract String getType();
+
     public abstract String getId();
+
     public abstract void loop(Gamepad gamepad, StickyGamepad stickyGamepad, Telemetry telemetry, Logger logger);
 }

@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 @Disabled
-@Autonomous(name="Beacon Test")
+@Autonomous(name = "Beacon Test")
 public class BeaconTest extends BeaconOpMode {
     @Override
     public void init() {

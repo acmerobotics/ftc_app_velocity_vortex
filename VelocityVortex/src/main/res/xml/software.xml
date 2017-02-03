@@ -1,15 +1,35 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
-<Robot type="FirstInspires-FTC" name="software">
-    <MotorController name="right" serialNumber="AL00VKFT">
-        <Motor name="rightFront" port="1" />
-        <Motor name="rightBack" port="2" />
+<Robot
+    type="FirstInspires-FTC"
+    name="software">
+    <MotorController
+        name="right"
+        serialNumber="AL00VKFT">
+        <Motor
+            name="rightFront"
+            port="1" />
+        <Motor
+            name="rightBack"
+            port="2" />
     </MotorController>
-    <MotorController name="left" serialNumber="AI049PZC">
-        <Motor name="leftFront" port="1" />
-        <Motor name="leftBack" port="2" />
+    <MotorController
+        name="left"
+        serialNumber="AI049PZC">
+        <Motor
+            name="leftFront"
+            port="1" />
+        <Motor
+            name="leftBack"
+            port="2" />
     </MotorController>
-    <DeviceInterfaceModule name="dim" serialNumber="AL00VFTI">
-        <I2cDeviceSynch name="imu" port="0" />
-        <AnalogInput name="maxSonar" port="0" />
+    <DeviceInterfaceModule
+        name="dim"
+        serialNumber="AL00VFTI">
+        <I2cDeviceSynch
+            name="imu"
+            port="0" />
+        <AnalogInput
+            name="maxSonar"
+            port="0" />
     </DeviceInterfaceModule>
 </Robot>
