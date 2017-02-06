@@ -39,7 +39,7 @@ public class MecanumDrive {
         motors[1] = map.dcMotor.get("rightFront");
         motors[1].setDirection(DcMotorSimple.Direction.REVERSE);
         motors[2] = map.dcMotor.get("rightBack");
-        motors[2].setDirection(DcMotorSimple.Direction.REVERSE);
+//        motors[2].setDirection(DcMotorSimple.Direction.REVERSE);
         motors[3] = map.dcMotor.get("leftBack");
 
         for (DcMotor motor : motors) {
@@ -107,7 +107,8 @@ public class MecanumDrive {
             Vector2D angularVelocity = rotDirs[i].copy().multiply(angularSpeed);
             Vector2D transVelocity = v.copy().multiply(Math.min(1 - angularSpeed, speed));
             transVelocity.add(angularVelocity);
-            motors[i].setPower(RUN_WITH_ENCODER_MAX_SPEED * transVelocity.dot(rollerDirs[i]) * (smallestRPM / wheelTypes[i].getRPM()));
+            double wheelSpeed = transVelocity.dot(rollerDirs[i]);
+            motors[i].setPower(RUN_WITH_ENCODER_MAX_SPEED * getAdjustedSpeed(wheelSpeed, wheelTypes[i]));
         }
 
     }
@@ -186,7 +187,7 @@ public class MecanumDrive {
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             int counts = wheelTypes[i].getCounts(inches);
             motor.setTargetPosition(motor.getCurrentPosition() + counts);
-            motor.setPower(RUN_TO_POSITION_MAX_SPEED * speed);
+            motor.setPower(RUN_TO_POSITION_MAX_SPEED * getAdjustedSpeed(speed, wheelTypes[i]));
         }
 
         boolean done = false;
@@ -203,6 +204,10 @@ public class MecanumDrive {
             DcMotor motor = motors[i];
             motor.setMode(prevModes[i]);
         }
+    }
+
+    private double getAdjustedSpeed(double speed, WheelType wheelType) {
+        return speed * (smallestRPM / wheelType.getRPM());
     }
 
 }

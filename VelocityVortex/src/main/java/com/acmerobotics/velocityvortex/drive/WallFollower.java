@@ -1,6 +1,7 @@
 package com.acmerobotics.velocityvortex.drive;
 
 import com.acmerobotics.library.configuration.RobotProperties;
+import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.sensors.ExponentialSmoother;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -16,7 +17,7 @@ public class WallFollower {
     public static final double DISTANCE_SMOOTHER_EXP = 1;
     public static final double DEFAULT_STRAFE_P = 0.15;
 
-    private EnhancedMecanumDrive drive;
+    protected EnhancedMecanumDrive drive;
     private DistanceSensor sensor;
     private double sensorOffset;
     private ExponentialSmoother smoother;

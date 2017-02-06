@@ -20,8 +20,8 @@ public class ThresholdColorAnalyzer implements ColorAnalyzer {
 
     @Override
     public BeaconColor getBeaconColor() {
-        double red = sensor.red();
-        double blue = sensor.blue();
+        double red = red();
+        double blue = blue();
         if (red >= redThreshold) {
             return BeaconColor.RED;
         } else if (blue >= blueThreshold) {
@@ -29,5 +29,20 @@ public class ThresholdColorAnalyzer implements ColorAnalyzer {
         } else {
             return BeaconColor.UNKNOWN;
         }
+    }
+
+    @Override
+    public String toString() {
+        return String.format("ThresholdAnalyzer[red=%f,blue=%f]", redThreshold, blueThreshold);
+    }
+
+    @Override
+    public int red() {
+        return sensor.red();
+    }
+
+    @Override
+    public int blue() {
+        return sensor.blue();
     }
 }

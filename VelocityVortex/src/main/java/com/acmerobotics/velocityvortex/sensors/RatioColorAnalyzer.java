@@ -20,8 +20,8 @@ public class RatioColorAnalyzer implements ColorAnalyzer {
 
     @Override
     public ColorAnalyzer.BeaconColor getBeaconColor() {
-        double red = sensor.red();
-        double blue = sensor.blue();
+        double red = red();
+        double blue = blue();
         double blueRedRatio = blue / red;
         if (blueRedRatio >= blueThreshold) {
             return BeaconColor.BLUE;
@@ -30,5 +30,20 @@ public class RatioColorAnalyzer implements ColorAnalyzer {
         } else {
             return BeaconColor.UNKNOWN;
         }
+    }
+
+    @Override
+    public String toString() {
+        return String.format("RatioAnalyzer[red=%f,blue=%f]", redThreshold, blueThreshold);
+    }
+
+    @Override
+    public int red() {
+        return sensor.red();
+    }
+
+    @Override
+    public int blue() {
+        return sensor.blue();
     }
 }

@@ -108,7 +108,7 @@ public abstract class BeaconOpMode extends OpMode {
 
     @Override
     protected void postInitLoop() {
-        telemetry.addData(">", ready ? "Camera is ready!" : "Camera is loading...");
+        telemetry.addData(">", ready ? "Camera is moveToLineAndWait!" : "Camera is loading...");
 
         super.postInitLoop();
     }

@@ -11,5 +11,7 @@ public interface ColorAnalyzer {
         UNKNOWN
     }
 
-    public BeaconColor getBeaconColor();
+    BeaconColor getBeaconColor();
+    int red();
+    int blue();
 }

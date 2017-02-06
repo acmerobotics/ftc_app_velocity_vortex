@@ -44,35 +44,32 @@ public class BlockAuto extends Auto {
     public void runOpMode() throws InterruptedException {
         super.runOpMode();
 
-        moveAndShoot();
+        moveAndFire();
 
-        ready();
-        set();
-        go();
+        moveToLineAndWait();
+
+//        go();
     }
 
-    public void moveAndShoot() throws InterruptedException {
+    public void moveAndFire() throws InterruptedException {
         basicDrive.move(-((Math.sqrt(2) * TILE_SIZE) + 3), .8, this);
 
         launcher.fireBalls(numBalls, this);
-
     }
 
-    public void ready() {
-        basicDrive.move(-2 * TILE_SIZE * ROOT2 + 3, .8);
-    }
+    public void moveToLineAndWait() {
+        basicDrive.move(-2 * TILE_SIZE * ROOT2 + 3, 1, this);
 
-    public void set() {
         drive.turnSync(-45 * allianceModifier, this);
         while (opModeIsActive() && getRuntime() < 10) {
             idle();
         }
-        basicDrive.move(-TILE_SIZE * 2 + 2, .8);
     }
 
-    public void go() throws InterruptedException {
-        drive.turnSync(90, this);
-        basicDrive.move(-.5 * TILE_SIZE, .8);
-        wallFollower.moveToDistance(BEACON_DISTANCE, BEACON_SPREAD, this);
-    }
+//    public void go() throws InterruptedException {
+//        basicDrive.move(-TILE_SIZE * 2 + 2, 1, this);
+//        drive.turnSync(90, this);
+//        basicDrive.move(-.5 * TILE_SIZE, 1, this);
+//        wallFollower.moveToDistance(BeaconFollower.BEACON_DISTANCE, BeaconFollower.BEACON_SPREAD, this);
+//    }
 }

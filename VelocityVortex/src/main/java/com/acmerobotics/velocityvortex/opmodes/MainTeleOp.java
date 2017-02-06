@@ -2,6 +2,7 @@ package com.acmerobotics.velocityvortex.opmodes;
 
 import com.acmerobotics.library.configuration.OpModeConfiguration;
 import com.acmerobotics.library.configuration.RobotProperties;
+import com.acmerobotics.velocityvortex.drive.BeaconFollower;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
 import com.acmerobotics.velocityvortex.drive.Vector2D;
@@ -72,7 +73,7 @@ public class MainTeleOp extends OpMode {
 
         DistanceSensor distanceSensor = new MaxSonarEZ1UltrasonicSensor(hardwareMap.analogInput.get("maxSonar"));
         wallFollower = new WallFollower(drive, distanceSensor, properties);
-        wallFollower.setTargetDistance(Auto.BEACON_DISTANCE, Auto.BEACON_SPREAD);
+        wallFollower.setTargetDistance(BeaconFollower.BEACON_DISTANCE, BeaconFollower.BEACON_SPREAD);
 
         launcher = new FixedLauncher(hardwareMap);
         collector = new Collector(hardwareMap);
@@ -189,7 +190,7 @@ public class MainTeleOp extends OpMode {
                 drive.setTargetHeading(Math.round(drive.getHeading() / 90.0) * 90);
 
                 if (colorAnalyzer.getBeaconColor() != targetColor) {
-                    wallFollower.setForwardSpeed(sideModifier * Auto.BEACON_SEARCH_SPEED);
+                    wallFollower.setForwardSpeed(sideModifier * BeaconFollower.BEACON_SEARCH_SPEED);
                     wallFollower.update();
                 } else {
                     drive.stop();

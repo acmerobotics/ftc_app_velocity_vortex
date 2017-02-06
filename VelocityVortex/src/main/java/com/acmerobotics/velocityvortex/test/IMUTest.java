@@ -56,7 +56,7 @@ public class IMUTest extends OpMode {
 
     @Override
     public void init_loop() {
-        telemetry.addData(">", "ready");
+        telemetry.addData(">", "moveToLineAndWait");
     }
 
     @Override
