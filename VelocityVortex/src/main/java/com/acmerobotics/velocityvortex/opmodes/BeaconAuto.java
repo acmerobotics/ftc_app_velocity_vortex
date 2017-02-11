@@ -37,9 +37,6 @@ public class BeaconAuto extends Auto {
     private ColorAnalyzer colorAnalyzer;
 
     private BeaconPusher beaconPusher;
-    private int beaconsPressed;
-
-    private ElapsedTime timer;
 
     private VoltageSensor voltageSensor;
     private double voltage;
@@ -48,8 +45,6 @@ public class BeaconAuto extends Auto {
     @Override
     public void initOpMode() {
         targetColor = (allianceColor == AllianceColor.BLUE) ? BeaconColor.BLUE : BeaconColor.RED;
-
-        timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
         imu = new AdafruitBNO055IMU(hardwareMap.i2cDeviceSynch.get("imu"));
         AdafruitBNO055IMU.Parameters parameters = new AdafruitBNO055IMU.Parameters();
@@ -85,6 +80,8 @@ public class BeaconAuto extends Auto {
         super.runOpMode();
 
         moveAndFire();
+
+        beaconFollower.moveToDistance(BeaconFollower.BEACON_DISTANCE, BeaconFollower.BEACON_SPREAD / 2.0, this);
 
         beaconFollower.pushBeacons(2, allianceModifier, targetColor, this);
 

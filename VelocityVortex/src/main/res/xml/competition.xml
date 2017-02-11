@@ -64,5 +64,8 @@
         <AnalogInput
             name="maxSonar"
             port="0" />
+        <AnalogInput
+            name="lp"
+            port="1" />
     </DeviceInterfaceModule>
 </Robot>

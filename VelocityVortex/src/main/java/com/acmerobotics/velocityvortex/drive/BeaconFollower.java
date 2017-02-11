@@ -14,8 +14,8 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 public class BeaconFollower extends WallFollower {
 
-    public static final double BEACON_DISTANCE = 6.4;
-    public static final double BEACON_SPREAD = 0.3;
+    public static final double BEACON_DISTANCE = 8;
+    public static final double BEACON_SPREAD = 1;
     public static final double BEACON_SEARCH_SPEED = 0.6;
 
     private ColorAnalyzer colorAnalyzer;
@@ -39,7 +39,7 @@ public class BeaconFollower extends WallFollower {
             ColorAnalyzer.BeaconColor color = colorAnalyzer.getBeaconColor();
 
             if (logFile != null) {
-                logFile.write(String.format("%d,%s,%f,%f", System.currentTimeMillis(), color, colorAnalyzer.red(), colorAnalyzer.blue()));
+                logFile.write(String.format("%d,%s,%d,%d", System.currentTimeMillis(), color, colorAnalyzer.red(), colorAnalyzer.blue()));
             }
 
             if (color == targetColor) {
@@ -49,7 +49,7 @@ public class BeaconFollower extends WallFollower {
 
                 drive.turnSync(0, 1, opMode);
 
-                beaconPusher.autoPush();
+                beaconPusher.push(opMode);
                 beaconsPressed++;
 
                 if (beaconsPressed < numBeacons) {

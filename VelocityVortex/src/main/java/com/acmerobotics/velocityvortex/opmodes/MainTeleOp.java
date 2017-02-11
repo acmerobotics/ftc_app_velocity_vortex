@@ -18,6 +18,7 @@ import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 
@@ -44,9 +45,13 @@ public class MainTeleOp extends OpMode {
 
     private ColorSensor colorSensor;
     private ColorAnalyzer colorAnalyzer;
-    private ColorAnalyzer.BeaconColor targetColor;
+
+    private DeviceInterfaceModule dim;
 
     private double sideModifier;
+
+    private long lastFlashTime, flashInterval = 250;
+    private boolean shouldFlash;
 
     private enum State {
         DRIVER,
@@ -86,10 +91,10 @@ public class MainTeleOp extends OpMode {
 
         colorAnalyzer = new ThresholdColorAnalyzer(colorSensor, 5, 5);
 
-        targetColor = configuration.getAllianceColor() == OpModeConfiguration.AllianceColor.BLUE ? ColorAnalyzer.BeaconColor.BLUE : ColorAnalyzer.BeaconColor.RED;
-
         stickyGamepad1 = new StickyGamepad(gamepad1);
         stickyGamepad2 = new StickyGamepad(gamepad2);
+
+        dim = hardwareMap.deviceInterfaceModule.get("dim");
 
         sideModifier = 1;
 
@@ -180,8 +185,32 @@ public class MainTeleOp extends OpMode {
                 }
                 launcher.update();
 
-                telemetry.addData("leftPower", launcher.getLeftPower());
-                telemetry.addData("rightPower", launcher.getRightPower());
+                // launcher dim lights
+                if (launcher.isRunning() && !launcher.isBusy()) {
+                    long now = System.currentTimeMillis();
+                    if (lastFlashTime == 0) {
+                        lastFlashTime = now;
+                    } else if ((now - lastFlashTime) > flashInterval) {
+                        lastFlashTime = 0;
+                        shouldFlash = !shouldFlash;
+                    }
+                } else {
+                    shouldFlash = false;
+                }
+
+                dim.setLED(Auto.BLUE_LED_CHANNEL, shouldFlash);
+                dim.setLED(Auto.RED_LED_CHANNEL, shouldFlash);
+
+                // launcher status telemetry
+                if (launcher.isRunning()) {
+                    if (launcher.isBusy()) {
+                        telemetry.addData("launcher", "busy");
+                    } else {
+                        telemetry.addData("launcher", "ready");
+                    }
+                } else {
+                    telemetry.addData("launcher", "stopped");
+                }
 
                 break;
 
@@ -189,7 +218,7 @@ public class MainTeleOp extends OpMode {
                 // align to the nearest 90-degree orientation
                 drive.setTargetHeading(Math.round(drive.getHeading() / 90.0) * 90);
 
-                if (colorAnalyzer.getBeaconColor() != targetColor) {
+                if (colorAnalyzer.getBeaconColor() == ColorAnalyzer.BeaconColor.UNKNOWN) {
                     wallFollower.setForwardSpeed(sideModifier * BeaconFollower.BEACON_SEARCH_SPEED);
                     wallFollower.update();
                 } else {
@@ -218,7 +247,7 @@ public class MainTeleOp extends OpMode {
                 break;
 
             case BEACON_PUSH:
-                beaconPusher.autoPush();
+                beaconPusher.push();
 
                 state = State.DRIVER;
 

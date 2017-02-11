@@ -36,11 +36,12 @@ public class MecanumDrive {
 
         motors = new DcMotor[4];
         motors[0] = map.dcMotor.get("leftFront");
+        motors[0].setDirection(DcMotorSimple.Direction.REVERSE);
         motors[1] = map.dcMotor.get("rightFront");
-        motors[1].setDirection(DcMotorSimple.Direction.REVERSE);
         motors[2] = map.dcMotor.get("rightBack");
 //        motors[2].setDirection(DcMotorSimple.Direction.REVERSE);
         motors[3] = map.dcMotor.get("leftBack");
+        motors[3].setDirection(DcMotorSimple.Direction.REVERSE);
 
         for (DcMotor motor : motors) {
             motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -123,7 +124,7 @@ public class MecanumDrive {
     }
 
     /**
-     * Reset the encoder positions. This will reset the value of {@link #getPositions()}.
+     * Reset the encoder positions. This will reset the value of {@link #getCurrentPositions()}.
      */
     public void resetEncoders() {
         offsets = getRawPositions();
@@ -134,7 +135,7 @@ public class MecanumDrive {
      *
      * @return an array of positions
      */
-    public int[] getPositions() {
+    public int[] getCurrentPositions() {
         int[] pos = getRawPositions();
         for (int i = 0; i < pos.length; i++) {
             pos[i] -= offsets[i];
@@ -162,7 +163,7 @@ public class MecanumDrive {
      */
     public int getMeanPosition() {
         int sum = 0;
-        for (int pos : getPositions()) {
+        for (int pos : getCurrentPositions()) {
             sum += pos;
         }
         return sum / motors.length;

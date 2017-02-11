@@ -45,10 +45,10 @@ public class OpModeConfiguration {
         @Override
         public WheelType[] getWheelTypes() {
             return new WheelType[] {
-                    new WheelType(MotorType.ANDYMARK_40, 1, 2),
-                    new WheelType(MotorType.ANDYMARK_40, 1, 2),
                     new WheelType(MotorType.ANDYMARK_20, 1, 2),
-                    new WheelType(MotorType.ANDYMARK_40, 1, 2)
+                    new WheelType(MotorType.ANDYMARK_20, 1, 2),
+                    new WheelType(MotorType.ANDYMARK_20, 1, 2),
+                    new WheelType(MotorType.ANDYMARK_20, 1, 2)
             };
         }
 

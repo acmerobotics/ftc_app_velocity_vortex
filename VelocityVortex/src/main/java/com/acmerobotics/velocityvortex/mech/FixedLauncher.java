@@ -66,6 +66,10 @@ public class FixedLauncher {
         }
     }
 
+    public boolean isBusy() {
+        return ramping;
+    }
+
     public boolean isRunning() {
         return leftTarget != 0 || rightTarget != 0;
     }

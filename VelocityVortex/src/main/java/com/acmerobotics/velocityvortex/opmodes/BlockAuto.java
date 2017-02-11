@@ -48,17 +48,19 @@ public class BlockAuto extends Auto {
 
         moveToLineAndWait();
 
+        basicDrive.move(-3 * TILE_SIZE, 1, this);
+
 //        go();
     }
 
-    public void moveAndFire() throws InterruptedException {
-        basicDrive.move(-((Math.sqrt(2) * TILE_SIZE) + 3), .8, this);
+    public void moveAndFire() {
+        basicDrive.move(-((Math.sqrt(2) * TILE_SIZE) + 3), 1, this);
 
         launcher.fireBalls(numBalls, this);
     }
 
     public void moveToLineAndWait() {
-        basicDrive.move(-2 * TILE_SIZE * ROOT2 + 3, 1, this);
+        basicDrive.move(-1 * TILE_SIZE * ROOT2 + 3, 1, this);
 
         drive.turnSync(-45 * allianceModifier, this);
         while (opModeIsActive() && getRuntime() < 10) {
