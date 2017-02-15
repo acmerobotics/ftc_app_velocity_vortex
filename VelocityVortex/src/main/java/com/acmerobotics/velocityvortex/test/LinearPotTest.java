@@ -14,7 +14,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * Created by kelly on 2/6/2017.
  */
 
-@Autonomous(name="linearPotTest")
+@Autonomous(name="Linear Pot Test")
 public class LinearPotTest extends OpMode {
 
     DistanceSensor sensor;

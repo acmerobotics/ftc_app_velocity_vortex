@@ -15,7 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class WallFollower {
 
     public static final double DISTANCE_SMOOTHER_EXP = 1;
-    public static final double DEFAULT_STRAFE_P = 0.15;
+    public static final double DEFAULT_STRAFE_P = 0.125;
 
     protected EnhancedMecanumDrive drive;
     private DistanceSensor sensor;

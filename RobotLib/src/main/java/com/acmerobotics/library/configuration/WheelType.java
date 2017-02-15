@@ -1,21 +1,29 @@
 package com.acmerobotics.library.configuration;
 
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
 /**
  * @author Ryan
  */
 
 public class WheelType {
     private MotorType motorType;
+    private DcMotorSimple.Direction direction;
     private double gearRatio, wheelRadius;
 
-    public WheelType(MotorType type, double ratio, double radius) {
+    public WheelType(MotorType type, DcMotorSimple.Direction dir, double ratio, double radius) {
         motorType = type;
+        direction = dir;
         gearRatio = ratio;
         wheelRadius = radius;
     }
 
     public MotorType getMotorType() {
         return motorType;
+    }
+
+    public DcMotorSimple.Direction getDirection() {
+        return direction;
     }
 
     public double getGearRatio() {

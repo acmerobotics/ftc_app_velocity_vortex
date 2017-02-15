@@ -22,12 +22,17 @@ public abstract class Auto extends LinearOpMode {
     public static final int BLUE_LED_CHANNEL = 0;
     public static final int RED_LED_CHANNEL = 1;
 
+    public static final double MOVEMENT_SPEED = 0.75;
+
+    public static final double ROOT2 = Math.sqrt(2);
+
     public static final double TILE_SIZE = 24;
 
     protected OpModeConfiguration opModeConfiguration;
     protected AllianceColor allianceColor;
     protected ParkDest parkDest;
     protected int delay, numBalls, matchNumber, allianceModifier;
+    protected double lastHeading;
     protected MatchType matchType;
     protected RobotProperties properties;
 
@@ -47,6 +52,7 @@ public abstract class Auto extends LinearOpMode {
         matchType = opModeConfiguration.getMatchType();
         matchNumber = opModeConfiguration.getMatchNumber();
         allianceModifier = (allianceColor == AllianceColor.BLUE) ? 1 : -1;
+        lastHeading = opModeConfiguration.getLastHeading();
         properties = opModeConfiguration.getRobotType().getProperties();
 
         dim = hardwareMap.deviceInterfaceModule.get("dim");
@@ -83,6 +89,7 @@ public abstract class Auto extends LinearOpMode {
         telemetry.addData("delay", delay);
         telemetry.addData("num_balls", numBalls);
         telemetry.addData("park_dest", parkDest);
+        telemetry.addData("last_heading", lastHeading);
         telemetry.update();
     }
 

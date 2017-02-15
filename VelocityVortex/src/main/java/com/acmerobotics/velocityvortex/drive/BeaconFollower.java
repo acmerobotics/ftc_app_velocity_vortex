@@ -1,5 +1,7 @@
 package com.acmerobotics.velocityvortex.drive;
 
+import android.os.SystemClock;
+
 import com.acmerobotics.library.configuration.RobotProperties;
 import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.mech.BeaconPusher;
@@ -16,7 +18,7 @@ public class BeaconFollower extends WallFollower {
 
     public static final double BEACON_DISTANCE = 8;
     public static final double BEACON_SPREAD = 1;
-    public static final double BEACON_SEARCH_SPEED = 0.6;
+    public static final double BEACON_SEARCH_SPEED = 0.6 * Auto.MOVEMENT_SPEED;
 
     private ColorAnalyzer colorAnalyzer;
     private BeaconPusher beaconPusher;
@@ -42,6 +44,9 @@ public class BeaconFollower extends WallFollower {
                 logFile.write(String.format("%d,%s,%d,%d", System.currentTimeMillis(), color, colorAnalyzer.red(), colorAnalyzer.blue()));
             }
 
+            beaconPusher.setTargetPosition(getDistance() - 6);
+            beaconPusher.update();
+
             if (color == targetColor) {
                 drive.stop();
 
@@ -51,6 +56,8 @@ public class BeaconFollower extends WallFollower {
 
                 beaconPusher.push(opMode);
                 beaconsPressed++;
+
+                beaconPusher.moveToPosition(getDistance() - 6, 0.1, opMode);
 
                 if (beaconsPressed < numBeacons) {
                     drive.move(direction * Auto.TILE_SIZE, 1, opMode);

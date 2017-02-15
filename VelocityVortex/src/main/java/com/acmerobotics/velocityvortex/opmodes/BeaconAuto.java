@@ -17,13 +17,15 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import static com.acmerobotics.library.configuration.OpModeConfiguration.AllianceColor;
 import static com.acmerobotics.velocityvortex.sensors.ColorAnalyzer.BeaconColor;
 
 @Autonomous(name = "Beacon Auto")
 public class BeaconAuto extends Auto {
+
+    public static final double FIRE_DISTANCE = 24;
+    public static final int RAMP_PARK_ELEVATION = 7;
 
     private FixedLauncher launcher;
 
@@ -37,10 +39,6 @@ public class BeaconAuto extends Auto {
     private ColorAnalyzer colorAnalyzer;
 
     private BeaconPusher beaconPusher;
-
-    private VoltageSensor voltageSensor;
-    private double voltage;
-    private double fireDistance;
 
     @Override
     public void initOpMode() {
@@ -68,11 +66,6 @@ public class BeaconAuto extends Auto {
 
         beaconFollower = new BeaconFollower(drive, distanceSensor, colorAnalyzer, beaconPusher, properties);
         beaconFollower.setLogFile(new DataFile(getFileName("BeaconFollower")));
-
-//        voltageSensor = hardwareMap.voltageSensor.get("launcher");
-//        voltage = voltageSensor.getVoltage();
-//        double voltageError = Range.clip(voltage - 12, 0, 5);
-        fireDistance = 24;
     }
 
     @Override
@@ -98,13 +91,13 @@ public class BeaconAuto extends Auto {
     }
 
     public void moveAndFire() {
-        basicDrive.move(-fireDistance, 1, this);
+        basicDrive.move(-FIRE_DISTANCE, MOVEMENT_SPEED, this);
 
         launcher.fireBalls(numBalls, this);
 
-        drive.turnSync(allianceModifier * -110, this);
+        drive.turnSync(allianceModifier * -105, this);
 
-        basicDrive.move(50, 1, this);
+        basicDrive.move(50, MOVEMENT_SPEED, this);
 
         if (allianceColor == OpModeConfiguration.AllianceColor.BLUE) {
             drive.setTargetHeading(180);
@@ -118,10 +111,12 @@ public class BeaconAuto extends Auto {
     private void centerPark() {
         beaconFollower.moveToDistance(20, 2 * BeaconFollower.BEACON_SPREAD, this);
 
-        drive.turnSync(0, this);
-        basicDrive.move(-2 * allianceModifier * TILE_SIZE, 1, this);
-        drive.turnSync(90, this);
-        basicDrive.move(-TILE_SIZE * 1.3, 1, this);
+        drive.turnSync(45, this);
+        basicDrive.move(-2 * ROOT2 * TILE_SIZE - 3, MOVEMENT_SPEED, this);
+//        drive.turnSync(0, this);
+//        basicDrive.move(-2 * allianceModifier * TILE_SIZE, MOVEMENT_SPEED, this);
+//        drive.turnSync(90, this);
+//        basicDrive.move(-TILE_SIZE * 1.3, MOVEMENT_SPEED, this);
     }
 
     private void cornerPark() {
@@ -131,10 +126,10 @@ public class BeaconAuto extends Auto {
             drive.turnSync(180, this);
         }
 
-        drive.setVelocity(new Vector2D(0, -1));
+            drive.setVelocity(new Vector2D(0, -1));
 
-        while (opModeIsActive() && Math.abs(imu.getAngularOrientation().thirdAngle) < 7) {
-            drive.update();
+            while (opModeIsActive() && Math.abs(imu.getAngularOrientation().thirdAngle) < RAMP_PARK_ELEVATION) {
+                drive.update();
             idle();
         }
     }

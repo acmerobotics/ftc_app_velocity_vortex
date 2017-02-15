@@ -7,8 +7,9 @@ import com.qualcomm.robotcore.hardware.ServoImpl;
 
 /**
  * @author Kelly Muir
+ * @deprecated
  */
-
+@Deprecated
 public class BeaconRam {
 
     public static final double IN = 0.37;

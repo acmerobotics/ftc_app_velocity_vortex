@@ -36,15 +36,13 @@ public class MecanumDrive {
 
         motors = new DcMotor[4];
         motors[0] = map.dcMotor.get("leftFront");
-        motors[0].setDirection(DcMotorSimple.Direction.REVERSE);
         motors[1] = map.dcMotor.get("rightFront");
         motors[2] = map.dcMotor.get("rightBack");
-//        motors[2].setDirection(DcMotorSimple.Direction.REVERSE);
         motors[3] = map.dcMotor.get("leftBack");
-        motors[3].setDirection(DcMotorSimple.Direction.REVERSE);
 
-        for (DcMotor motor : motors) {
-            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        for (int i = 0; i < motors.length; i++) {
+            motors[i].setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            motors[i].setDirection(wheelTypes[i].getDirection());
         }
 
         rollerDirs = new Vector2D[4];
@@ -52,9 +50,6 @@ public class MecanumDrive {
         rollerDirs[1] = new Vector2D(1, 1).normalize();
         rollerDirs[2] = rollerDirs[0];
         rollerDirs[3] = rollerDirs[1];
-
-        //double offX = 1;
-        //double offY = 1;
 
         rotDirs = new Vector2D[4];
         rotDirs[0] = new Vector2D(0, -1);

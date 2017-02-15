@@ -11,6 +11,7 @@ import com.acmerobotics.velocityvortex.mech.BeaconPusher;
 import com.acmerobotics.velocityvortex.mech.Collector;
 import com.acmerobotics.velocityvortex.mech.FixedLauncher;
 import com.acmerobotics.velocityvortex.sensors.ColorAnalyzer;
+import com.acmerobotics.velocityvortex.sensors.LinearPot;
 import com.acmerobotics.velocityvortex.sensors.MaxSonarEZ1UltrasonicSensor;
 import com.acmerobotics.velocityvortex.sensors.ThresholdColorAnalyzer;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
@@ -21,9 +22,14 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.I2cAddr;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @TeleOp(name = "TeleOp")
 public class MainTeleOp extends OpMode {
+
+    public static final int FLASH_MS = 250;
 
     private MecanumDrive basicDrive;
 
@@ -50,7 +56,7 @@ public class MainTeleOp extends OpMode {
 
     private double sideModifier;
 
-    private long lastFlashTime, flashInterval = 250;
+    private ElapsedTime flashTimer;
     private boolean shouldFlash;
 
     private enum State {
@@ -80,10 +86,10 @@ public class MainTeleOp extends OpMode {
         wallFollower = new WallFollower(drive, distanceSensor, properties);
         wallFollower.setTargetDistance(BeaconFollower.BEACON_DISTANCE, BeaconFollower.BEACON_SPREAD);
 
+
         launcher = new FixedLauncher(hardwareMap);
         collector = new Collector(hardwareMap);
-        beaconPusher = new BeaconPusher(hardwareMap);
-        beaconPusher = new BeaconPusher(hardwareMap);
+        beaconPusher = new BeaconPusher(hardwareMap, new LinearPot(hardwareMap.analogInput.get("lp"), 200, DistanceUnit.MM));
 
         colorSensor = hardwareMap.colorSensor.get("color");
         colorSensor.setI2cAddress(I2cAddr.create8bit(0x3e));
@@ -93,6 +99,8 @@ public class MainTeleOp extends OpMode {
 
         stickyGamepad1 = new StickyGamepad(gamepad1);
         stickyGamepad2 = new StickyGamepad(gamepad2);
+
+        flashTimer = new ElapsedTime();
 
         dim = hardwareMap.deviceInterfaceModule.get("dim");
 
@@ -187,12 +195,9 @@ public class MainTeleOp extends OpMode {
 
                 // launcher dim lights
                 if (launcher.isRunning() && !launcher.isBusy()) {
-                    long now = System.currentTimeMillis();
-                    if (lastFlashTime == 0) {
-                        lastFlashTime = now;
-                    } else if ((now - lastFlashTime) > flashInterval) {
-                        lastFlashTime = 0;
+                    if (flashTimer.milliseconds() >= FLASH_MS) {
                         shouldFlash = !shouldFlash;
+                        flashTimer.reset();
                     }
                 } else {
                     shouldFlash = false;
@@ -200,17 +205,6 @@ public class MainTeleOp extends OpMode {
 
                 dim.setLED(Auto.BLUE_LED_CHANNEL, shouldFlash);
                 dim.setLED(Auto.RED_LED_CHANNEL, shouldFlash);
-
-                // launcher status telemetry
-                if (launcher.isRunning()) {
-                    if (launcher.isBusy()) {
-                        telemetry.addData("launcher", "busy");
-                    } else {
-                        telemetry.addData("launcher", "ready");
-                    }
-                } else {
-                    telemetry.addData("launcher", "stopped");
-                }
 
                 break;
 
@@ -254,5 +248,18 @@ public class MainTeleOp extends OpMode {
                 break;
 
         }
+
+        // launcher status telemetry
+        if (launcher.isRunning()) {
+            if (launcher.isBusy()) {
+                telemetry.addData("launcher", "busy");
+            } else {
+                telemetry.addData("launcher", "ready");
+            }
+        } else {
+            telemetry.addData("launcher", "stopped");
+        }
+
+        telemetry.addData("pusher_position", beaconPusher.getCurrentPosition());
     }
 }

@@ -16,8 +16,6 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 @Autonomous(name = "Block Auto")
 public class BlockAuto extends Auto {
 
-    public static final double ROOT2 = Math.sqrt(2);
-
     private FixedLauncher launcher;
 
     private EnhancedMecanumDrive drive;
@@ -48,19 +46,19 @@ public class BlockAuto extends Auto {
 
         moveToLineAndWait();
 
-        basicDrive.move(-3 * TILE_SIZE, 1, this);
+        basicDrive.move(-3 * TILE_SIZE, MOVEMENT_SPEED, this);
 
 //        go();
     }
 
     public void moveAndFire() {
-        basicDrive.move(-((Math.sqrt(2) * TILE_SIZE) + 3), 1, this);
+        basicDrive.move(-((Math.sqrt(2) * TILE_SIZE) + 3), MOVEMENT_SPEED, this);
 
         launcher.fireBalls(numBalls, this);
     }
 
     public void moveToLineAndWait() {
-        basicDrive.move(-1 * TILE_SIZE * ROOT2 + 3, 1, this);
+        basicDrive.move(-1 * TILE_SIZE * ROOT2 + 3, MOVEMENT_SPEED, this);
 
         drive.turnSync(-45 * allianceModifier, this);
         while (opModeIsActive() && getRuntime() < 10) {

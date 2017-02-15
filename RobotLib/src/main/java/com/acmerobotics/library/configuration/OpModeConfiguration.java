@@ -3,6 +3,7 @@ package com.acmerobotics.library.configuration;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.DifferentialControlLoopCoefficients;
 
 import org.opencv.core.Mat;
@@ -18,10 +19,10 @@ public class OpModeConfiguration {
         @Override
         public WheelType[] getWheelTypes() {
             return new WheelType[] {
-                    new WheelType(MotorType.ANDYMARK_60, 1, 2),
-                    new WheelType(MotorType.ANDYMARK_60, 1, 2),
-                    new WheelType(MotorType.ANDYMARK_60, 1, 2),
-                    new WheelType(MotorType.ANDYMARK_60, 1, 2)
+                    new WheelType(MotorType.ANDYMARK_60, DcMotorSimple.Direction.FORWARD, 1, 2),
+                    new WheelType(MotorType.ANDYMARK_60, DcMotorSimple.Direction.FORWARD, 1, 2),
+                    new WheelType(MotorType.ANDYMARK_60, DcMotorSimple.Direction.FORWARD, 1, 2),
+                    new WheelType(MotorType.ANDYMARK_60, DcMotorSimple.Direction.FORWARD, 1, 2)
             };
         }
 
@@ -39,16 +40,16 @@ public class OpModeConfiguration {
     private static final RobotProperties COMP_BOT = new RobotProperties() {
         @Override
         public DifferentialControlLoopCoefficients getTurnParameters() {
-            return new DifferentialControlLoopCoefficients(0.035, 0, 0);
+            return new DifferentialControlLoopCoefficients(0.025, 0, 0);
         }
 
         @Override
         public WheelType[] getWheelTypes() {
             return new WheelType[] {
-                    new WheelType(MotorType.ANDYMARK_20, 1, 2),
-                    new WheelType(MotorType.ANDYMARK_20, 1, 2),
-                    new WheelType(MotorType.ANDYMARK_20, 1, 2),
-                    new WheelType(MotorType.ANDYMARK_20, 1, 2)
+                    new WheelType(MotorType.ANDYMARK_20, DcMotorSimple.Direction.REVERSE, 1, 2),
+                    new WheelType(MotorType.ANDYMARK_20, DcMotorSimple.Direction.FORWARD, 1, 2),
+                    new WheelType(MotorType.ANDYMARK_20, DcMotorSimple.Direction.FORWARD, 1, 2),
+                    new WheelType(MotorType.ANDYMARK_20, DcMotorSimple.Direction.REVERSE, 1, 2)
             };
         }
 
