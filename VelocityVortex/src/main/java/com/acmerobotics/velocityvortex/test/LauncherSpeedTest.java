@@ -17,7 +17,7 @@ public class LauncherSpeedTest extends LinearOpMode {
 
     private DataFile log;
     private FixedLauncher launcher;
-    private long lastUpdateTime;
+    private long lastLeftTime, lastRightTime;
     private int lastLeftPos, lastRightPos;
     private double rightSpeed, leftSpeed;
 
@@ -35,7 +35,7 @@ public class LauncherSpeedTest extends LinearOpMode {
         while (opModeIsActive()) {
             timer.reset();
             launcher.reset();
-            lastUpdateTime = 0;
+            lastLeftTime = 0;
 
             launcher.setPower(1, 1, 2000);
             while (opModeIsActive() && timer.milliseconds() < 5000) {
@@ -53,20 +53,26 @@ public class LauncherSpeedTest extends LinearOpMode {
         long updateTime = System.currentTimeMillis();
         int leftPos = launcher.getLeftPosition();
         int rightPos = launcher.getRightPosition();
-        if (lastUpdateTime == 0) {
-            lastUpdateTime = updateTime;
+        if (lastLeftTime == 0) {
+            lastLeftTime = updateTime;
+            lastRightTime = updateTime;
             lastLeftPos = leftPos;
             lastRightPos = rightPos;
             rightSpeed = 0;
             leftSpeed = 0;
-        } else if (lastLeftPos != leftPos || lastRightPos != rightPos) {
-            double dt = updateTime - lastUpdateTime;
-            rightSpeed = (leftPos - lastLeftPos) / dt;
-            leftSpeed = (rightPos - lastRightPos) / dt;
+        } else {
+            if (lastLeftPos != leftPos) {
+                rightSpeed = (leftPos - lastLeftPos) / (updateTime - lastLeftTime);
 
-            lastUpdateTime = updateTime;
-            lastLeftPos = leftPos;
-            lastRightPos = rightPos;
+                lastLeftTime = updateTime;
+                lastLeftPos = leftPos;
+            }
+            if (lastRightPos != rightPos) {
+                leftSpeed = (rightPos - lastRightPos) / (updateTime - lastRightTime);
+
+                lastRightPos = rightPos;
+                lastRightTime = updateTime;
+            }
         }
         log.write(String.format("%d,%d,%d,%f,%f", updateTime, leftPos, rightPos, leftSpeed, rightSpeed));
     }
