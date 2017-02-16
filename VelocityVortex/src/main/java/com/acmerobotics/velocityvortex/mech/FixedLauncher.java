@@ -24,6 +24,7 @@ public class FixedLauncher {
     private double leftTarget, rightTarget;
     private long stopTime, lastTime;
     private boolean ramping;
+    private int leftInitialPos, rightInitialPos;
 
     public FixedLauncher(HardwareMap hardwareMap) {
         trigger = hardwareMap.servo.get("trigger");
@@ -35,6 +36,8 @@ public class FixedLauncher {
         left.setDirection(DcMotorSimple.Direction.REVERSE);
         left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+        reset();
     }
 
     public void delay(int ms) {
@@ -154,6 +157,19 @@ public class FixedLauncher {
     private void internalSetRightPower(double power) {
         this.rightPower = Range.clip(power, -1, 1);
         right.setPower(rightPower);
+    }
+
+    public int getLeftPosition() {
+        return left.getCurrentPosition() - leftInitialPos;
+    }
+
+    public int getRightPosition() {
+        return right.getCurrentPosition() - rightInitialPos;
+    }
+
+    public void reset() {
+        leftInitialPos = left.getCurrentPosition();
+        rightInitialPos = right.getCurrentPosition();
     }
 
     public double getLeftPower() {

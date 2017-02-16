@@ -261,5 +261,6 @@ public class MainTeleOp extends OpMode {
         }
 
         telemetry.addData("pusher_position", beaconPusher.getCurrentPosition());
+        telemetry.addData("heading", drive.getHeading());
     }
 }

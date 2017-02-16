@@ -25,7 +25,6 @@ public class BeaconPusher {
     public static final DifferentialControlLoopCoefficients PID_COEFFICIENTS = new DifferentialControlLoopCoefficients(3, 0, 0);
     public static final int PUSH_MS = 250;
 
-    private boolean sensorActive;
     private CRServo servo;
     private DistanceSensor sensor;
     private double initialPosition, targetPosition;
@@ -45,12 +44,11 @@ public class BeaconPusher {
     }
 
     public boolean isSensorActive() {
-        return sensorActive;
+        return getRawPosition() > 0;
     }
 
     public void reset() {
         initialPosition = getRawPosition();
-        sensorActive = initialPosition > 0;
     }
 
     public void setTargetPosition(double pos) {
@@ -109,10 +107,7 @@ public class BeaconPusher {
             double lastPos = getCurrentPosition();
             while (opMode == null || opMode.opModeIsActive()) {
                 double pos = getCurrentPosition();
-                opMode.telemetry.addData("pos", pos);
-                opMode.telemetry.addData("time", time.milliseconds());
-                opMode.telemetry.update();
-                if (Math.abs(pos - lastPos) < 0.1) { //0.025) {
+                if (Math.abs(pos - lastPos) < 0.1) {
                     if (time.milliseconds() >= PUSH_MS) {
                         break;
                     }
