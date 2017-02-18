@@ -56,8 +56,11 @@ public class MainTeleOp extends OpMode {
 
     private double sideModifier;
 
-    private ElapsedTime flashTimer;
-    private boolean shouldFlash;
+    private ElapsedTime flashTimer, launcherTimer;
+    private boolean shouldFlash, collectorReversed, launcherRunning;
+
+    private double lastLeftPos, lastRightPos;
+    private double rightSpeed, leftSpeed;
 
     private enum State {
         DRIVER,
@@ -88,6 +91,7 @@ public class MainTeleOp extends OpMode {
 
 
         launcher = new FixedLauncher(hardwareMap);
+
         collector = new Collector(hardwareMap);
         beaconPusher = new BeaconPusher(hardwareMap, new LinearPot(hardwareMap.analogInput.get("lp"), 200, DistanceUnit.MM));
 
@@ -101,6 +105,7 @@ public class MainTeleOp extends OpMode {
         stickyGamepad2 = new StickyGamepad(gamepad2);
 
         flashTimer = new ElapsedTime();
+        launcherTimer = new ElapsedTime();
 
         dim = hardwareMap.deviceInterfaceModule.get("dim");
 
@@ -129,10 +134,10 @@ public class MainTeleOp extends OpMode {
                 //driver
                 double x = -gamepad1.left_stick_x;
                 double y = -gamepad1.left_stick_y;
-                if (x == 0) x = -gamepad2.left_stick_x;
+                if (y == 0) y = -0.4 * gamepad2.left_stick_y;
 
                 double omega = -gamepad1.right_stick_x;
-                if (omega == 0) omega = -gamepad2.left_stick_x;
+                if (omega == 0) omega = 0.5 * -gamepad2.right_stick_x;
 
                 // check the dpad
                 if (gamepad1.dpad_up) y = -1;
@@ -143,20 +148,33 @@ public class MainTeleOp extends OpMode {
                 // apply quadratic (square) function
                 double radius = Math.pow(Math.hypot(x, y), 2);
                 double theta = Math.atan2(y, x);
+                omega = Math.signum(omega) * Math.pow(omega, 2);
+
+                telemetry.addData("radius", radius);
+                telemetry.addData("theta", theta);
+                telemetry.addData("omega", omega);
+
                 basicDrive.setVelocity(new Vector2D(radius * Math.cos(theta), radius * Math.sin(theta)), omega);
+                basicDrive.logPowers(telemetry);
 
                 if (gamepad1.left_bumper && gamepad1.right_bumper) {
                     drive.resetHeading();
                 } else {
                     //collector
-                    if (stickyGamepad1.right_bumper) {
-                        if (collector.isRunning()) {
-                            collector.stop();
-                        } else {
-                            collector.forward();
-                        }
-                    } else if (gamepad1.right_trigger > 0.95) {
+                    if (gamepad1.right_trigger > 0.95) {
                         collector.reverse();
+                        collectorReversed = true;
+                    } else {
+                        if (stickyGamepad1.right_bumper) {
+                            if (collector.isRunning()) {
+                                collector.stop();
+                            } else {
+                                collector.forward();
+                            }
+                        } else if (collectorReversed) {
+                            collector.stop();
+                            collectorReversed = false;
+                        }
                     }
 
                     //beacons
@@ -183,18 +201,35 @@ public class MainTeleOp extends OpMode {
                     launcher.triggerDown();
                 }
 
+                double leftPos = launcher.getLeftPosition();
+                double rightPos = launcher.getRightPosition();
+                if (launcherTimer.milliseconds() >= 100) {
+                    double dt = launcherTimer.milliseconds();
+                    rightSpeed = (leftPos - lastLeftPos) / dt;
+                    leftSpeed = (rightPos - lastRightPos) / dt;
+
+                    lastLeftPos = leftPos;
+                    lastRightPos = rightPos;
+                    launcherTimer.reset();
+                }
+
+                if (leftSpeed > 0.1 && launcher.isRunning()) {
+                    launcherRunning = true;
+                }
+
                 //wheels
                 if (stickyGamepad2.left_bumper) {
                     if (launcher.isRunning()) {
                         launcher.setPower(0);
+                        launcherRunning = false;
                     } else {
-                        launcher.setPower(1, 1, 2000);
+                        launcher.setPower(1);
                     }
                 }
                 launcher.update();
 
                 // launcher dim lights
-                if (launcher.isRunning() && !launcher.isBusy()) {
+                if (launcherRunning) {
                     if (flashTimer.milliseconds() >= FLASH_MS) {
                         shouldFlash = !shouldFlash;
                         flashTimer.reset();
@@ -212,6 +247,9 @@ public class MainTeleOp extends OpMode {
                 // align to the nearest 90-degree orientation
                 drive.setTargetHeading(Math.round(drive.getHeading() / 90.0) * 90);
 
+                beaconPusher.setTargetPosition(wallFollower.getDistance() - BeaconFollower.PUSHER_DISTANCE);
+                beaconPusher.update();
+
                 if (colorAnalyzer.getBeaconColor() == ColorAnalyzer.BeaconColor.UNKNOWN) {
                     wallFollower.setForwardSpeed(sideModifier * BeaconFollower.BEACON_SEARCH_SPEED);
                     wallFollower.update();
@@ -223,6 +261,9 @@ public class MainTeleOp extends OpMode {
                 break;
 
             case BEACON_LATERAL:
+                beaconPusher.setTargetPosition(wallFollower.getDistance() - BeaconFollower.PUSHER_DISTANCE);
+                beaconPusher.update();
+
                 wallFollower.setForwardSpeed(0);
                 if (wallFollower.update()) {
                     drive.stop();
@@ -232,6 +273,9 @@ public class MainTeleOp extends OpMode {
                 break;
 
             case BEACON_ALIGN:
+                beaconPusher.setTargetPosition(wallFollower.getDistance() - BeaconFollower.PUSHER_DISTANCE);
+                beaconPusher.update();
+
                 if (drive.getHeadingError() < EnhancedMecanumDrive.DEFAULT_TURN_ERROR) {
                     drive.stop();
                     state = State.BEACON_PUSH;
@@ -241,6 +285,8 @@ public class MainTeleOp extends OpMode {
                 break;
 
             case BEACON_PUSH:
+                drive.stop();
+
                 beaconPusher.push();
 
                 state = State.DRIVER;
@@ -249,18 +295,9 @@ public class MainTeleOp extends OpMode {
 
         }
 
-        // launcher status telemetry
-        if (launcher.isRunning()) {
-            if (launcher.isBusy()) {
-                telemetry.addData("launcher", "busy");
-            } else {
-                telemetry.addData("launcher", "ready");
-            }
-        } else {
-            telemetry.addData("launcher", "stopped");
-        }
-
         telemetry.addData("pusher_position", beaconPusher.getCurrentPosition());
         telemetry.addData("heading", drive.getHeading());
+        telemetry.addData("color", colorAnalyzer.getBeaconColor());
+        telemetry.addData("left_speed", leftSpeed);
     }
 }

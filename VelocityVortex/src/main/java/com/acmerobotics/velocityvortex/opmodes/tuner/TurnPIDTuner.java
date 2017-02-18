@@ -1,27 +1,29 @@
-package com.acmerobotics.velocityvortex.test;
+package com.acmerobotics.velocityvortex.opmodes.tuner;
 
 import com.acmerobotics.library.configuration.OpModeConfiguration;
 import com.acmerobotics.library.configuration.RobotProperties;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
+import com.acmerobotics.velocityvortex.drive.PIDController;
 import com.acmerobotics.velocityvortex.drive.Vector2D;
 import com.acmerobotics.velocityvortex.opmodes.StickyGamepad;
+import com.acmerobotics.velocityvortex.opmodes.tuner.Tuner;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name = "Enhanced Mecanum Test")
-public class EnhancedMecanumTest extends OpMode {
+@TeleOp(name = "Turn PID Tuner")
+public class TurnPIDTuner extends Tuner {
 
     private EnhancedMecanumDrive drive;
-    private StickyGamepad stickyGamepad1;
 
     private OpModeConfiguration configuration;
     private RobotProperties properties;
 
     @Override
     public void init() {
+        super.init();
+
         configuration = new OpModeConfiguration(hardwareMap.appContext);
         properties = configuration.getRobotType().getProperties();
 
@@ -38,20 +40,8 @@ public class EnhancedMecanumTest extends OpMode {
     }
 
     @Override
-    public void init_loop() {
-        telemetry.addData(">", "in init_loop()");
-    }
-
-    @Override
     public void loop() {
-        stickyGamepad1.update();
-
-        if (stickyGamepad1.dpad_up) {
-            drive.getController().getCoefficients().p += 0.001;
-        }
-        if (stickyGamepad1.dpad_down) {
-            drive.getController().getCoefficients().p -= 0.001;
-        }
+        super.loop();
 
         double x = -gamepad1.left_stick_x;
         double y = -gamepad1.left_stick_y;
@@ -60,6 +50,10 @@ public class EnhancedMecanumTest extends OpMode {
         telemetry.addData("target_heading", drive.getTargetHeading());
         telemetry.addData("error", drive.getHeadingError());
         telemetry.addData("update", drive.update());
-        telemetry.addData("pid", drive.getController().toString());
+    }
+
+    @Override
+    protected PIDController getController() {
+        return drive.getController();
     }
 }

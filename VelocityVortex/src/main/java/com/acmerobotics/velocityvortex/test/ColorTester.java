@@ -2,6 +2,7 @@ package com.acmerobotics.velocityvortex.test;
 
 import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.sensors.TCS34725ColorSensor;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
@@ -10,6 +11,7 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
  * @author Kelly Muir
  */
 
+@Disabled
 @TeleOp(name = "Color Tester")
 public class ColorTester extends OpMode {
 

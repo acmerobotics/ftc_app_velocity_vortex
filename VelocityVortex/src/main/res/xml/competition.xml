@@ -4,7 +4,7 @@
     name="competition">
     <MotorController
         name="rightDrive"
-        serialNumber="AH00QHU3">
+        serialNumber="AI049Q4Y">
         <Motor
             name="rightFront"
             port="1" />

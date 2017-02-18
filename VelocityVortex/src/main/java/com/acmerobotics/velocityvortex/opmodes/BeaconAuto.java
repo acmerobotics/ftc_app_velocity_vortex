@@ -8,6 +8,7 @@ import com.acmerobotics.velocityvortex.drive.Vector2D;
 import com.acmerobotics.velocityvortex.mech.BeaconPusher;
 import com.acmerobotics.velocityvortex.mech.FixedLauncher;
 import com.acmerobotics.velocityvortex.sensors.ColorAnalyzer;
+import com.acmerobotics.velocityvortex.sensors.LinearPot;
 import com.acmerobotics.velocityvortex.sensors.MaxSonarEZ1UltrasonicSensor;
 import com.acmerobotics.velocityvortex.sensors.ThresholdColorAnalyzer;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
@@ -17,6 +18,8 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import static com.acmerobotics.library.configuration.OpModeConfiguration.AllianceColor;
 import static com.acmerobotics.velocityvortex.sensors.ColorAnalyzer.BeaconColor;
@@ -40,6 +43,8 @@ public class BeaconAuto extends Auto {
 
     private BeaconPusher beaconPusher;
 
+    private boolean targetFirstLastBeacon;
+
     @Override
     public void initOpMode() {
         targetColor = (allianceColor == AllianceColor.BLUE) ? BeaconColor.BLUE : BeaconColor.RED;
@@ -54,7 +59,7 @@ public class BeaconAuto extends Auto {
         DistanceSensor distanceSensor = new MaxSonarEZ1UltrasonicSensor(hardwareMap.analogInput.get("maxSonar"));
 
         launcher = new FixedLauncher(hardwareMap);
-        launcher.setTrim(-.05);
+//        launcher.setTrim(-.05);
 
         colorSensor = hardwareMap.colorSensor.get("color");
         colorSensor.setI2cAddress(I2cAddr.create8bit(0x3e));
@@ -62,7 +67,7 @@ public class BeaconAuto extends Auto {
 
         colorAnalyzer = new ThresholdColorAnalyzer(colorSensor, 5, 5);
 
-        beaconPusher = new BeaconPusher(hardwareMap);
+        beaconPusher = new BeaconPusher(hardwareMap, new LinearPot(hardwareMap.analogInput.get("lp"), 200, DistanceUnit.MM));
 
         beaconFollower = new BeaconFollower(drive, distanceSensor, colorAnalyzer, beaconPusher, properties);
         beaconFollower.setLogFile(new DataFile(getFileName("BeaconFollower")));
@@ -76,7 +81,7 @@ public class BeaconAuto extends Auto {
 
         beaconFollower.moveToDistance(BeaconFollower.BEACON_DISTANCE, BeaconFollower.BEACON_SPREAD / 2.0, this);
 
-        beaconFollower.pushBeacons(2, allianceModifier, targetColor, this);
+        targetFirstLastBeacon = beaconFollower.pushBeacons(2, allianceModifier, targetColor, this);
 
         switch (parkDest) {
             case NONE:
@@ -95,9 +100,13 @@ public class BeaconAuto extends Auto {
 
         launcher.fireBalls(numBalls, this);
 
-        drive.turnSync(allianceModifier * -105, this);
+        if (allianceColor == AllianceColor.BLUE) {
+            drive.turnSync(-110, this);
+        } else {
+            drive.turnSync(100, this);
+        }
 
-        basicDrive.move(50, MOVEMENT_SPEED, this);
+        basicDrive.move(54, MOVEMENT_SPEED, this);
 
         if (allianceColor == OpModeConfiguration.AllianceColor.BLUE) {
             drive.setTargetHeading(180);
@@ -109,9 +118,17 @@ public class BeaconAuto extends Auto {
     }
 
     private void centerPark() {
-        beaconFollower.moveToDistance(20, 2 * BeaconFollower.BEACON_SPREAD, this);
+        //beaconFollower.moveToDistance(12, 2 * BeaconFollower.BEACON_SPREAD, this);
 
-        drive.turnSync(45, this);
+        if (allianceColor == AllianceColor.BLUE) {
+            drive.turnSync(45, this);
+        } else {
+            if (targetFirstLastBeacon) {
+                drive.turnSync(127, this);
+            } else {
+                drive.turnSync(135, this);
+            }
+        }
         basicDrive.move(-2 * ROOT2 * TILE_SIZE - 3, MOVEMENT_SPEED, this);
 //        drive.turnSync(0, this);
 //        basicDrive.move(-2 * allianceModifier * TILE_SIZE, MOVEMENT_SPEED, this);

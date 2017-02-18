@@ -15,12 +15,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class WallFollower {
 
     public static final double DISTANCE_SMOOTHER_EXP = 1;
-    public static final double DEFAULT_STRAFE_P = 0.125;
 
     protected EnhancedMecanumDrive drive;
     private DistanceSensor sensor;
     private double sensorOffset;
     private ExponentialSmoother smoother;
+    private PIDController controller;
 
     private double targetDistance, distanceSpread, forwardSpeed;
 
@@ -28,7 +28,12 @@ public class WallFollower {
         this.drive = drive;
         this.sensor = sensor;
         this.sensorOffset = properties.getDistanceSensorOffset();
+        this.controller = new PIDController(properties.getWallParameters());
         this.smoother = new ExponentialSmoother(DISTANCE_SMOOTHER_EXP);
+    }
+
+    public PIDController getController() {
+        return controller;
     }
 
     public double getDistance() {
@@ -38,6 +43,14 @@ public class WallFollower {
 
     public double getSmoothedDistance() {
         return smoother.update(getDistance());
+    }
+
+    public double getTargetDistance() {
+        return targetDistance;
+    }
+
+    public double getTargetSpread() {
+        return distanceSpread;
     }
 
     public void setTargetDistance(double distance, double spread) {
@@ -58,10 +71,14 @@ public class WallFollower {
         drive.stop();
     }
 
+    public double getDistanceError() {
+        return targetDistance - getSmoothedDistance();
+    }
+
     public boolean update() {
-        double distanceError = targetDistance - getSmoothedDistance();
+        double distanceError = getDistanceError();
         if (Math.abs(distanceError) > distanceSpread) {
-            double lateralSpeed = DEFAULT_STRAFE_P * distanceError;
+            double lateralSpeed = controller.update(distanceError);
             drive.setVelocity(new Vector2D(lateralSpeed, forwardSpeed));
             drive.update();
             return false;

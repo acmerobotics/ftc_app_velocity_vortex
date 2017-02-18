@@ -13,8 +13,8 @@ import com.qualcomm.robotcore.util.Range;
 
 public class FixedLauncher {
 
-    public static final double TRIGGER_UP = 0.6;
-    public static final double TRIGGER_DOWN = 0.82;
+    public static final double TRIGGER_UP = .97;
+    public static final double TRIGGER_DOWN = .7;
 
     private Servo trigger;
     private boolean triggered;

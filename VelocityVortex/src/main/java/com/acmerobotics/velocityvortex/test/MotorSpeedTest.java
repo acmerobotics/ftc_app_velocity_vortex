@@ -1,6 +1,7 @@
 package com.acmerobotics.velocityvortex.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
@@ -8,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
  * @author Ryan
  */
 
+@Disabled
 @Autonomous(name = "Motor Speed Test")
 public class MotorSpeedTest extends LinearOpMode {
 

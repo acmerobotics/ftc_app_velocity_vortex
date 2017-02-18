@@ -22,7 +22,7 @@ public abstract class Auto extends LinearOpMode {
     public static final int BLUE_LED_CHANNEL = 0;
     public static final int RED_LED_CHANNEL = 1;
 
-    public static final double MOVEMENT_SPEED = 0.75;
+    public static final double MOVEMENT_SPEED = 0.8;
 
     public static final double ROOT2 = Math.sqrt(2);
 

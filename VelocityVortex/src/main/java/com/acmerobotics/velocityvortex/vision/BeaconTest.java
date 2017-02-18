@@ -1,4 +1,4 @@
-package com.acmerobotics.velocityvortex.test;
+package com.acmerobotics.velocityvortex.vision;
 
 import com.acmerobotics.library.vision.Beacon;
 import com.acmerobotics.velocityvortex.vision.BeaconOpMode;

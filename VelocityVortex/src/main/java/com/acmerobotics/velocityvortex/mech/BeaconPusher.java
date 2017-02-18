@@ -23,7 +23,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class BeaconPusher {
 
     public static final DifferentialControlLoopCoefficients PID_COEFFICIENTS = new DifferentialControlLoopCoefficients(3, 0, 0);
-    public static final int PUSH_MS = 250;
+    public static final int PUSH_MS = 400;
 
     private CRServo servo;
     private DistanceSensor sensor;
@@ -44,7 +44,7 @@ public class BeaconPusher {
     }
 
     public boolean isSensorActive() {
-        return getRawPosition() > 0;
+        return sensor != null && getRawPosition() > 0;
     }
 
     public void reset() {
@@ -69,7 +69,7 @@ public class BeaconPusher {
 
     public void moveToPosition(double pos, double error, LinearOpMode opMode) {
         setTargetPosition(pos);
-        while ((opMode == null || opMode.opModeIsActive()) && Math.abs(getPositionError()) < error) {
+        while ((opMode == null || opMode.opModeIsActive()) && Math.abs(getPositionError()) > error) {
             update();
             Thread.yield();
         }

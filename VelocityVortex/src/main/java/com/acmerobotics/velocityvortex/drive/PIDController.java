@@ -45,6 +45,10 @@ public class PIDController {
         return update;
     }
 
+    public void reset() {
+        lastTime = 0;
+    }
+
     public double getErrorSum() {
         return sum;
     }

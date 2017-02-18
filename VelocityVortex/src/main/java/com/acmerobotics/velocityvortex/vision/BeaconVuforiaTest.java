@@ -1,4 +1,4 @@
-package com.acmerobotics.velocityvortex.test;
+package com.acmerobotics.velocityvortex.vision;
 
 import android.app.Activity;
 import android.content.Context;

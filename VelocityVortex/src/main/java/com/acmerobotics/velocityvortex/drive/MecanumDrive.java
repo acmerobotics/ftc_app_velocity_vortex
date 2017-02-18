@@ -4,9 +4,10 @@ import com.acmerobotics.library.configuration.RobotProperties;
 import com.acmerobotics.library.configuration.WheelType;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 /**
  * This class implements the basic functionality of an omnidirectional mecanum wheel drive system.
@@ -15,6 +16,13 @@ public class MecanumDrive {
 
     public static final double RUN_TO_POSITION_MAX_SPEED = 0.65;
     public static final double RUN_WITH_ENCODER_MAX_SPEED = 0.85;
+
+    public static final String[] MOTOR_ORDER = {
+            "leftFront",
+            "rightFront",
+            "rightBack",
+            "leftBack"
+    };
 
     private DcMotor[] motors;
     private WheelType[] wheelTypes;
@@ -35,12 +43,8 @@ public class MecanumDrive {
         }
 
         motors = new DcMotor[4];
-        motors[0] = map.dcMotor.get("leftFront");
-        motors[1] = map.dcMotor.get("rightFront");
-        motors[2] = map.dcMotor.get("rightBack");
-        motors[3] = map.dcMotor.get("leftBack");
-
         for (int i = 0; i < motors.length; i++) {
+            motors[i] = map.dcMotor.get(MOTOR_ORDER[i]);
             motors[i].setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             motors[i].setDirection(wheelTypes[i].getDirection());
         }
@@ -115,6 +119,12 @@ public class MecanumDrive {
     public void stop() {
         for (DcMotor motor : motors) {
             motor.setPower(0);
+        }
+    }
+
+    public void logPowers(Telemetry telemetry) {
+        for (int i = 0; i < 4; i++) {
+            telemetry.addData(MOTOR_ORDER[i], motors[i].getPower());
         }
     }
 

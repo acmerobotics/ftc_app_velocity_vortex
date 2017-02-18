@@ -17,6 +17,11 @@ public class OpModeConfiguration {
         }
 
         @Override
+        public DifferentialControlLoopCoefficients getWallParameters() {
+            return new DifferentialControlLoopCoefficients(0, 0, 0);
+        }
+
+        @Override
         public WheelType[] getWheelTypes() {
             return new WheelType[] {
                     new WheelType(MotorType.ANDYMARK_60, DcMotorSimple.Direction.FORWARD, 1, 2),
@@ -41,6 +46,11 @@ public class OpModeConfiguration {
         @Override
         public DifferentialControlLoopCoefficients getTurnParameters() {
             return new DifferentialControlLoopCoefficients(0.025, 0, 0);
+        }
+
+        @Override
+        public DifferentialControlLoopCoefficients getWallParameters() {
+            return new DifferentialControlLoopCoefficients(0.095, 0, 0);
         }
 
         @Override

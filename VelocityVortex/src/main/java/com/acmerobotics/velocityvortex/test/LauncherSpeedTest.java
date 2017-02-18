@@ -4,6 +4,8 @@ import android.util.Log;
 
 import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.mech.FixedLauncher;
+import com.acmerobotics.velocityvortex.sensors.AverageDifferentiator;
+import com.acmerobotics.velocityvortex.sensors.ExponentialSmoother;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -18,8 +20,10 @@ public class LauncherSpeedTest extends LinearOpMode {
     private DataFile log;
     private FixedLauncher launcher;
     private long lastUpdateTime;
-    private int lastLeftPos, lastRightPos;
+    private double lastLeftPos, lastRightPos;
     private double rightSpeed, leftSpeed;
+
+    private ElapsedTime timer2;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -30,6 +34,10 @@ public class LauncherSpeedTest extends LinearOpMode {
 
         ElapsedTime timer = new ElapsedTime();
 
+        timer2 = new ElapsedTime();
+        lastLeftPos = launcher.getLeftPosition();
+        lastRightPos = launcher.getRightPosition();
+
         waitForStart();
 
         while (opModeIsActive()) {
@@ -37,8 +45,8 @@ public class LauncherSpeedTest extends LinearOpMode {
             launcher.reset();
             lastUpdateTime = 0;
 
-            launcher.setPower(1, 1, 2000);
-            while (opModeIsActive() && timer.milliseconds() < 5000) {
+            launcher.setPower(1);
+            while (opModeIsActive() && timer.milliseconds() < 7000) {
                 launcher.update();
                 logData();
             }
@@ -50,24 +58,16 @@ public class LauncherSpeedTest extends LinearOpMode {
     }
 
     private void logData() {
-        long updateTime = System.currentTimeMillis();
-        int leftPos = launcher.getLeftPosition();
-        int rightPos = launcher.getRightPosition();
-        if (lastUpdateTime == 0) {
-            lastUpdateTime = updateTime;
-            lastLeftPos = leftPos;
-            lastRightPos = rightPos;
-            rightSpeed = 0;
-            leftSpeed = 0;
-        } else if (lastLeftPos != leftPos || lastRightPos != rightPos) {
-            double dt = updateTime - lastUpdateTime;
+        double leftPos = launcher.getLeftPosition();
+        double rightPos = launcher.getRightPosition();
+        if (timer2.milliseconds() >= 100) {
+            double dt = timer2.milliseconds();
             rightSpeed = (leftPos - lastLeftPos) / dt;
             leftSpeed = (rightPos - lastRightPos) / dt;
-
-            lastUpdateTime = updateTime;
             lastLeftPos = leftPos;
             lastRightPos = rightPos;
+            timer2.reset();
         }
-        log.write(String.format("%d,%d,%d,%f,%f", updateTime, leftPos, rightPos, leftSpeed, rightSpeed));
+        log.write(String.format("%d,%f,%f,%f,%f", System.currentTimeMillis(), leftPos, rightPos, leftSpeed, rightSpeed));
     }
 }

@@ -18,7 +18,8 @@ public class BeaconFollower extends WallFollower {
 
     public static final double BEACON_DISTANCE = 8;
     public static final double BEACON_SPREAD = 1;
-    public static final double BEACON_SEARCH_SPEED = 0.6 * Auto.MOVEMENT_SPEED;
+    public static final double BEACON_SEARCH_SPEED = 0.45 * Auto.MOVEMENT_SPEED;
+    public static final double PUSHER_DISTANCE = 6.5;
 
     private ColorAnalyzer colorAnalyzer;
     private BeaconPusher beaconPusher;
@@ -35,8 +36,9 @@ public class BeaconFollower extends WallFollower {
         pushBeacons(numBeacons, direction, targetColor, null);
     }
 
-    public void pushBeacons(int numBeacons, int direction, ColorAnalyzer.BeaconColor targetColor, LinearOpMode opMode) {
+    public boolean pushBeacons(int numBeacons, int direction, ColorAnalyzer.BeaconColor targetColor, LinearOpMode opMode) {
         int beaconsPressed = 0;
+        boolean targetFirstLastBeacon = true;
         while (opMode == null || opMode.opModeIsActive()) {
             ColorAnalyzer.BeaconColor color = colorAnalyzer.getBeaconColor();
 
@@ -44,7 +46,7 @@ public class BeaconFollower extends WallFollower {
                 logFile.write(String.format("%d,%s,%d,%d", System.currentTimeMillis(), color, colorAnalyzer.red(), colorAnalyzer.blue()));
             }
 
-            beaconPusher.setTargetPosition(getDistance() - 6);
+            beaconPusher.setTargetPosition(getDistance() - PUSHER_DISTANCE);
             beaconPusher.update();
 
             if (color == targetColor) {
@@ -57,15 +59,20 @@ public class BeaconFollower extends WallFollower {
                 beaconPusher.push(opMode);
                 beaconsPressed++;
 
-                beaconPusher.moveToPosition(getDistance() - 6, 0.1, opMode);
+                beaconPusher.moveToPosition(getDistance() - PUSHER_DISTANCE, 0.1, opMode);
 
                 if (beaconsPressed < numBeacons) {
-                    drive.move(direction * Auto.TILE_SIZE, 1, opMode);
+                    targetFirstLastBeacon = true;
+                    drive.getDrive().move(1.5 * direction * Auto.TILE_SIZE, Auto.MOVEMENT_SPEED, opMode);
                 } else {
                     drive.stop();
-                    return;
+                    beaconPusher.retract();
+                    return targetFirstLastBeacon;
                 }
             } else {
+                if (color != ColorAnalyzer.BeaconColor.UNKNOWN) {
+                    targetFirstLastBeacon = false;
+                }
                 setForwardSpeed(direction * BEACON_SEARCH_SPEED);
                 setTargetDistance(BEACON_DISTANCE, BEACON_SPREAD);
                 update();
@@ -73,6 +80,7 @@ public class BeaconFollower extends WallFollower {
 
             Thread.yield();
         }
+        return false;
     }
 
     public void setLogFile(DataFile file) {
