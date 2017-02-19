@@ -35,7 +35,7 @@ public class CapBallAuto extends Auto {
     public void moveAndShoot() {
         basicDrive.move(-((Math.sqrt(2) * TILE_SIZE) + 3), MOVEMENT_SPEED, this);
 
-        launcher.fireBalls(numBalls, this);
+        Auto.fireBalls(launcher, numBalls, this);
     }
 
     public void pushAndPark() {

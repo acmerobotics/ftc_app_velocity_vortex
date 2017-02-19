@@ -54,11 +54,11 @@ public class BlockAuto extends Auto {
     public void moveAndFire() {
         basicDrive.move(-((Math.sqrt(2) * TILE_SIZE) + 3), MOVEMENT_SPEED, this);
 
-        launcher.fireBalls(numBalls, this);
+        Auto.fireBalls(launcher, numBalls, this);
     }
 
     public void moveToLineAndWait() {
-        basicDrive.move(-1 * TILE_SIZE * ROOT2 + 3, MOVEMENT_SPEED, this);
+        basicDrive.move(-1 * TILE_SIZE * ROOT2 + 6, MOVEMENT_SPEED, this);
 
         drive.turnSync(-45 * allianceModifier, this);
         while (opModeIsActive() && getRuntime() < 10) {

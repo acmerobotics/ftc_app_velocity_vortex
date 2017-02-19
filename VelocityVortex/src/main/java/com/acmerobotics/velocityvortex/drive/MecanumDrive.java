@@ -30,6 +30,7 @@ public class MecanumDrive {
     private Vector2D[] rollerDirs;
     private Vector2D[] rotDirs;
     private int[] offsets;
+    private DcMotor.RunMode runMode;
 
     public MecanumDrive(HardwareMap map, RobotProperties properties) {
         wheelTypes = properties.getWheelTypes();
@@ -42,10 +43,11 @@ public class MecanumDrive {
             }
         }
 
+        setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         motors = new DcMotor[4];
         for (int i = 0; i < motors.length; i++) {
             motors[i] = map.dcMotor.get(MOTOR_ORDER[i]);
-            motors[i].setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             motors[i].setDirection(wheelTypes[i].getDirection());
         }
 
@@ -108,7 +110,18 @@ public class MecanumDrive {
             Vector2D transVelocity = v.copy().multiply(Math.min(1 - angularSpeed, speed));
             transVelocity.add(angularVelocity);
             double wheelSpeed = transVelocity.dot(rollerDirs[i]);
-            motors[i].setPower(RUN_WITH_ENCODER_MAX_SPEED * getAdjustedSpeed(wheelSpeed, wheelTypes[i]));
+            double adjustedSpeed = getAdjustedSpeed(wheelSpeed, wheelTypes[i]);
+            switch (runMode) {
+                case RUN_USING_ENCODER:
+                    adjustedSpeed *= RUN_WITH_ENCODER_MAX_SPEED;
+                    break;
+                case RUN_TO_POSITION:
+                    adjustedSpeed *= RUN_TO_POSITION_MAX_SPEED;
+                    break;
+                default:
+                    // do nothing
+            }
+            motors[i].setPower(adjustedSpeed);
         }
 
     }
@@ -185,16 +198,11 @@ public class MecanumDrive {
      * @param speed  the speed to travel at
      */
     public void move(double inches, double speed, LinearOpMode opMode) {
-        DcMotor.RunMode[] prevModes = new DcMotor.RunMode[motors.length];
+        setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        for (int i = 0; i < motors.length; i++) {
-            DcMotor motor = motors[i];
-            prevModes[i] = motor.getMode();
-            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            int counts = wheelTypes[i].getCounts(inches);
-            motor.setTargetPosition(motor.getCurrentPosition() + counts);
-            motor.setPower(RUN_TO_POSITION_MAX_SPEED * getAdjustedSpeed(speed, wheelTypes[i]));
-        }
+        setRelativePosition(inches);
+
+        setVelocity(new Vector2D(0, speed));
 
         boolean done = false;
         while (!done && (opMode == null || opMode.opModeIsActive())) {
@@ -206,14 +214,30 @@ public class MecanumDrive {
 
         stop();
 
+        setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    public double getAdjustedSpeed(double speed, WheelType wheelType) {
+        return speed * (smallestRPM / wheelType.getRPM());
+    }
+
+    public DcMotor.RunMode getRunMode() {
+        return runMode;
+    }
+
+    public void setMode(DcMotor.RunMode mode) {
+        runMode = mode;
         for (int i = 0; i < motors.length; i++) {
-            DcMotor motor = motors[i];
-            motor.setMode(prevModes[i]);
+            motors[i].setMode(mode);
         }
     }
 
-    private double getAdjustedSpeed(double speed, WheelType wheelType) {
-        return speed * (smallestRPM / wheelType.getRPM());
+    public void setRelativePosition(double inches) {
+        for (int i = 0; i < motors.length; i++) {
+            DcMotor motor = motors[i];
+            int counts = wheelTypes[i].getCounts(inches);
+            motor.setTargetPosition(motor.getCurrentPosition() + counts);
+        }
     }
 
 }

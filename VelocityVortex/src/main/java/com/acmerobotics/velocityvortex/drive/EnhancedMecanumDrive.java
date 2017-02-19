@@ -1,6 +1,7 @@
 package com.acmerobotics.velocityvortex.drive;
 
 import com.acmerobotics.library.configuration.RobotProperties;
+import com.acmerobotics.library.configuration.WheelType;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -177,16 +178,39 @@ public class EnhancedMecanumDrive {
         return heading;
     }
 
-    public void move(double inches, double power, LinearOpMode opMode) {
-        int counts = drive.getWheelTypes()[0].getCounts(inches);
-        DcMotor motor = drive.getMotors()[0];
-        int startPos = motor.getCurrentPosition();
-        setVelocity(new Vector2D(0, power));
-        while ((opMode == null || opMode.opModeIsActive()) && (motor.getCurrentPosition() - startPos) < counts) {
+//    public void move(double inches, double power, LinearOpMode opMode) {
+//        int counts = drive.getWheelTypes()[0].getCounts(inches);
+//        DcMotor motor = drive.getMotors()[0];
+//        int startPos = motor.getCurrentPosition();
+//        setVelocity(new Vector2D(0, power));
+//        while ((opMode == null || opMode.opModeIsActive()) && (motor.getCurrentPosition() - startPos) < counts) {
+//            update();
+//            Thread.yield();
+//        }
+//        stop();
+//    }
+
+    public void move(double inches, double speed, LinearOpMode opMode) {
+        DcMotor[] motors = drive.getMotors();
+
+        drive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        drive.setRelativePosition(inches);
+
+        setVelocity(new Vector2D(0, speed));
+
+        boolean done = false;
+        while (!done && (opMode == null || opMode.opModeIsActive())) {
+            for (DcMotor motor : motors) {
+                if (!motor.isBusy()) done = true;
+            }
             update();
             Thread.yield();
         }
+
         stop();
+
+        drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
 }

@@ -180,6 +180,7 @@ public class FixedLauncher {
         return rightPower;
     }
 
+    @Deprecated
     public void fireBalls(int numBalls, LinearOpMode opMode) {
         if (numBalls == 0) return;
 

@@ -98,7 +98,7 @@ public class BeaconAuto extends Auto {
     public void moveAndFire() {
         basicDrive.move(-FIRE_DISTANCE, MOVEMENT_SPEED, this);
 
-        launcher.fireBalls(numBalls, this);
+        Auto.fireBalls(launcher, numBalls, this);
 
         if (allianceColor == AllianceColor.BLUE) {
             drive.turnSync(-110, this);
@@ -121,7 +121,11 @@ public class BeaconAuto extends Auto {
         //beaconFollower.moveToDistance(12, 2 * BeaconFollower.BEACON_SPREAD, this);
 
         if (allianceColor == AllianceColor.BLUE) {
-            drive.turnSync(45, this);
+            if (targetFirstLastBeacon) {
+                drive.turnSync(45, this);
+            } else {
+                drive.turnSync(40, this);
+            }
         } else {
             if (targetFirstLastBeacon) {
                 drive.turnSync(127, this);

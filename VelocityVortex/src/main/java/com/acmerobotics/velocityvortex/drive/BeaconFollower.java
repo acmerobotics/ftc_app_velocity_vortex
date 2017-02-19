@@ -63,7 +63,7 @@ public class BeaconFollower extends WallFollower {
 
                 if (beaconsPressed < numBeacons) {
                     targetFirstLastBeacon = true;
-                    drive.getDrive().move(1.5 * direction * Auto.TILE_SIZE, Auto.MOVEMENT_SPEED, opMode);
+                    drive.getDrive().move( direction * Auto.TILE_SIZE, Auto.MOVEMENT_SPEED, opMode);
                 } else {
                     drive.stop();
                     beaconPusher.retract();

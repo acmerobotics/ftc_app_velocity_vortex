@@ -77,13 +77,20 @@ public class MainTeleOp extends OpMode {
 
         basicDrive = new MecanumDrive(hardwareMap, properties);
 
-        imu = new AdafruitBNO055IMU(hardwareMap.i2cDeviceSynch.get("imu"));
-        AdafruitBNO055IMU.Parameters parameters = new AdafruitBNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        imu.initialize(parameters);
+        try {
+            imu = new AdafruitBNO055IMU(hardwareMap.i2cDeviceSynch.get("imu"));
+            AdafruitBNO055IMU.Parameters parameters = new AdafruitBNO055IMU.Parameters();
+            parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+            imu.initialize(parameters);
 
-        drive = new EnhancedMecanumDrive(basicDrive, imu, properties);
+            drive = new EnhancedMecanumDrive(basicDrive, imu, properties);
 //        drive.setInitialHeading(configuration.getLastHeading());
+        } catch (Throwable t) {
+            telemetry.addData("WARNING", "IMU did not initialize!");
+            imu = null;
+            drive = null;
+        }
+
 
         DistanceSensor distanceSensor = new MaxSonarEZ1UltrasonicSensor(hardwareMap.analogInput.get("maxSonar"));
         wallFollower = new WallFollower(drive, distanceSensor, properties);
@@ -125,7 +132,7 @@ public class MainTeleOp extends OpMode {
 
         // abort
         if (gamepad1.a) {
-            drive.stop();
+            basicDrive.stop();
             state = State.DRIVER;
         }
 
@@ -158,7 +165,7 @@ public class MainTeleOp extends OpMode {
                 basicDrive.logPowers(telemetry);
 
                 if (gamepad1.left_bumper && gamepad1.right_bumper) {
-                    drive.resetHeading();
+                    if (drive != null) drive.resetHeading();
                 } else {
                     //collector
                     if (gamepad1.right_trigger > 0.95) {
@@ -178,12 +185,14 @@ public class MainTeleOp extends OpMode {
                     }
 
                     //beacons
-                    if (stickyGamepad1.x) {
-                        sideModifier = 1;
-                        state = State.BEACON_FORWARD;
-                    } else if (stickyGamepad1.b) {
-                        sideModifier = -1;
-                        state = State.BEACON_FORWARD;
+                    if (drive != null) {
+                        if (stickyGamepad1.x) {
+                            sideModifier = 1;
+                            state = State.BEACON_FORWARD;
+                        } else if (stickyGamepad1.b) {
+                            sideModifier = -1;
+                            state = State.BEACON_FORWARD;
+                        }
                     }
 
                     if (gamepad1.left_bumper) {

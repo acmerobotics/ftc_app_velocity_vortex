@@ -1,6 +1,7 @@
 package com.acmerobotics.velocityvortex.test;
 
 import com.acmerobotics.velocityvortex.mech.FixedLauncher;
+import com.acmerobotics.velocityvortex.opmodes.Auto;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -19,6 +20,6 @@ public class AutoFireTest extends LinearOpMode {
 
         waitForStart();
 
-        launcher.fireBalls(3, this);
+        Auto.fireBalls(launcher, 3, this);
     }
 }

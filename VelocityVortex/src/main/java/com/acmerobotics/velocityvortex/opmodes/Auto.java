@@ -1,5 +1,7 @@
 package com.acmerobotics.velocityvortex.opmodes;
 
+import android.os.SystemClock;
+
 import com.acmerobotics.library.configuration.OpModeConfiguration;
 import com.acmerobotics.library.configuration.RobotProperties;
 import com.acmerobotics.library.file.DataFile;
@@ -8,6 +10,7 @@ import com.acmerobotics.velocityvortex.mech.FixedLauncher;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
 import com.qualcomm.robotcore.util.ClassFilter;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import static com.acmerobotics.library.configuration.OpModeConfiguration.AllianceColor;
 import static com.acmerobotics.library.configuration.OpModeConfiguration.MatchType;
@@ -95,6 +98,53 @@ public abstract class Auto extends LinearOpMode {
 
     public String getFileName(String tag) {
         return tag + "_" + matchType + "_" + ((matchType == OpModeConfiguration.MatchType.PRACTICE) ? System.currentTimeMillis() : matchNumber) + ".csv";
+    }
+
+    public static void fireBalls(FixedLauncher launcher, int balls, LinearOpMode opMode) {
+        if (balls == 0) return;
+
+        launcher.setPower(1);
+
+        boolean launcherRunning = false;
+        ElapsedTime launcherTimer = new ElapsedTime();
+        ElapsedTime totalTimer = new ElapsedTime();
+        double leftSpeed = 0, rightSpeed = 0, lastLeftPos, lastRightPos;
+
+        lastLeftPos = launcher.getLeftPosition();
+        lastRightPos = launcher.getRightPosition();
+
+        while ((opMode == null || opMode.opModeIsActive()) && !launcherRunning && totalTimer.milliseconds() < 3000) {
+            double leftPos = launcher.getLeftPosition();
+            double rightPos = launcher.getRightPosition();
+            if (launcherTimer.milliseconds() >= 100) {
+                double dt = launcherTimer.milliseconds();
+                rightSpeed = (leftPos - lastLeftPos) / dt;
+                leftSpeed = (rightPos - lastRightPos) / dt;
+
+                lastLeftPos = leftPos;
+                lastRightPos = rightPos;
+                launcherTimer.reset();
+            }
+
+            if (leftSpeed > 0.1 && launcher.isRunning()) {
+                launcherRunning = true;
+            }
+
+            Thread.yield();
+        }
+
+        for (int i = 1; i <= balls; i++) {
+            launcher.triggerUp();
+            SystemClock.sleep(500);
+            launcher.triggerDown();
+            if (i == balls) {
+                launcher.setPower(0);
+                return;
+            } else {
+                SystemClock.sleep(2500);
+            }
+        }
+
     }
 
 }
