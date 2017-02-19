@@ -105,33 +105,35 @@ public abstract class Auto extends LinearOpMode {
 
         launcher.setPower(1);
 
-        boolean launcherRunning = false;
-        ElapsedTime launcherTimer = new ElapsedTime();
-        ElapsedTime totalTimer = new ElapsedTime();
-        double leftSpeed = 0, rightSpeed = 0, lastLeftPos, lastRightPos;
+//        boolean launcherRunning = false;
+//        ElapsedTime launcherTimer = new ElapsedTime();
+//        ElapsedTime totalTimer = new ElapsedTime();
+//        double leftSpeed = 0, rightSpeed = 0, lastLeftPos, lastRightPos;
+//
+//        lastLeftPos = launcher.getLeftPosition();
+//        lastRightPos = launcher.getRightPosition();
+//
+//        while ((opMode == null || opMode.opModeIsActive()) && !launcherRunning && totalTimer.milliseconds() < 2000) {
+//            double leftPos = launcher.getLeftPosition();
+//            double rightPos = launcher.getRightPosition();
+//            if (launcherTimer.milliseconds() >= 100) {
+//                double dt = launcherTimer.milliseconds();
+//                rightSpeed = (leftPos - lastLeftPos) / dt;
+//                leftSpeed = (rightPos - lastRightPos) / dt;
+//
+//                lastLeftPos = leftPos;
+//                lastRightPos = rightPos;
+//                launcherTimer.reset();
+//            }
+//
+//            if (leftSpeed > 0.1 && launcher.isRunning()) {
+//                launcherRunning = true;
+//            }
+//
+//            Thread.yield();
+//        }
 
-        lastLeftPos = launcher.getLeftPosition();
-        lastRightPos = launcher.getRightPosition();
-
-        while ((opMode == null || opMode.opModeIsActive()) && !launcherRunning && totalTimer.milliseconds() < 3000) {
-            double leftPos = launcher.getLeftPosition();
-            double rightPos = launcher.getRightPosition();
-            if (launcherTimer.milliseconds() >= 100) {
-                double dt = launcherTimer.milliseconds();
-                rightSpeed = (leftPos - lastLeftPos) / dt;
-                leftSpeed = (rightPos - lastRightPos) / dt;
-
-                lastLeftPos = leftPos;
-                lastRightPos = rightPos;
-                launcherTimer.reset();
-            }
-
-            if (leftSpeed > 0.1 && launcher.isRunning()) {
-                launcherRunning = true;
-            }
-
-            Thread.yield();
-        }
+        SystemClock.sleep(2000);
 
         for (int i = 1; i <= balls; i++) {
             launcher.triggerUp();
@@ -141,7 +143,7 @@ public abstract class Auto extends LinearOpMode {
                 launcher.setPower(0);
                 return;
             } else {
-                SystemClock.sleep(2500);
+                SystemClock.sleep(1500);
             }
         }
 

@@ -20,6 +20,6 @@ public class AutoFireTest extends LinearOpMode {
 
         waitForStart();
 
-        Auto.fireBalls(launcher, 3, this);
+        Auto.fireBalls(launcher, 2, this);
     }
 }

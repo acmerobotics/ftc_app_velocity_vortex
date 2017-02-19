@@ -43,13 +43,13 @@ public class MecanumDrive {
             }
         }
 
-        setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
         motors = new DcMotor[4];
         for (int i = 0; i < motors.length; i++) {
             motors[i] = map.dcMotor.get(MOTOR_ORDER[i]);
             motors[i].setDirection(wheelTypes[i].getDirection());
         }
+
+        setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         rollerDirs = new Vector2D[4];
         rollerDirs[0] = new Vector2D(-1, 1).normalize();

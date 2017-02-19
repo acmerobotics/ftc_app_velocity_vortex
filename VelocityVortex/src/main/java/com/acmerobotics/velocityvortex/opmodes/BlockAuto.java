@@ -46,19 +46,19 @@ public class BlockAuto extends Auto {
 
         moveToLineAndWait();
 
-        basicDrive.move(-3 * TILE_SIZE, MOVEMENT_SPEED, this);
+        drive.move(-3 * TILE_SIZE, MOVEMENT_SPEED, this);
 
 //        go();
     }
 
     public void moveAndFire() {
-        basicDrive.move(-((Math.sqrt(2) * TILE_SIZE) + 3), MOVEMENT_SPEED, this);
+        drive.move(-((Math.sqrt(2) * TILE_SIZE) + 3), MOVEMENT_SPEED, this);
 
         Auto.fireBalls(launcher, numBalls, this);
     }
 
     public void moveToLineAndWait() {
-        basicDrive.move(-1 * TILE_SIZE * ROOT2 + 6, MOVEMENT_SPEED, this);
+        drive.move(-1 * TILE_SIZE * ROOT2 + 6, MOVEMENT_SPEED, this);
 
         drive.turnSync(-45 * allianceModifier, this);
         while (opModeIsActive() && getRuntime() < 10) {
@@ -67,9 +67,9 @@ public class BlockAuto extends Auto {
     }
 
 //    public void go() throws InterruptedException {
-//        basicDrive.move(-TILE_SIZE * 2 + 2, 1, this);
+//        drive.move(-TILE_SIZE * 2 + 2, 1, this);
 //        drive.turnSync(90, this);
-//        basicDrive.move(-.5 * TILE_SIZE, 1, this);
+//        drive.move(-.5 * TILE_SIZE, 1, this);
 //        wallFollower.moveToDistance(BeaconFollower.BEACON_DISTANCE, BeaconFollower.BEACON_SPREAD, this);
 //    }
 }

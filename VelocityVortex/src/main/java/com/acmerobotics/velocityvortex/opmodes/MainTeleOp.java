@@ -62,6 +62,8 @@ public class MainTeleOp extends OpMode {
     private double lastLeftPos, lastRightPos;
     private double rightSpeed, leftSpeed;
 
+    private boolean gamepad1HalfSpeed;
+
     private enum State {
         DRIVER,
         BEACON_FORWARD,
@@ -141,9 +143,15 @@ public class MainTeleOp extends OpMode {
                 //driver
                 double x = -gamepad1.left_stick_x;
                 double y = -gamepad1.left_stick_y;
-                if (y == 0) y = -0.4 * gamepad2.left_stick_y;
-
                 double omega = -gamepad1.right_stick_x;
+
+                if (gamepad1HalfSpeed) {
+                    x *= 0.6;
+                    y *= 0.6;
+                    omega *= 0.6;
+                }
+
+                if (y == 0) y = 0.4 * gamepad2.left_stick_y;
                 if (omega == 0) omega = 0.5 * -gamepad2.right_stick_x;
 
                 // check the dpad
@@ -163,6 +171,10 @@ public class MainTeleOp extends OpMode {
 
                 basicDrive.setVelocity(new Vector2D(radius * Math.cos(theta), radius * Math.sin(theta)), omega);
                 basicDrive.logPowers(telemetry);
+
+                if (stickyGamepad1.y) {
+                    gamepad1HalfSpeed = !gamepad1HalfSpeed;
+                }
 
                 if (gamepad1.left_bumper && gamepad1.right_bumper) {
                     if (drive != null) drive.resetHeading();

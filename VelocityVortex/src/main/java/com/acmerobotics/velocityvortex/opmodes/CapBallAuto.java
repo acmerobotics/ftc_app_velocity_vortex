@@ -1,5 +1,6 @@
 package com.acmerobotics.velocityvortex.opmodes;
 
+import com.acmerobotics.library.configuration.OpModeConfiguration;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
@@ -27,18 +28,18 @@ public class CapBallAuto extends Auto {
 
         moveAndShoot();
 
-        pushAndPark();
+        if (parkDest == OpModeConfiguration.ParkDest.CENTER) pushAndPark();
 
         drive.turnSync(45, this);
     }
 
     public void moveAndShoot() {
-        basicDrive.move(-((Math.sqrt(2) * TILE_SIZE) + 3), MOVEMENT_SPEED, this);
+        drive.move(-((Math.sqrt(2) * TILE_SIZE) + 7), MOVEMENT_SPEED, this);
 
         Auto.fireBalls(launcher, numBalls, this);
     }
 
     public void pushAndPark() {
-        basicDrive.move(Math.sqrt(2) * -TILE_SIZE, MOVEMENT_SPEED, this);
+        drive.move(Math.sqrt(2) * -TILE_SIZE - 4, MOVEMENT_SPEED, this);
     }
 }

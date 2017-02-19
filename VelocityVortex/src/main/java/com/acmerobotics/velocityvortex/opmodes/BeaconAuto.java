@@ -96,7 +96,7 @@ public class BeaconAuto extends Auto {
     }
 
     public void moveAndFire() {
-        basicDrive.move(-FIRE_DISTANCE, MOVEMENT_SPEED, this);
+        drive.move(-FIRE_DISTANCE, MOVEMENT_SPEED, this);
 
         Auto.fireBalls(launcher, numBalls, this);
 
@@ -106,7 +106,7 @@ public class BeaconAuto extends Auto {
             drive.turnSync(100, this);
         }
 
-        basicDrive.move(54, MOVEMENT_SPEED, this);
+        drive.move(54, MOVEMENT_SPEED, this);
 
         if (allianceColor == OpModeConfiguration.AllianceColor.BLUE) {
             drive.setTargetHeading(180);
@@ -133,11 +133,14 @@ public class BeaconAuto extends Auto {
                 drive.turnSync(135, this);
             }
         }
-        basicDrive.move(-2 * ROOT2 * TILE_SIZE - 3, MOVEMENT_SPEED, this);
+        drive.move(-2 * ROOT2 * TILE_SIZE - 3, MOVEMENT_SPEED, this);
+
+        drive.setTargetHeading(180);
+        drive.turnSync(0, this);
 //        drive.turnSync(0, this);
-//        basicDrive.move(-2 * allianceModifier * TILE_SIZE, MOVEMENT_SPEED, this);
+//        drive.move(-2 * allianceModifier * TILE_SIZE, MOVEMENT_SPEED, this);
 //        drive.turnSync(90, this);
-//        basicDrive.move(-TILE_SIZE * 1.3, MOVEMENT_SPEED, this);
+//        drive.move(-TILE_SIZE * 1.3, MOVEMENT_SPEED, this);
     }
 
     private void cornerPark() {
