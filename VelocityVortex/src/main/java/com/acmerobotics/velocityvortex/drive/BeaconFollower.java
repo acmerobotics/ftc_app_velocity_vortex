@@ -18,7 +18,7 @@ public class BeaconFollower extends WallFollower {
 
     public static final double BEACON_DISTANCE = 8;
     public static final double BEACON_SPREAD = 1;
-    public static final double BEACON_SEARCH_SPEED = 0.45 * Auto.MOVEMENT_SPEED;
+    public static final double BEACON_SEARCH_SPEED = 0.35;
     public static final double PUSHER_DISTANCE = 6.5;
 
     private ColorAnalyzer colorAnalyzer;
