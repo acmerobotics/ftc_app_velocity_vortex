@@ -22,7 +22,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class BeaconPusher {
 
-    public static final DifferentialControlLoopCoefficients PID_COEFFICIENTS = new DifferentialControlLoopCoefficients(3, 0, 0);
+    public static final DifferentialControlLoopCoefficients PID_COEFFICIENTS = new DifferentialControlLoopCoefficients(0.5, 0, 0);
     public static final int PUSH_MS = 400;
 
     private CRServo servo;
@@ -41,6 +41,10 @@ public class BeaconPusher {
 
     public BeaconPusher(HardwareMap hardwareMap) {
         this(hardwareMap, null);
+    }
+
+    public PIDController getController() {
+        return controller;
     }
 
     public boolean isSensorActive() {

@@ -21,7 +21,7 @@ public abstract class Tuner extends OpMode {
 
     @Override
     public void init_loop() {
-        telemetry.addData("ready", "ready");
+        telemetry.log().add("Ready!");
     }
 
     @Override
@@ -32,14 +32,24 @@ public abstract class Tuner extends OpMode {
         DifferentialControlLoopCoefficients coefficients = controller.getCoefficients();
 
         if (stickyGamepad1.dpad_right) {
-            pos = (pos + 1) % 3;
+            pos++;
         } else if (stickyGamepad1.dpad_left) {
-            pos = (2 * pos - 1) % 3;
+            pos--;
+        }
+
+        if (pos < 0) {
+            pos += 3;
+        }
+        if (pos >= 3) {
+            pos -= 3;
         }
 
         double incr = 0.001;
         if (gamepad1.a) {
             incr = 0.01;
+        }
+        if (gamepad1.b) {
+            incr = 0.1;
         }
 
         if (stickyGamepad1.dpad_up) {
