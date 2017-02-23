@@ -1,13 +1,14 @@
 package com.acmerobotics.velocityvortex.sensors;
 
+
 /**
  * @author Ryan
  */
 
 public class AverageDifferentiator {
 
-    public static final int STARTING_CAPACITY = 100;
-    public static final int CAPACITY_INCR = 50;
+    public static final int STARTING_CAPACITY = 50;
+    public static final int CAPACITY_INCR = 25;
 
     private long[] times;
     private double[] values;
@@ -27,36 +28,41 @@ public class AverageDifferentiator {
     }
 
     public double update(long time, double value) {
-        if (value == values[now]) {
+        if (now != -1 && value == values[now]) {
             return lastVel;
         }
         int i = now;
+        double vel = 0;
         while (true) {
-            i = (i + 1) % capacity;
+            i--;
+            if (i < 0) {
+                i += capacity;
+            }
             long pastTime = times[i];
 
-            if (i == now || pastTime == 0) {
+            if (pastTime == 0) {
                 // didn't find a value
-                if (i == now) {
-                    // need more room
-                    expand(CAPACITY_INCR);
-                }
-                lastVel = 0;
+                break;
+            }
+
+            if (i == now) {
+                // need more room
+                System.out.println("expanding");
+                expand(CAPACITY_INCR);
                 break;
             }
 
             if ((time - pastTime) > interval) {
                 // found the value
                 double dt = (time - pastTime);
-                double vel = 0;
                 if (dt != 0) {
                     vel = (value - values[i]) / dt;
                 }
-                lastVel = vel;
                 break;
             }
         }
         add(time, value);
+        lastVel = vel;
         return lastVel;
     }
 
