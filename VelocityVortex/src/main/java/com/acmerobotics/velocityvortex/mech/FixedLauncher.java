@@ -1,5 +1,6 @@
 package com.acmerobotics.velocityvortex.mech;
 
+import com.acmerobotics.velocityvortex.sensors.AverageDifferentiator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -16,6 +17,8 @@ public class FixedLauncher {
     public static final double TRIGGER_UP = .97;
     public static final double TRIGGER_DOWN = .7;
 
+    private AverageDifferentiator speedMeasurer;
+
     private Servo trigger;
     private boolean triggered;
     private DcMotor left, right;
@@ -27,6 +30,8 @@ public class FixedLauncher {
     private int leftInitialPos, rightInitialPos;
 
     public FixedLauncher(HardwareMap hardwareMap) {
+        speedMeasurer = new AverageDifferentiator(1000);
+
         trigger = hardwareMap.servo.get("trigger");
         trigger.setPosition(TRIGGER_DOWN);
 
@@ -67,6 +72,10 @@ public class FixedLauncher {
         } else {
             triggerUp();
         }
+    }
+
+    public double getSpeed() {
+        return speedMeasurer.getLastDerivative();
     }
 
     public boolean isBusy() {
@@ -126,6 +135,8 @@ public class FixedLauncher {
     }
 
     public void update() {
+        speedMeasurer.update(getLeftPosition());
+
         if (!ramping) return;
         long now = System.currentTimeMillis();
         if (now >= stopTime) {

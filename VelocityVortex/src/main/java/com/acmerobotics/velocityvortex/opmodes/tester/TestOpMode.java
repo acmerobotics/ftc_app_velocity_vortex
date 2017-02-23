@@ -1,7 +1,8 @@
-package com.acmerobotics.velocityvortex.opmodes;
+package com.acmerobotics.velocityvortex.opmodes.tester;
 
 import com.acmerobotics.library.file.LogFile;
 import com.acmerobotics.library.logging.MultipleLogger;
+import com.acmerobotics.velocityvortex.opmodes.StickyGamepad;
 import com.acmerobotics.velocityvortex.opmodes.tester.DefaultTester;
 import com.acmerobotics.velocityvortex.opmodes.tester.DistanceSensorTester;
 import com.acmerobotics.velocityvortex.opmodes.tester.MRDeviceInterfaceModuleTester;
@@ -49,10 +50,10 @@ public class TestOpMode extends OpMode {
 
     @Override
     public void init() {
-        String logName = "tester_timer_" + System.currentTimeMillis() + ".txt";
-        logFile = new LogFile(logName);
+//        String logName = "tester_timer_" + System.currentTimeMillis() + ".txt";
+//        logFile = new LogFile(logName);
         logger = new MultipleLogger();
-        logger.addLogger(logFile);
+//        logger.addLogger(logFile);
 
         loopTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
@@ -61,7 +62,7 @@ public class TestOpMode extends OpMode {
 
         stickyGamepad1 = new StickyGamepad(gamepad1);
 
-        logger.msg(logName);
+//        logger.msg(logName);
         logger.msg("devices:");
 
         testers = new ArrayList<>();

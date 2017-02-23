@@ -43,7 +43,7 @@ public class BeaconFollower extends WallFollower {
             ColorAnalyzer.BeaconColor color = colorAnalyzer.getBeaconColor();
 
             if (logFile != null) {
-                logFile.write(String.format("%d,%s,%d,%d", System.currentTimeMillis(), color, colorAnalyzer.red(), colorAnalyzer.blue()));
+                logFile.write(String.format("%d,%s,%d,%d,%f,%f,%f", System.currentTimeMillis(), color, colorAnalyzer.red(), colorAnalyzer.blue(), getDistance(), beaconPusher.getCurrentPosition(), drive.getHeading()));
             }
 
             beaconPusher.setTargetPosition(getDistance() - PUSHER_DISTANCE);
@@ -89,8 +89,10 @@ public class BeaconFollower extends WallFollower {
             logFile = null;
         } else {
             logFile = file;
-            logFile.write("analyzer: " + colorAnalyzer.toString());
-            logFile.write("time,color,red,blue");
+            logFile.write("color: " + colorAnalyzer.toString());
+            logFile.write("distance: target=" + BEACON_DISTANCE + ",spread=" + BEACON_SPREAD);
+            logFile.write("pusher: target=" + PUSHER_DISTANCE);
+            logFile.write("time,color,red,blue,distance,pusherExt,heading");
         }
     }
 }

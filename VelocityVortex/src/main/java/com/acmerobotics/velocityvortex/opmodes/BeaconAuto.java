@@ -65,7 +65,7 @@ public class BeaconAuto extends Auto {
         colorSensor.setI2cAddress(I2cAddr.create8bit(0x3e));
         colorSensor.enableLed(false);
 
-        colorAnalyzer = new ThresholdColorAnalyzer(colorSensor, 10, 4);
+        colorAnalyzer = new ThresholdColorAnalyzer(colorSensor, Auto.BLUE_THRESHOLD, Auto.RED_THRESHOLD);
 
         beaconPusher = new BeaconPusher(hardwareMap, new LinearPot(hardwareMap.analogInput.get("lp"), 200, DistanceUnit.MM));
 

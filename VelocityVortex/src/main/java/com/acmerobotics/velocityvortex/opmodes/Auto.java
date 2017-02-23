@@ -25,6 +25,9 @@ public abstract class Auto extends LinearOpMode {
     public static final int BLUE_LED_CHANNEL = 0;
     public static final int RED_LED_CHANNEL = 1;
 
+    public static final int RED_THRESHOLD = 4;
+    public static final int BLUE_THRESHOLD = 10;
+
     public static final double MOVEMENT_SPEED = 1;
 
     public static final double ROOT2 = Math.sqrt(2);

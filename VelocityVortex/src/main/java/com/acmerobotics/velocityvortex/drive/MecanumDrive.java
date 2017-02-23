@@ -221,7 +221,7 @@ public class MecanumDrive {
         return speed * (smallestRPM / wheelType.getRPM());
     }
 
-    public DcMotor.RunMode getRunMode() {
+    public DcMotor.RunMode getMode() {
         return runMode;
     }
 

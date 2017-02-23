@@ -2,6 +2,7 @@ package com.acmerobotics.velocityvortex.opmodes;
 
 import com.acmerobotics.library.configuration.OpModeConfiguration;
 import com.acmerobotics.library.configuration.RobotProperties;
+import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.drive.BeaconFollower;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
@@ -54,15 +55,16 @@ public class MainTeleOp extends OpMode {
 
     private DeviceInterfaceModule dim;
 
-    private double sideModifier;
+    private int sideModifier;
 
-    private ElapsedTime flashTimer, launcherTimer;
+    private ElapsedTime flashTimer;
     private boolean shouldFlash, collectorReversed, launcherRunning;
 
-    private double lastLeftPos, lastRightPos;
-    private double rightSpeed, leftSpeed;
-
     private boolean gamepad1HalfSpeed;
+
+    private double launcherSpeed;
+
+    private DataFile logFile;
 
     private enum State {
         DRIVER,
@@ -108,13 +110,12 @@ public class MainTeleOp extends OpMode {
         colorSensor.setI2cAddress(I2cAddr.create8bit(0x3e));
         colorSensor.enableLed(false);
 
-        colorAnalyzer = new ThresholdColorAnalyzer(colorSensor, 5, 5);
+        colorAnalyzer = new ThresholdColorAnalyzer(colorSensor, Auto.BLUE_THRESHOLD, Auto.RED_THRESHOLD);
 
         stickyGamepad1 = new StickyGamepad(gamepad1);
         stickyGamepad2 = new StickyGamepad(gamepad2);
 
         flashTimer = new ElapsedTime();
-        launcherTimer = new ElapsedTime();
 
         dim = hardwareMap.deviceInterfaceModule.get("dim");
 
@@ -122,6 +123,8 @@ public class MainTeleOp extends OpMode {
 
         state = State.DRIVER;
 
+        logFile = new DataFile("TeleOp_" + System.currentTimeMillis() + ".csv");
+        logFile.write("time,launcherSpeed");
     }
 
     @Override
@@ -222,22 +225,6 @@ public class MainTeleOp extends OpMode {
                     launcher.triggerDown();
                 }
 
-                double leftPos = launcher.getLeftPosition();
-                double rightPos = launcher.getRightPosition();
-                if (launcherTimer.milliseconds() >= 100) {
-                    double dt = launcherTimer.milliseconds();
-                    rightSpeed = (leftPos - lastLeftPos) / dt;
-                    leftSpeed = (rightPos - lastRightPos) / dt;
-
-                    lastLeftPos = leftPos;
-                    lastRightPos = rightPos;
-                    launcherTimer.reset();
-                }
-
-                if (leftSpeed > 0.1 && launcher.isRunning()) {
-                    launcherRunning = true;
-                }
-
                 //wheels
                 if (stickyGamepad2.left_bumper) {
                     if (launcher.isRunning()) {
@@ -248,6 +235,13 @@ public class MainTeleOp extends OpMode {
                     }
                 }
                 launcher.update();
+
+                launcherSpeed = launcher.getSpeed();
+                if (launcherSpeed > 2.5 && launcher.isRunning()) {
+                    launcherRunning = true;
+                }
+
+                logFile.write(System.currentTimeMillis() + "," + launcherSpeed);
 
                 // launcher dim lights
                 if (launcherRunning) {
@@ -316,9 +310,14 @@ public class MainTeleOp extends OpMode {
 
         }
 
-        telemetry.addData("pusher_position", beaconPusher.getCurrentPosition());
+        telemetry.addData("pusher", beaconPusher.getCurrentPosition());
         telemetry.addData("heading", drive.getHeading());
         telemetry.addData("color", colorAnalyzer.getBeaconColor());
-        telemetry.addData("left_speed", leftSpeed);
+        telemetry.addData("speed", launcherSpeed);
+    }
+
+    @Override
+    public void stop() {
+        logFile.close();
     }
 }
