@@ -12,7 +12,7 @@ import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name = "Turn PID Tuner")
+@TeleOp(name = "Turn PID Tuner", group="PID Tuner")
 public class TurnPIDTuner extends Tuner {
 
     private EnhancedMecanumDrive drive;

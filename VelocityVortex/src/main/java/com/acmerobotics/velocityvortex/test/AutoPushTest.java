@@ -13,7 +13,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * @author Ryan
  */
 
-@Autonomous(name="Auto Push Test")
+@Autonomous(name="Auto Push Test", group="Test")
 public class AutoPushTest extends LinearOpMode {
 
     private  DistanceSensor sensor;

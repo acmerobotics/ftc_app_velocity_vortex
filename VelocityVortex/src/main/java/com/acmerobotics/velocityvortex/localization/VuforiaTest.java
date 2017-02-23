@@ -1,6 +1,7 @@
 package com.acmerobotics.velocityvortex.localization;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -19,6 +20,7 @@ import java.util.concurrent.BlockingQueue;
  * Created by kelly on 10/18/2016.
  */
 
+@Disabled
 @Autonomous(name = "Concept: Vuforia Navigation", group = "Concept")
 public class VuforiaTest extends OpMode {
 

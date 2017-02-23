@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @Disabled
-@TeleOp(name = "Mecanum Test")
+@TeleOp(name = "Mecanum Test", group="Test")
 public class MecanumTest extends OpMode {
 
     protected MecanumDrive mecanumDrive;

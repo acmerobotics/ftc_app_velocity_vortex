@@ -6,7 +6,7 @@ import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "Cap Ball Auto")
+@Autonomous(name = "Cap Ball Auto", group="Autonomous")
 public class CapBallAuto extends Auto {
 
     private BNO055IMU imu;

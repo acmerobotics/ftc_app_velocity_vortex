@@ -17,10 +17,7 @@ public abstract class Tuner extends OpMode {
     @Override
     public void init() {
         stickyGamepad1 = new StickyGamepad(gamepad1);
-    }
 
-    @Override
-    public void init_loop() {
         telemetry.log().add("Ready!");
     }
 
@@ -39,8 +36,7 @@ public abstract class Tuner extends OpMode {
 
         if (pos < 0) {
             pos += 3;
-        }
-        if (pos >= 3) {
+        } else if (pos >= 3) {
             pos -= 3;
         }
 
@@ -82,6 +78,7 @@ public abstract class Tuner extends OpMode {
             controller.reset();
         }
 
+        telemetry.clearAll();
         telemetry.addData("pid", controller.toString());
         telemetry.addData("pos", pos);
     }

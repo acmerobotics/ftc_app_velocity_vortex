@@ -20,8 +20,8 @@ public class MecanumDrive {
     public static final String[] MOTOR_ORDER = {
             "leftFront",
             "rightFront",
-            "rightBack",
-            "leftBack"
+            "leftBack",
+            "rightBack"
     };
 
     private DcMotor[] motors;
@@ -54,14 +54,14 @@ public class MecanumDrive {
         rollerDirs = new Vector2D[4];
         rollerDirs[0] = new Vector2D(-1, 1).normalize();
         rollerDirs[1] = new Vector2D(1, 1).normalize();
-        rollerDirs[2] = rollerDirs[0];
-        rollerDirs[3] = rollerDirs[1];
+        rollerDirs[2] = rollerDirs[1];
+        rollerDirs[3] = rollerDirs[0];
 
         rotDirs = new Vector2D[4];
         rotDirs[0] = new Vector2D(0, -1);
         rotDirs[1] = new Vector2D(0, 1);
-        rotDirs[2] = new Vector2D(0, 1);
-        rotDirs[3] = new Vector2D(0, -1);
+        rotDirs[2] = rotDirs[0];
+        rotDirs[3] = rotDirs[1];
 
         resetEncoders();
     }

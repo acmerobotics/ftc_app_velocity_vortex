@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
  */
 
 @Disabled
-@TeleOp(name = "Color Tester")
+@TeleOp(name = "Color Tester", group="Test")
 public class ColorTester extends OpMode {
 
     TCS34725ColorSensor device;

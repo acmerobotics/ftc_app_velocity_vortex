@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
  */
 
 @Disabled
-@Autonomous(name = "Motor Speed Test")
+@Autonomous(name = "Motor Speed Test", group="Test")
 public class MotorSpeedTest extends LinearOpMode {
 
     private DcMotor motor;

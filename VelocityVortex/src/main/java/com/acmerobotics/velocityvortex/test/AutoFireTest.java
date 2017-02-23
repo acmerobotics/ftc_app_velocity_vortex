@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
  * @author kelly
  */
 
-@Autonomous(name = "Auto Fire Test")
+@Autonomous(name = "Auto Fire Test", group="Test")
 public class AutoFireTest extends LinearOpMode {
 
     private FixedLauncher launcher;

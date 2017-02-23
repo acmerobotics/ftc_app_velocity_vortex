@@ -58,8 +58,8 @@ public class OpModeConfiguration {
             return new WheelType[] {
                     new WheelType(MotorType.ANDYMARK_20, DcMotorSimple.Direction.REVERSE, 1, 2),
                     new WheelType(MotorType.ANDYMARK_20, DcMotorSimple.Direction.FORWARD, 1, 2),
-                    new WheelType(MotorType.ANDYMARK_20, DcMotorSimple.Direction.FORWARD, 1, 2),
-                    new WheelType(MotorType.ANDYMARK_20, DcMotorSimple.Direction.REVERSE, 1, 2)
+                    new WheelType(MotorType.ANDYMARK_20, DcMotorSimple.Direction.REVERSE, 1, 2),
+                    new WheelType(MotorType.ANDYMARK_20, DcMotorSimple.Direction.FORWARD, 1, 2)
             };
         }
 

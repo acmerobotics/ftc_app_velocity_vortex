@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-@TeleOp(name = "Max Sonar Test")
+@TeleOp(name = "Max Sonar Test", group="Test")
 public class MaxSonarTest extends OpMode {
 
     private MaxSonarEZ1UltrasonicSensor sensor;

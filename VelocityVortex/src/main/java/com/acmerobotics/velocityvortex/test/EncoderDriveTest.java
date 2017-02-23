@@ -9,13 +9,15 @@ import com.acmerobotics.velocityvortex.drive.MecanumDrive;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 /**
  * Created by ACME Robotics on 2/18/2017.
  */
 
-@Autonomous(name="Encoder Drive Test")
+@Disabled
+@Autonomous(name="Encoder Drive Test", group="Test")
 public class EncoderDriveTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {

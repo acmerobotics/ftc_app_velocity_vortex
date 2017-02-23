@@ -19,7 +19,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
  * @author Ryan Brott
  */
 
-@TeleOp(name = "IMU Test")
+@TeleOp(name = "IMU Test", group="Test")
 public class IMUTest extends OpMode {
 
     private static final String XYZ_FORMAT_STRING = "%5.2f,%5.2f,%5.2f";

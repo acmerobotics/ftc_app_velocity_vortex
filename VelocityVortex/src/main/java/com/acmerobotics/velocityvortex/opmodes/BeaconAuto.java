@@ -24,7 +24,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import static com.acmerobotics.library.configuration.OpModeConfiguration.AllianceColor;
 import static com.acmerobotics.velocityvortex.sensors.ColorAnalyzer.BeaconColor;
 
-@Autonomous(name = "Beacon Auto")
+@Autonomous(name = "Beacon Auto", group="Autonomous")
 public class BeaconAuto extends Auto {
 
     public static final double FIRE_DISTANCE = 24;

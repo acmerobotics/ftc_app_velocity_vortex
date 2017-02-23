@@ -15,7 +15,7 @@ import com.qualcomm.robotcore.hardware.I2cAddr;
  */
 
 @Disabled
-@TeleOp(name = "I2c Device Comparison Test")
+@TeleOp(name = "I2c Device Comparison Test", group="Test")
 public class I2cDeviceComparisonTest extends OpMode {
 
     private ColorSensor amsColor;

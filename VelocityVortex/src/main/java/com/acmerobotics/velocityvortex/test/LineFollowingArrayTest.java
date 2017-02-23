@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
  * This class tests the functionality of the line following array
  */
 @Disabled
-@Autonomous(name = "Line Following Array Test")
+@Autonomous(name = "Line Following Array Test", group="Test")
 public class LineFollowingArrayTest extends OpMode {
 
     SparkFunLineFollowingArray lineFollowerArray;

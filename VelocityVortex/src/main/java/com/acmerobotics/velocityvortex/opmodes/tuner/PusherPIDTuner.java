@@ -12,7 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * Created by ACME Robotics on 2/22/2017.
  */
 
-@TeleOp(name="Pusher PID Tuner")
+@TeleOp(name="Pusher PID Tuner", group="PID Tuner")
 public class PusherPIDTuner extends Tuner {
 
     private BeaconPusher pusher;

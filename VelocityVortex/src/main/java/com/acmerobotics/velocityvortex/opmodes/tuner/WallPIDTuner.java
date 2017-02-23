@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
  * @author Ryan
  */
 
-@TeleOp(name="Wall PID Tuner")
+@TeleOp(name="Wall PID Tuner", group="PID Tuner")
 public class WallPIDTuner extends Tuner {
 
     private EnhancedMecanumDrive drive;

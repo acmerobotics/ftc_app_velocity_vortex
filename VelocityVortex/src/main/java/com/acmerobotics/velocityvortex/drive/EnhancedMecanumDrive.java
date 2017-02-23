@@ -178,18 +178,6 @@ public class EnhancedMecanumDrive {
         return heading;
     }
 
-//    public void move(double inches, double power, LinearOpMode opMode) {
-//        int counts = drive.getWheelTypes()[0].getCounts(inches);
-//        DcMotor motor = drive.getMotors()[0];
-//        int startPos = motor.getCurrentPosition();
-//        setVelocity(new Vector2D(0, power));
-//        while ((opMode == null || opMode.opModeIsActive()) && (motor.getCurrentPosition() - startPos) < counts) {
-//            update();
-//            Thread.yield();
-//        }
-//        stop();
-//    }
-
     public void move(double inches, double speed, LinearOpMode opMode) {
         DcMotor[] motors = drive.getMotors();
 

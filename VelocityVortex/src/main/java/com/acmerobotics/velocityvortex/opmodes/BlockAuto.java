@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
  * @author Ryan Brott
  */
 
-@Autonomous(name = "Block Auto")
+@Autonomous(name = "Block Auto", group="Autonomous")
 public class BlockAuto extends Auto {
 
     private FixedLauncher launcher;

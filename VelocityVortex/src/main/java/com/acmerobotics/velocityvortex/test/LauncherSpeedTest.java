@@ -7,6 +7,7 @@ import com.acmerobotics.velocityvortex.mech.FixedLauncher;
 import com.acmerobotics.velocityvortex.sensors.AverageDifferentiator;
 import com.acmerobotics.velocityvortex.sensors.ExponentialSmoother;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -14,7 +15,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * @author Ryan
  */
 
-@Autonomous(name="Launcher Speed Test")
+@Disabled
+@Autonomous(name="Launcher Speed Test", group="Test")
 public class LauncherSpeedTest extends LinearOpMode {
 
     private DataFile log;

@@ -15,7 +15,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
  */
 
 @Disabled
-@Autonomous(name = "Turn Test")
+@Autonomous(name = "Turn Test", group="Test")
 public class TurnTest extends LinearOpMode {
 
     private OpModeConfiguration opModeConfiguration;

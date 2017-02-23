@@ -17,7 +17,7 @@ import java.util.Date;
  * a basic PID update suitable for line following.
  */
 @Disabled
-@Autonomous(name = "PID Line Following")
+@Autonomous(name = "PID Line Following", group="Test")
 public class PIDLineFollowingTest extends OpMode {
 
     private PIDController controller;
