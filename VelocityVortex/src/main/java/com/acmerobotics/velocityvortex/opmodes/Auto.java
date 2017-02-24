@@ -80,9 +80,19 @@ public abstract class Auto extends LinearOpMode {
 
         waitForStart();
 
+        DataFile file = new DataFile("AutoStart_" + System.currentTimeMillis() + ".csv");
+        file.write("active: " + opModeIsActive());
+        file.write("started: " + isStarted());
+        file.write("stop_req: " + isStopRequested());
+        file.close();
+
+        if (isStopRequested()) {
+            Thread.currentThread().interrupt();
+        }
+
         resetStartTime();
 
-        sleep(1000 * delay);
+        Util.sleep(1000 * delay);
     }
 
     public abstract void initOpMode();
@@ -108,45 +118,20 @@ public abstract class Auto extends LinearOpMode {
 
         launcher.setPower(1);
 
-//        boolean launcherRunning = false;
-//        ElapsedTime launcherTimer = new ElapsedTime();
-//        ElapsedTime totalTimer = new ElapsedTime();
-//        double leftSpeed = 0, rightSpeed = 0, lastLeftPos, lastRightPos;
-//
-//        lastLeftPos = launcher.getLeftPosition();
-//        lastRightPos = launcher.getRightPosition();
-//
-//        while ((opMode == null || opMode.opModeIsActive()) && !launcherRunning && totalTimer.milliseconds() < 2000) {
-//            double leftPos = launcher.getLeftPosition();
-//            double rightPos = launcher.getRightPosition();
-//            if (launcherTimer.milliseconds() >= 100) {
-//                double dt = launcherTimer.milliseconds();
-//                rightSpeed = (leftPos - lastLeftPos) / dt;
-//                leftSpeed = (rightPos - lastRightPos) / dt;
-//
-//                lastLeftPos = leftPos;
-//                lastRightPos = rightPos;
-//                launcherTimer.reset();
-//            }
-//
-//            if (leftSpeed > 0.1 && launcher.isRunning()) {
-//                launcherRunning = true;
-//            }
-//
-//            Thread.yield();
-//        }
-
-        SystemClock.sleep(2000);
+        while ((opMode == null || opMode.opModeIsActive()) && launcher.getLeftSpeed() < 2.5) {
+            launcher.update();
+            Thread.yield();
+        }
 
         for (int i = 1; i <= balls; i++) {
             launcher.triggerUp();
-            SystemClock.sleep(500);
+            Util.sleep(500);
             launcher.triggerDown();
             if (i == balls) {
                 launcher.setPower(0);
                 return;
             } else {
-                SystemClock.sleep(1500);
+                Util.sleep(1500);
             }
         }
 

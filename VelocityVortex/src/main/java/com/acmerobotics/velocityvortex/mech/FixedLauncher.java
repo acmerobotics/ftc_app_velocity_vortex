@@ -1,11 +1,13 @@
 package com.acmerobotics.velocityvortex.mech;
 
+import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.sensors.AverageDifferentiator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.Range;
 
 /**
@@ -17,7 +19,9 @@ public class FixedLauncher {
     public static final double TRIGGER_UP = .97;
     public static final double TRIGGER_DOWN = .7;
 
-    private AverageDifferentiator speedMeasurer;
+    public static final int DIFF_MS = 1000;
+
+    private AverageDifferentiator leftSpeedMeasurer, rightSpeedMeasurer;
 
     private Servo trigger;
     private boolean triggered;
@@ -29,8 +33,15 @@ public class FixedLauncher {
     private boolean ramping;
     private int leftInitialPos, rightInitialPos;
 
+    private DataFile logFile;
+
+    private VoltageSensor voltageSensor;
+
     public FixedLauncher(HardwareMap hardwareMap) {
-        speedMeasurer = new AverageDifferentiator(1000);
+        leftSpeedMeasurer = new AverageDifferentiator(DIFF_MS);
+        rightSpeedMeasurer = new AverageDifferentiator(DIFF_MS);
+
+        voltageSensor = hardwareMap.voltageSensor.get("launcher");
 
         trigger = hardwareMap.servo.get("trigger");
         trigger.setPosition(TRIGGER_DOWN);
@@ -74,8 +85,12 @@ public class FixedLauncher {
         }
     }
 
-    public double getSpeed() {
-        return speedMeasurer.getLastDerivative();
+    public double getLeftSpeed() {
+        return leftSpeedMeasurer.getLastDerivative();
+    }
+
+    public double getRightSpeed() {
+        return rightSpeedMeasurer.getLastDerivative();
     }
 
     public boolean isBusy() {
@@ -135,23 +150,30 @@ public class FixedLauncher {
     }
 
     public void update() {
-        speedMeasurer.update(getLeftPosition());
-
-        if (!ramping) return;
         long now = System.currentTimeMillis();
-        if (now >= stopTime) {
-            ramping = false;
-            internalSetPower(leftTarget, rightTarget);
-        } else {
-            long smallDelta = now - lastTime;
-            long bigDelta = stopTime - lastTime;
-            if (leftTarget != 0) {
-                internalSetLeftPower(leftPower + smallDelta * (leftTarget - leftPower) / bigDelta);
+
+        double leftSpeed = leftSpeedMeasurer.update(getLeftPosition());
+        double rightSpeed = rightSpeedMeasurer.update(getRightPosition());
+
+        if (ramping) {
+            if (now >= stopTime) {
+                ramping = false;
+                internalSetPower(leftTarget, rightTarget);
+            } else {
+                long smallDelta = now - lastTime;
+                long bigDelta = stopTime - lastTime;
+                if (leftTarget != 0) {
+                    internalSetLeftPower(leftPower + smallDelta * (leftTarget - leftPower) / bigDelta);
+                }
+                if (rightTarget != 0) {
+                    internalSetRightPower(rightPower + smallDelta * (rightTarget - rightPower) / bigDelta);
+                }
+                lastTime = now;
             }
-            if (rightTarget != 0) {
-                internalSetRightPower(rightPower + smallDelta * (rightTarget - rightPower) / bigDelta);
-            }
-            lastTime = now;
+        }
+
+        if (logFile != null) {
+            logFile.write(String.format("%d,%f,%f,%f,%f,%f", now, leftPower, rightPower, leftSpeed, rightSpeed, voltageSensor.getVoltage()));
         }
     }
 
@@ -212,6 +234,16 @@ public class FixedLauncher {
                 return;
             }
             delay(2500);
+        }
+    }
+
+    public void setLogFile(DataFile file) {
+        if (file == null) {
+            if (logFile != null) logFile.close();
+            logFile = null;
+        } else {
+            logFile = file;
+            logFile.write("time,leftPower,rightPower,leftSpeed,rightSpeed,voltage");
         }
     }
 

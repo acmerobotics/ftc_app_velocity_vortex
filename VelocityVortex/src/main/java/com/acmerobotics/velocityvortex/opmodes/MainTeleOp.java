@@ -64,8 +64,6 @@ public class MainTeleOp extends OpMode {
 
     private double launcherSpeed;
 
-    private DataFile logFile;
-
     private enum State {
         DRIVER,
         BEACON_FORWARD,
@@ -123,8 +121,7 @@ public class MainTeleOp extends OpMode {
 
         state = State.DRIVER;
 
-        logFile = new DataFile("TeleOp_" + System.currentTimeMillis() + ".csv");
-        logFile.write("time,launcherSpeed");
+        launcher.setLogFile(new DataFile("Launcher_" + System.currentTimeMillis() + ".csv"));
     }
 
     @Override
@@ -173,7 +170,7 @@ public class MainTeleOp extends OpMode {
                 telemetry.addData("omega", omega);
 
                 basicDrive.setVelocity(new Vector2D(radius * Math.cos(theta), radius * Math.sin(theta)), omega);
-                basicDrive.logPowers(telemetry);
+//                basicDrive.logPowers(telemetry);
 
                 if (stickyGamepad1.y) {
                     gamepad1HalfSpeed = !gamepad1HalfSpeed;
@@ -215,6 +212,7 @@ public class MainTeleOp extends OpMode {
                     } else {
                         beaconPusher.retract();
                     }
+                    beaconPusher.update();
                 }
 
                 //launcher
@@ -236,12 +234,10 @@ public class MainTeleOp extends OpMode {
                 }
                 launcher.update();
 
-                launcherSpeed = launcher.getSpeed();
+                launcherSpeed = launcher.getLeftSpeed();
                 if (launcherSpeed > 2.5 && launcher.isRunning()) {
                     launcherRunning = true;
                 }
-
-                logFile.write(System.currentTimeMillis() + "," + launcherSpeed);
 
                 // launcher dim lights
                 if (launcherRunning) {
@@ -313,11 +309,7 @@ public class MainTeleOp extends OpMode {
         telemetry.addData("pusher", beaconPusher.getCurrentPosition());
         telemetry.addData("heading", drive.getHeading());
         telemetry.addData("color", colorAnalyzer.getBeaconColor());
-        telemetry.addData("speed", launcherSpeed);
-    }
-
-    @Override
-    public void stop() {
-        logFile.close();
+        telemetry.addData("leftSpeed", launcher.getLeftSpeed());
+        telemetry.addData("rightSpeed", launcher.getRightSpeed());
     }
 }

@@ -38,6 +38,9 @@
         <Motor
             name="collector"
             port="1" />
+        <Motor
+            name="pusher"
+            port="2" />
     </MotorController>
     <ServoController
         name="servo"
@@ -45,9 +48,6 @@
         <Servo
             name="trigger"
             port="1" />
-        <ContinuousRotationServo
-            name="pusher"
-            port="2" />
     </ServoController>
     <DeviceInterfaceModule
         name="dim"

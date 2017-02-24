@@ -3,9 +3,11 @@ package com.acmerobotics.velocityvortex.mech;
 import android.os.SystemClock;
 
 import com.acmerobotics.velocityvortex.drive.PIDController;
+import com.acmerobotics.velocityvortex.opmodes.Util;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.CRServoImpl;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.ServoController;
@@ -22,16 +24,19 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class BeaconPusher {
 
+    public static final double FULLY_RETRACTED = 0;
+    public static final double FULLY_EXTENDED = 4;
+
     public static final DifferentialControlLoopCoefficients PID_COEFFICIENTS = new DifferentialControlLoopCoefficients(0.5, 0, 0);
     public static final int PUSH_MS = 400;
 
-    private CRServo servo;
+    private DcMotorSimple servo;
     private DistanceSensor sensor;
     private double initialPosition, targetPosition;
     private PIDController controller;
 
     public BeaconPusher(HardwareMap hardwareMap, DistanceSensor distanceSensor) {
-        servo = hardwareMap.crservo.get("pusher");
+        servo = hardwareMap.dcMotor.get("pusher");
         sensor = distanceSensor;
         if (sensor != null) {
             reset();
@@ -47,6 +52,7 @@ public class BeaconPusher {
         return controller;
     }
 
+    @Deprecated
     public boolean isSensorActive() {
         return sensor != null && getRawPosition() > 0;
     }
@@ -88,11 +94,11 @@ public class BeaconPusher {
     }
 
     public void extend() {
-        servo.setPower(1);
+        setTargetPosition(FULLY_EXTENDED);
     }
 
     public void retract() {
-        servo.setPower(-1);
+        setTargetPosition(FULLY_RETRACTED);
     }
 
     public void stop() {
@@ -122,7 +128,7 @@ public class BeaconPusher {
                 Thread.yield();
             }
         } else {
-            SystemClock.sleep(3000);
+            Util.sleep(3000);
         }
     }
 
