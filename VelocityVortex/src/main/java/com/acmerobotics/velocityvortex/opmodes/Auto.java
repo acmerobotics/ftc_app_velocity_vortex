@@ -87,7 +87,8 @@ public abstract class Auto extends LinearOpMode {
         file.close();
 
         if (isStopRequested()) {
-            Thread.currentThread().interrupt();
+//            Thread.currentThread().interrupt();
+            return;
         }
 
         resetStartTime();

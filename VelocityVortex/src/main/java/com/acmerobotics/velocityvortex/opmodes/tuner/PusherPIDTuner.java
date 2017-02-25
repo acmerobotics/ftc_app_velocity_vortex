@@ -42,6 +42,8 @@ public class PusherPIDTuner extends Tuner {
         }
 
         pusher.update();
+
+        telemetry.addData("pusher_pos", pusher.getCurrentPosition());
     }
 
     @Override

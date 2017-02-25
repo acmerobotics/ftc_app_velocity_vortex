@@ -122,6 +122,7 @@ public class MainTeleOp extends OpMode {
         state = State.DRIVER;
 
         launcher.setLogFile(new DataFile("Launcher_" + System.currentTimeMillis() + ".csv"));
+        beaconPusher.setLogFile(new DataFile("BeaconPusher_" + System.currentTimeMillis() + ".csv"));
     }
 
     @Override

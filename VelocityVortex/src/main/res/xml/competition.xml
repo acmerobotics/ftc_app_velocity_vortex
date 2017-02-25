@@ -51,7 +51,7 @@
     </ServoController>
     <DeviceInterfaceModule
         name="dim"
-        serialNumber="AI02RLOW">
+        serialNumber="AL026BG9">
         <I2cDeviceSynch
             name="imu"
             port="0" />

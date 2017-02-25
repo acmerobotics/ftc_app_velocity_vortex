@@ -2,8 +2,10 @@ package com.acmerobotics.velocityvortex.mech;
 
 import android.os.SystemClock;
 
+import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.drive.PIDController;
 import com.acmerobotics.velocityvortex.opmodes.Util;
+import com.acmerobotics.velocityvortex.sensors.AverageDifferentiator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.CRServoImpl;
@@ -11,6 +13,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.ServoController;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.DifferentialControlLoopCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -25,11 +28,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class BeaconPusher {
 
     public static final double FULLY_RETRACTED = 0;
-    public static final double FULLY_EXTENDED = 4;
+    public static final double FULLY_EXTENDED = 5;
 
     public static final DifferentialControlLoopCoefficients PID_COEFFICIENTS = new DifferentialControlLoopCoefficients(0.5, 0, 0);
     public static final int PUSH_MS = 400;
 
+    private VoltageSensor voltageSensor;
+    private DataFile logFile;
+    private AverageDifferentiator speedMeasurer;
     private DcMotorSimple servo;
     private DistanceSensor sensor;
     private double initialPosition, targetPosition;
@@ -37,7 +43,12 @@ public class BeaconPusher {
 
     public BeaconPusher(HardwareMap hardwareMap, DistanceSensor distanceSensor) {
         servo = hardwareMap.dcMotor.get("pusher");
+        servo.setDirection(DcMotorSimple.Direction.REVERSE);
         sensor = distanceSensor;
+
+        voltageSensor = hardwareMap.voltageSensor.get("collector");
+
+        speedMeasurer = new AverageDifferentiator(500);
         if (sensor != null) {
             reset();
             controller = new PIDController(PID_COEFFICIENTS);
@@ -89,7 +100,23 @@ public class BeaconPusher {
     public void update() {
         if (isSensorActive()) {
             double error = getPositionError();
+            double pos = getCurrentPosition();
+            double speed = speedMeasurer.update(pos);
             servo.setPower(Range.clip(controller.update(error), -1, 1));
+
+            if (logFile != null) {
+                logFile.write(String.format("%d,%f,%f,%f", System.currentTimeMillis(), pos, speed, voltageSensor.getVoltage()));
+            }
+        }
+    }
+
+    public void setLogFile(DataFile file) {
+        if (file == null) {
+            if (logFile != null) logFile.close();
+            logFile = null;
+        } else {
+            logFile = file;
+            logFile.write("time,pos,speed,voltage");
         }
     }
 
