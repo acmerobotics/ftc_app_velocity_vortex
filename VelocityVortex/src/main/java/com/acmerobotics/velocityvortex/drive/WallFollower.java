@@ -79,7 +79,7 @@ public class WallFollower {
         double distanceError = getDistanceError();
         if (Math.abs(distanceError) > distanceSpread) {
             double lateralSpeed = controller.update(distanceError);
-            drive.setVelocity(new Vector2D(lateralSpeed, forwardSpeed));
+            drive.setVelocity(new Vector2D(lateralSpeed, 0));
             drive.update();
             return false;
         } else {

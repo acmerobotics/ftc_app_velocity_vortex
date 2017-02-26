@@ -47,4 +47,9 @@ public class WheelType {
         int counts = (int) Math.round((inches * getCPR()) / circum);
         return counts;
     }
+
+    public double getDistance(int counts) {
+        double circum = 2 * Math.PI * wheelRadius;
+        return (counts * circum) / getCPR();
+    }
 }
