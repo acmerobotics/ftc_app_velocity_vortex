@@ -3,20 +3,13 @@ package com.acmerobotics.velocityvortex.opmodes.tester;
 import com.acmerobotics.library.file.LogFile;
 import com.acmerobotics.library.logging.MultipleLogger;
 import com.acmerobotics.velocityvortex.opmodes.StickyGamepad;
-import com.acmerobotics.velocityvortex.opmodes.tester.DefaultTester;
-import com.acmerobotics.velocityvortex.opmodes.tester.DistanceSensorTester;
-import com.acmerobotics.velocityvortex.opmodes.tester.MRDeviceInterfaceModuleTester;
-import com.acmerobotics.velocityvortex.opmodes.tester.MRMotorControllerTester;
-import com.acmerobotics.velocityvortex.opmodes.tester.MRServoControllerTester;
-import com.acmerobotics.velocityvortex.opmodes.tester.TCS34725ColorSensorTester;
-import com.acmerobotics.velocityvortex.opmodes.tester.Tester;
-import com.acmerobotics.velocityvortex.opmodes.tester.TesterBinding;
-import com.acmerobotics.velocityvortex.opmodes.tester.UltrasonicSensorTester;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsUsbDcMotorController;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsUsbDeviceInterfaceModule;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsUsbServoController;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
@@ -100,6 +93,7 @@ public class TestOpMode extends OpMode {
 
         bind("amsColor", I2cDeviceSynch.class, TCS34725ColorSensorTester.class);
 
+        bind(ModernRoboticsI2cColorSensor.class, MRColorSensorTester.class);
         bind(DistanceSensor.class, DistanceSensorTester.class);
         bind(UltrasonicSensor.class, UltrasonicSensorTester.class);
 

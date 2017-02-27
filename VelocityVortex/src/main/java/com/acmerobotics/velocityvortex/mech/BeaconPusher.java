@@ -24,8 +24,11 @@ public class BeaconPusher {
     public static final double MIN_POSITION = 0;
     public static final double MAX_POSITION = 5;
 
+    public static final double THRESHOLD = 0.003;
+    public static final int INTERVAL = 100;
+
     public static final DifferentialControlLoopCoefficients PID_COEFFICIENTS = new DifferentialControlLoopCoefficients(0.5, 0, 0);
-    public static final int PUSH_MS = 400;
+    public static final int PUSH_MS = 0;
 
     private VoltageSensor voltageSensor;
     private DataFile logFile;
@@ -42,7 +45,7 @@ public class BeaconPusher {
 
         voltageSensor = hardwareMap.voltageSensor.get("collector");
 
-        speedMeasurer = new AverageDifferentiator(500);
+        speedMeasurer = new AverageDifferentiator(INTERVAL);
         if (sensor != null) {
             reset();
             controller = new PIDController(PID_COEFFICIENTS);
@@ -104,12 +107,17 @@ public class BeaconPusher {
         }
     }
 
+    public double getSpeed() {
+        return speedMeasurer.getLastDerivative();
+    }
+
     public void setLogFile(DataFile file) {
         if (file == null) {
             if (logFile != null) logFile.close();
             logFile = null;
         } else {
             logFile = file;
+            logFile.write("diff: interval=" + speedMeasurer.getInterval() + "ms");
             logFile.write("time,pos,speed,voltage");
         }
     }
@@ -134,17 +142,18 @@ public class BeaconPusher {
         extend();
 
         if (isSensorActive()) {
-            ElapsedTime time = new ElapsedTime();
-            double lastPos = getCurrentPosition();
+            ElapsedTime timer = new ElapsedTime();
+            boolean aboveThreshold = false;
             while (opMode == null || opMode.opModeIsActive()) {
-                double pos = getCurrentPosition();
-                if (Math.abs(pos - lastPos) < 0.1) {
-                    if (time.milliseconds() >= PUSH_MS) {
-                        break;
+                update();
+                if (getSpeed() < THRESHOLD) {
+                    if (aboveThreshold && timer.milliseconds() > PUSH_MS) {
+                        stop();
+                        return;
                     }
                 } else {
-                    lastPos = pos;
-                    time.reset();
+                    aboveThreshold = true;
+                    timer.reset();
                 }
                 Thread.yield();
             }

@@ -23,6 +23,10 @@ public class AverageDifferentiator {
         this.interval = interval;
     }
 
+    public int getInterval() {
+        return interval;
+    }
+
     public double update(double value) {
         return update(System.currentTimeMillis(), value);
     }
