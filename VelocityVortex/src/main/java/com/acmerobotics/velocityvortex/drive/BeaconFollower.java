@@ -59,7 +59,7 @@ public class BeaconFollower extends WallFollower {
                 beaconPusher.push(opMode);
                 beaconsPressed++;
 
-                beaconPusher.moveToPosition(getDistance() - PUSHER_DISTANCE, 0.1, opMode);
+                beaconPusher.moveToPosition(getDistance() - PUSHER_DISTANCE, 0.25, opMode);
 
                 if (beaconsPressed < numBeacons) {
                     targetFirstLastBeacon = true;

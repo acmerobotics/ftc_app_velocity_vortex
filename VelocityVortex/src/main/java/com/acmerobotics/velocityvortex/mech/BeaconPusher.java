@@ -24,11 +24,12 @@ public class BeaconPusher {
     public static final double MIN_POSITION = 0;
     public static final double MAX_POSITION = 5;
 
-    public static final double THRESHOLD = 0.003;
+    public static final double THRESHOLD = 0.001;
     public static final int INTERVAL = 100;
+    public static final int TIMEOUT = 250;
 
     public static final DifferentialControlLoopCoefficients PID_COEFFICIENTS = new DifferentialControlLoopCoefficients(0.5, 0, 0);
-    public static final int PUSH_MS = 0;
+    public static final int PUSH_MS = 200;
 
     private VoltageSensor voltageSensor;
     private DataFile logFile;
@@ -39,13 +40,13 @@ public class BeaconPusher {
     private PIDController controller;
 
     public BeaconPusher(HardwareMap hardwareMap, DistanceSensor distanceSensor) {
-        servo = hardwareMap.dcMotor.get("pusher");
-        servo.setDirection(DcMotorSimple.Direction.REVERSE);
+        servo = hardwareMap.crservo.get("pusher");
+//        servo.setDirection(DcMotorSimple.Direction.REVERSE);
         sensor = distanceSensor;
 
         voltageSensor = hardwareMap.voltageSensor.get("collector");
 
-        speedMeasurer = new AverageDifferentiator(INTERVAL);
+        speedMeasurer = new AverageDifferentiator(INTERVAL, TIMEOUT);
         if (sensor != null) {
             reset();
             controller = new PIDController(PID_COEFFICIENTS);

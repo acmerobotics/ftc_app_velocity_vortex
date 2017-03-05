@@ -68,6 +68,7 @@ public class BeaconAuto extends Auto {
         colorAnalyzer = new ThresholdColorAnalyzer(colorSensor, Auto.BLUE_THRESHOLD, Auto.RED_THRESHOLD);
 
         beaconPusher = new BeaconPusher(hardwareMap, new LinearPot(hardwareMap.analogInput.get("lp"), 200, DistanceUnit.MM));
+        beaconPusher.setLogFile(new DataFile(getFileName("BeaconPusher")));
 
         beaconFollower = new BeaconFollower(drive, distanceSensor, colorAnalyzer, beaconPusher, properties);
         beaconFollower.setLogFile(new DataFile(getFileName("BeaconFollower")));

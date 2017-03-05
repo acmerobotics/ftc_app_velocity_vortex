@@ -12,15 +12,20 @@ public class AverageDifferentiator {
 
     private long[] times;
     private double[] values;
-    private int capacity, now, interval;
+    private int capacity, now, interval, timeout;
     private double lastVel;
 
     public AverageDifferentiator(int interval) {
+        this(interval, 0);
+    }
+
+    public AverageDifferentiator(int interval, int timeout) {
         capacity = STARTING_CAPACITY;
         times = new long[capacity];
         values = new double[capacity];
         now = -1;
         this.interval = interval;
+        this.timeout = timeout;
     }
 
     public int getInterval() {
@@ -32,7 +37,7 @@ public class AverageDifferentiator {
     }
 
     public double update(long time, double value) {
-        if (now != -1 && value == values[now]) {
+        if (now != -1 && value == values[now] && (timeout != 0 && (time - times[now]) < timeout)) {
             return lastVel;
         }
         int i = now;
