@@ -1,6 +1,8 @@
 package com.acmerobotics.velocityvortex.opmodes;
 
+import com.acmerobotics.library.configuration.OpModeConfiguration;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
+import com.acmerobotics.velocityvortex.drive.FieldNavigator;
 import com.acmerobotics.velocityvortex.drive.WallFollower;
 import com.acmerobotics.velocityvortex.mech.FixedLauncher;
 import com.acmerobotics.velocityvortex.sensors.MaxSonarEZ1UltrasonicSensor;
@@ -19,9 +21,9 @@ public class BlockAuto extends Auto {
     private FixedLauncher launcher;
 
     private EnhancedMecanumDrive drive;
-    private BNO055IMU imu;
+    private FieldNavigator nav;
 
-    private WallFollower wallFollower;
+    private BNO055IMU imu;
 
     @Override
     public void initOpMode() {
@@ -31,9 +33,9 @@ public class BlockAuto extends Auto {
         imu.initialize(parameters);
 
         drive = new EnhancedMecanumDrive(basicDrive, imu, properties);
+//        nav = new FieldNavigator(drive, allianceColor == OpModeConfiguration.AllianceColor.BLUE);
 
-        DistanceSensor distanceSensor = new MaxSonarEZ1UltrasonicSensor(hardwareMap.analogInput.get("maxSonar"));
-        wallFollower = new WallFollower(drive, distanceSensor, properties);
+        nav.setPosition(1.5 * TILE_SIZE, -3 * TILE_SIZE + properties.getRobotSize() / 2);
 
         launcher = new FixedLauncher(hardwareMap);
     }
@@ -52,7 +54,8 @@ public class BlockAuto extends Auto {
     }
 
     public void moveAndFire() {
-        drive.move(-((Math.sqrt(2) * TILE_SIZE) + 3), MOVEMENT_SPEED, this);
+//        nav.moveTo(1.5 * TILE_SIZE, -2 * TILE_SIZE, this);
+        nav.moveTo(0.5 * TILE_SIZE, -TILE_SIZE, 45, this);
 
         Auto.fireBalls(launcher, numBalls, this);
     }
@@ -65,11 +68,4 @@ public class BlockAuto extends Auto {
             idle();
         }
     }
-
-//    public void go() throws InterruptedException {
-//        drive.move(-TILE_SIZE * 2 + 2, 1, this);
-//        drive.turnSync(90, this);
-//        drive.move(-.5 * TILE_SIZE, 1, this);
-//        wallFollower.moveToDistance(BeaconFollower.BEACON_DISTANCE, BeaconFollower.BEACON_SPREAD, this);
-//    }
 }

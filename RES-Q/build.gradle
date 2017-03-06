@@ -16,4 +16,8 @@ apply from: '../build.common.gradle'
 
 android {
     buildToolsVersion '25.0.0'
+
+    lintOptions {
+        abortOnError false
+    }
 }

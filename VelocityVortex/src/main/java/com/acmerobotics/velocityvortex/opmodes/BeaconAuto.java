@@ -4,6 +4,7 @@ import com.acmerobotics.library.configuration.OpModeConfiguration;
 import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.drive.BeaconFollower;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
+import com.acmerobotics.velocityvortex.drive.FieldNavigator;
 import com.acmerobotics.velocityvortex.drive.Vector2D;
 import com.acmerobotics.velocityvortex.mech.BeaconPusher;
 import com.acmerobotics.velocityvortex.mech.FixedLauncher;
@@ -29,10 +30,12 @@ public class BeaconAuto extends Auto {
 
     public static final double FIRE_DISTANCE = 24;
     public static final int RAMP_PARK_ELEVATION = 7;
+    public static final double BEACON_BUTTON_GAP = 5.3;
 
     private FixedLauncher launcher;
 
     private EnhancedMecanumDrive drive;
+    private FieldNavigator nav;
     private BNO055IMU imu;
 
     private BeaconFollower beaconFollower;
@@ -44,9 +47,12 @@ public class BeaconAuto extends Auto {
     private BeaconPusher beaconPusher;
 
     private boolean targetFirstLastBeacon;
+    private double halfWidth;
 
     @Override
     public void initOpMode() {
+        halfWidth = properties.getRobotSize() / 2;
+
         targetColor = (allianceColor == AllianceColor.BLUE) ? BeaconColor.BLUE : BeaconColor.RED;
 
         imu = new AdafruitBNO055IMU(hardwareMap.i2cDeviceSynch.get("imu"));
@@ -55,6 +61,9 @@ public class BeaconAuto extends Auto {
         imu.initialize(parameters);
 
         drive = new EnhancedMecanumDrive(basicDrive, imu, properties);
+        nav = new FieldNavigator(drive, allianceColor);
+        nav.setHeading(180);
+        nav.setPosition(3 * TILE_SIZE - halfWidth, halfWidth);
 
         DistanceSensor distanceSensor = new MaxSonarEZ1UltrasonicSensor(hardwareMap.analogInput.get("maxSonar"));
 
@@ -83,6 +92,11 @@ public class BeaconAuto extends Auto {
         beaconFollower.moveToDistance(BeaconFollower.BEACON_DISTANCE, BeaconFollower.BEACON_SPREAD / 2.0, this);
 
         targetFirstLastBeacon = beaconFollower.pushBeacons(2, allianceModifier, targetColor, this);
+        if (targetFirstLastBeacon) {
+            nav.setPosition(-3 * TILE_SIZE + properties.getRobotSize() / 2 + 4, 1.5 * TILE_SIZE - BEACON_BUTTON_GAP / 2);
+        } else {
+            nav.setPosition(-3 * TILE_SIZE + properties.getRobotSize() / 2 + 4, 1.5 * TILE_SIZE + BEACON_BUTTON_GAP / 2);
+        }
 
         switch (parkDest) {
             case NONE:
@@ -97,51 +111,15 @@ public class BeaconAuto extends Auto {
     }
 
     public void moveAndFire() {
-        drive.move(-FIRE_DISTANCE, MOVEMENT_SPEED, this);
+        nav.moveTo(3 * TILE_SIZE - halfWidth, TILE_SIZE + halfWidth, 180, this);
 
         Auto.fireBalls(launcher, numBalls, this);
 
-        if (allianceColor == AllianceColor.BLUE) {
-            drive.turnSync(-110, this);
-        } else {
-            drive.turnSync(100, this);
-        }
-
-        drive.move(54, MOVEMENT_SPEED, this);
-
-        if (allianceColor == OpModeConfiguration.AllianceColor.BLUE) {
-            drive.setTargetHeading(180);
-        } else {
-            drive.setTargetHeading(0);
-        }
-
-        drive.turnSync(0, this);
+        nav.moveTo(4 + halfWidth, 2.5 * TILE_SIZE, 180, this);
     }
 
     private void centerPark() {
-        //beaconFollower.moveToDistance(12, 2 * BeaconFollower.BEACON_SPREAD, this);
-
-        if (allianceColor == AllianceColor.BLUE) {
-            if (targetFirstLastBeacon) {
-                drive.turnSync(45, this);
-            } else {
-                drive.turnSync(40, this);
-            }
-        } else {
-            if (targetFirstLastBeacon) {
-                drive.turnSync(127, this);
-            } else {
-                drive.turnSync(135, this);
-            }
-        }
-        drive.move(-2 * ROOT2 * TILE_SIZE - 3, MOVEMENT_SPEED, this);
-
-        drive.setTargetHeading(180);
-        drive.turnSync(0, this);
-//        drive.turnSync(0, this);
-//        drive.move(-2 * allianceModifier * TILE_SIZE, MOVEMENT_SPEED, this);
-//        drive.turnSync(90, this);
-//        drive.move(-TILE_SIZE * 1.3, MOVEMENT_SPEED, this);
+        nav.moveTo(3 * TILE_SIZE, 3 * TILE_SIZE, -135, this);
     }
 
     private void cornerPark() {
@@ -151,10 +129,10 @@ public class BeaconAuto extends Auto {
             drive.turnSync(180, this);
         }
 
-            drive.setVelocity(new Vector2D(0, -1));
+        drive.setVelocity(new Vector2D(0, -1));
 
-            while (opModeIsActive() && Math.abs(imu.getAngularOrientation().thirdAngle) < RAMP_PARK_ELEVATION) {
-                drive.update();
+        while (opModeIsActive() && Math.abs(imu.getAngularOrientation().thirdAngle) < RAMP_PARK_ELEVATION) {
+            drive.update();
             idle();
         }
     }
