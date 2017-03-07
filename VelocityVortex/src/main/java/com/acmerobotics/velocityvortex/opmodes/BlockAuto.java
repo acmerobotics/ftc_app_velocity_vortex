@@ -1,15 +1,11 @@
 package com.acmerobotics.velocityvortex.opmodes;
 
-import com.acmerobotics.library.configuration.OpModeConfiguration;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.FieldNavigator;
-import com.acmerobotics.velocityvortex.drive.WallFollower;
 import com.acmerobotics.velocityvortex.mech.FixedLauncher;
-import com.acmerobotics.velocityvortex.sensors.MaxSonarEZ1UltrasonicSensor;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 /**
  * @author Ryan Brott
@@ -25,17 +21,21 @@ public class BlockAuto extends Auto {
 
     private BNO055IMU imu;
 
+    private double halfWidth;
+
     @Override
     public void initOpMode() {
+        halfWidth = properties.getRobotSize() / 2;
+
         imu = new AdafruitBNO055IMU(hardwareMap.i2cDeviceSynch.get("imu"));
         AdafruitBNO055IMU.Parameters parameters = new AdafruitBNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         imu.initialize(parameters);
 
         drive = new EnhancedMecanumDrive(basicDrive, imu, properties);
-//        nav = new FieldNavigator(drive, allianceColor == OpModeConfiguration.AllianceColor.BLUE);
-
-        nav.setPosition(1.5 * TILE_SIZE, -3 * TILE_SIZE + properties.getRobotSize() / 2);
+        drive.setInitialHeading(180);
+        nav = new FieldNavigator(drive, allianceColor);
+        nav.setLocation(4 * TILE_SIZE + halfWidth, halfWidth);
 
         launcher = new FixedLauncher(hardwareMap);
     }
@@ -47,23 +47,18 @@ public class BlockAuto extends Auto {
         moveAndFire();
 
         moveToLineAndWait();
-
-        drive.move(-3 * TILE_SIZE, MOVEMENT_SPEED, this);
-
-//        go();
     }
 
     public void moveAndFire() {
-//        nav.moveTo(1.5 * TILE_SIZE, -2 * TILE_SIZE, this);
-        nav.moveTo(0.5 * TILE_SIZE, -TILE_SIZE, 45, this);
+        nav.moveTo(4 * TILE_SIZE + halfWidth, TILE_SIZE - halfWidth, 180, this);
+        nav.moveTo(3.5 * TILE_SIZE, 1.5 * TILE_SIZE, 225, this);
 
         Auto.fireBalls(launcher, numBalls, this);
     }
 
     public void moveToLineAndWait() {
-        drive.move(-1 * TILE_SIZE * ROOT2 + 6, MOVEMENT_SPEED, this);
+        nav.moveTo(2.5 * TILE_SIZE, 2.5 * TILE_SIZE, 180, this);
 
-        drive.turnSync(-45 * allianceModifier, this);
         while (opModeIsActive() && getRuntime() < 10) {
             idle();
         }

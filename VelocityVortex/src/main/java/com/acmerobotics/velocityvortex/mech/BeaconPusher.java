@@ -2,7 +2,6 @@ package com.acmerobotics.velocityvortex.mech;
 
 import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.drive.PIDController;
-import com.acmerobotics.velocityvortex.opmodes.Util;
 import com.acmerobotics.velocityvortex.sensors.AverageDifferentiator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -55,6 +54,10 @@ public class BeaconPusher {
 
     public BeaconPusher(HardwareMap hardwareMap) {
         this(hardwareMap, null);
+    }
+
+    public DcMotorSimple getServo() {
+        return servo;
     }
 
     public PIDController getController() {
@@ -159,7 +162,7 @@ public class BeaconPusher {
                 Thread.yield();
             }
         } else {
-            Util.sleep(3000);
+            opMode.sleep(3000);
         }
     }
 

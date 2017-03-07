@@ -1,16 +1,11 @@
 package com.acmerobotics.velocityvortex.opmodes;
 
-import android.os.SystemClock;
-
 import com.acmerobotics.library.configuration.OpModeConfiguration;
 import com.acmerobotics.library.configuration.RobotProperties;
-import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
 import com.acmerobotics.velocityvortex.mech.FixedLauncher;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
-import com.qualcomm.robotcore.util.ClassFilter;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import static com.acmerobotics.library.configuration.OpModeConfiguration.AllianceColor;
 import static com.acmerobotics.library.configuration.OpModeConfiguration.MatchType;
@@ -29,8 +24,6 @@ public abstract class Auto extends LinearOpMode {
     public static final int BLUE_THRESHOLD = 6;
 
     public static final double MOVEMENT_SPEED = 1;
-
-    public static final double ROOT2 = Math.sqrt(2);
 
     public static final double TILE_SIZE = 24;
 
@@ -80,20 +73,13 @@ public abstract class Auto extends LinearOpMode {
 
         waitForStart();
 
-        DataFile file = new DataFile("AutoStart_" + System.currentTimeMillis() + ".csv");
-        file.write("active: " + opModeIsActive());
-        file.write("started: " + isStarted());
-        file.write("stop_req: " + isStopRequested());
-        file.close();
-
         if (isStopRequested()) {
-//            Thread.currentThread().interrupt();
             return;
         }
 
         resetStartTime();
 
-        Util.sleep(1000 * delay);
+        sleep(1000 * delay);
     }
 
     public abstract void initOpMode();
@@ -119,20 +105,20 @@ public abstract class Auto extends LinearOpMode {
 
         launcher.setPower(1);
 
-        while ((opMode == null || opMode.opModeIsActive()) && launcher.getLeftSpeed() < 2.5) {
+        while (opMode.opModeIsActive() && launcher.getLeftSpeed() < 2.5) {
             launcher.update();
             Thread.yield();
         }
 
         for (int i = 1; i <= balls; i++) {
             launcher.triggerUp();
-            Util.sleep(500);
+            opMode.sleep(500);
             launcher.triggerDown();
             if (i == balls) {
                 launcher.setPower(0);
                 return;
             } else {
-                Util.sleep(1500);
+                opMode.sleep(1500);
             }
         }
 

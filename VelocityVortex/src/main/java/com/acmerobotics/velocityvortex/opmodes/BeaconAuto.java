@@ -1,6 +1,5 @@
 package com.acmerobotics.velocityvortex.opmodes;
 
-import com.acmerobotics.library.configuration.OpModeConfiguration;
 import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.drive.BeaconFollower;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
@@ -18,7 +17,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.I2cAddr;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
@@ -31,6 +29,7 @@ public class BeaconAuto extends Auto {
     public static final double FIRE_DISTANCE = 24;
     public static final int RAMP_PARK_ELEVATION = 7;
     public static final double BEACON_BUTTON_GAP = 5.3;
+    public static final double WALL_DISTANCE = 6;
 
     private FixedLauncher launcher;
 
@@ -61,9 +60,9 @@ public class BeaconAuto extends Auto {
         imu.initialize(parameters);
 
         drive = new EnhancedMecanumDrive(basicDrive, imu, properties);
+        drive.setInitialHeading(180);
         nav = new FieldNavigator(drive, allianceColor);
-        nav.setHeading(180);
-        nav.setPosition(3 * TILE_SIZE - halfWidth, halfWidth);
+        nav.setLocation(3 * TILE_SIZE - halfWidth, halfWidth);
 
         DistanceSensor distanceSensor = new MaxSonarEZ1UltrasonicSensor(hardwareMap.analogInput.get("maxSonar"));
 
@@ -91,12 +90,17 @@ public class BeaconAuto extends Auto {
 
         beaconFollower.moveToDistance(BeaconFollower.BEACON_DISTANCE, BeaconFollower.BEACON_SPREAD / 2.0, this);
 
-        targetFirstLastBeacon = beaconFollower.pushBeacons(2, allianceModifier, targetColor, this);
+        targetFirstLastBeacon = beaconFollower.pushBeacons(1, allianceModifier, targetColor, this);
+        double x = WALL_DISTANCE + halfWidth;
+        double y = 4.5 * TILE_SIZE;
         if (targetFirstLastBeacon) {
-            nav.setPosition(-3 * TILE_SIZE + properties.getRobotSize() / 2 + 4, 1.5 * TILE_SIZE - BEACON_BUTTON_GAP / 2);
+            y -= BEACON_BUTTON_GAP / 2;
         } else {
-            nav.setPosition(-3 * TILE_SIZE + properties.getRobotSize() / 2 + 4, 1.5 * TILE_SIZE + BEACON_BUTTON_GAP / 2);
+            y += BEACON_BUTTON_GAP / 2;
         }
+        nav.setLocation(x, y);
+
+        beaconPusher.getServo().setPower(-1);
 
         switch (parkDest) {
             case NONE:
@@ -115,18 +119,24 @@ public class BeaconAuto extends Auto {
 
         Auto.fireBalls(launcher, numBalls, this);
 
-        nav.moveTo(4 + halfWidth, 2.5 * TILE_SIZE, 180, this);
+        nav.moveTo(WALL_DISTANCE + halfWidth, 2.5 * TILE_SIZE, allianceColor == AllianceColor.BLUE ? 0 : 180, this);
     }
 
     private void centerPark() {
-        nav.moveTo(3 * TILE_SIZE, 3 * TILE_SIZE, -135, this);
+        if (allianceColor == AllianceColor.RED) {
+            drive.turnSync(90, this);
+        }
+
+        sleep(500);
+
+        nav.moveTo(2.5 * TILE_SIZE, 2.5 * TILE_SIZE, this);
     }
 
     private void cornerPark() {
         beaconFollower.moveToDistance(15, 2 * BeaconFollower.BEACON_SPREAD, this);
 
         if (allianceColor == AllianceColor.RED) {
-            drive.turnSync(180, this);
+            drive.turnSync(90, this);
         }
 
         drive.setVelocity(new Vector2D(0, -1));
