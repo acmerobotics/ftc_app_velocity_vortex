@@ -29,7 +29,7 @@ public class BeaconAuto extends Auto {
     public static final double FIRE_DISTANCE = 24;
     public static final int RAMP_PARK_ELEVATION = 7;
     public static final double BEACON_BUTTON_GAP = 5.3;
-    public static final double WALL_DISTANCE = 6;
+    public static final double WALL_DISTANCE = 5;
 
     private FixedLauncher launcher;
 
@@ -61,6 +61,8 @@ public class BeaconAuto extends Auto {
 
         drive = new EnhancedMecanumDrive(basicDrive, imu, properties);
         drive.setInitialHeading(180);
+        drive.setLogFile(new DataFile(getFileName("EnhancedMecanumDrive")));
+
         nav = new FieldNavigator(drive, allianceColor);
         nav.setLocation(3 * TILE_SIZE - halfWidth, halfWidth);
 
@@ -115,19 +117,17 @@ public class BeaconAuto extends Auto {
     }
 
     public void moveAndFire() {
-        nav.moveTo(3 * TILE_SIZE - halfWidth, TILE_SIZE + halfWidth, 180, this);
+        nav.moveTo(3 * TILE_SIZE - halfWidth, TILE_SIZE + halfWidth, this);
 
         Auto.fireBalls(launcher, numBalls, this);
 
-        nav.moveTo(WALL_DISTANCE + halfWidth, 2.5 * TILE_SIZE, allianceColor == AllianceColor.BLUE ? 0 : 180, this);
+        nav.moveTo(WALL_DISTANCE + halfWidth, 2.15 * TILE_SIZE, allianceColor == AllianceColor.BLUE ? 0 : 180, this);
     }
 
     private void centerPark() {
         if (allianceColor == AllianceColor.RED) {
             drive.turnSync(90, this);
         }
-
-        sleep(500);
 
         nav.moveTo(2.5 * TILE_SIZE, 2.5 * TILE_SIZE, this);
     }
@@ -136,7 +136,7 @@ public class BeaconAuto extends Auto {
         beaconFollower.moveToDistance(15, 2 * BeaconFollower.BEACON_SPREAD, this);
 
         if (allianceColor == AllianceColor.RED) {
-            drive.turnSync(90, this);
+            drive.turnSync(180, this);
         }
 
         drive.setVelocity(new Vector2D(0, -1));

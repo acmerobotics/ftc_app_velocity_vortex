@@ -36,20 +36,19 @@ public class CapBallAuto extends Auto {
     public void runOpMode() throws InterruptedException {
         super.runOpMode();
 
-        moveAndShoot();
+        moveAndFire();
 
         if (parkDest == OpModeConfiguration.ParkDest.CENTER) pushAndPark();
-
-        drive.turnSync(45, this);
     }
 
-    public void moveAndShoot() {
-        drive.move(-((Math.sqrt(2) * TILE_SIZE) + 7), MOVEMENT_SPEED, this);
+    public void moveAndFire() {
+        nav.moveTo(4 * TILE_SIZE + halfWidth, TILE_SIZE - halfWidth, this);
+        nav.moveTo(3.5 * TILE_SIZE, 1.5 * TILE_SIZE, this);
 
         Auto.fireBalls(launcher, numBalls, this);
     }
 
     public void pushAndPark() {
-        drive.move(Math.sqrt(2) * -TILE_SIZE - 4, MOVEMENT_SPEED, this);
+        nav.moveTo(2.5 * TILE_SIZE, 2.5 * TILE_SIZE, this);
     }
 }

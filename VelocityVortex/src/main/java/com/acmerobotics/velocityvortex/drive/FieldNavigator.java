@@ -41,9 +41,14 @@ public class FieldNavigator {
 
         double r = Math.hypot(dx, dy);
         double targetHeading = sanitizeHeading(90 - Math.toDegrees(Math.atan2(dy, dx)));
-
         double currentHeading = sanitizeHeading(drive.getHeading());
-        double headingDiff = currentHeading - targetHeading;
+
+        if (allianceColor == OpModeConfiguration.AllianceColor.BLUE) {
+            targetHeading = -targetHeading;
+            finalHeading = -finalHeading;
+        }
+
+        double headingDiff = targetHeading - currentHeading;
         while (Math.abs(headingDiff) > 180) {
             headingDiff -= Math.signum(headingDiff) * 360;
         }
@@ -52,18 +57,12 @@ public class FieldNavigator {
             r = -r;
         }
 
-        if (allianceColor == OpModeConfiguration.AllianceColor.BLUE) {
-            targetHeading = -targetHeading;
-            finalHeading = -finalHeading;
-        }
-
-        Log.i("FieldNavigator", String.format("heading:\t%f,%f,%f\t\tradius:\t%f", currentHeading, targetHeading, finalHeading, r));
+        Log.i("FieldNavigator", String.format("heading:\t%f,%f,%f,%f\t\tradius:\t%f", currentHeading, targetHeading, finalHeading, headingDiff, r));
 
         drive.setTargetHeading(targetHeading);
         drive.turnSync(0, opMode);
 
-        // FIXME figure out what's wrong with EnhancedMecanumDrive#move()
-        drive.getDrive().move(r, Auto.MOVEMENT_SPEED, opMode);
+        drive.move(r, Auto.MOVEMENT_SPEED, opMode);
 
         if (Math.abs(finalHeading) != Double.POSITIVE_INFINITY) {
             finalHeading = sanitizeHeading(finalHeading);

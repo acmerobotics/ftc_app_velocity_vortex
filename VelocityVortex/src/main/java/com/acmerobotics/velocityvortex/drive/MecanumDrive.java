@@ -29,7 +29,7 @@ public class MecanumDrive {
     private double smallestRPM;
     private Vector2D[] rollerDirs;
     private Vector2D[] rotDirs;
-    private int[] offsets;
+    private double[] offsets;
     private DcMotor.RunMode runMode;
 
     public MecanumDrive(HardwareMap map, RobotProperties properties) {
@@ -153,8 +153,8 @@ public class MecanumDrive {
      *
      * @return an array of positions
      */
-    public int[] getCurrentPositions() {
-        int[] pos = getRawPositions();
+    public double[] getCurrentPositions() {
+        double[] pos = getRawPositions();
         for (int i = 0; i < pos.length; i++) {
             pos[i] -= offsets[i];
         }
@@ -166,25 +166,21 @@ public class MecanumDrive {
      *
      * @return an array of the positions
      */
-    public int[] getRawPositions() {
-        int[] raw = new int[motors.length];
+    private double[] getRawPositions() {
+        double[] raw = new double[motors.length];
         for (int i = 0; i < motors.length; i++) {
-            raw[i] = motors[i].getCurrentPosition();
+            raw[i] = wheelTypes[i].getDistance(motors[i].getCurrentPosition());
         }
         return raw;
     }
 
-    /**
-     * Compute and return the mean encoder position.
-     *
-     * @return the mean encoder position
-     */
-    public int getMeanPosition() {
-        int sum = 0;
-        for (int pos : getCurrentPositions()) {
-            sum += pos;
+    public double getMeanPosition() {
+        double[] pos = getRawPositions();
+        double sum = 0;
+        for (double val : pos) {
+            sum += val;
         }
-        return sum / motors.length;
+        return sum / pos.length;
     }
 
     public void move(double inches, double speed) {

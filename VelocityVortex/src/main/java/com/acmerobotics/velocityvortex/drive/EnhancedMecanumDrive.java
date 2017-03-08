@@ -2,6 +2,7 @@ package com.acmerobotics.velocityvortex.drive;
 
 import com.acmerobotics.library.configuration.RobotProperties;
 import com.acmerobotics.library.configuration.WheelType;
+import com.acmerobotics.library.file.DataFile;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -12,7 +13,7 @@ import com.qualcomm.robotcore.util.Range;
  */
 public class EnhancedMecanumDrive {
 
-    public static final double MAX_TURN_SPEED = 0.5;
+    public static final double MAX_TURN_SPEED = 0.75;
     public static final double DEFAULT_TURN_ERROR = 1;
 
     private PIDController controller;
@@ -21,6 +22,7 @@ public class EnhancedMecanumDrive {
     private Vector2D velocity;
     private double targetHeading;
     private double initialHeading;
+    private DataFile logFile;
 
     public EnhancedMecanumDrive(MecanumDrive drive, BNO055IMU imu, RobotProperties properties) {
         this.drive = drive;
@@ -80,6 +82,9 @@ public class EnhancedMecanumDrive {
         double error = getHeadingError();
         double feedback = controller.update(error);
         drive.setVelocity(velocity, Range.clip(feedback, -MAX_TURN_SPEED, MAX_TURN_SPEED));
+        if (logFile != null) {
+            logFile.write(String.format("%d,%f,%f", System.currentTimeMillis(), getHeading(), targetHeading));
+        }
         return feedback;
     }
 
@@ -170,7 +175,7 @@ public class EnhancedMecanumDrive {
         return error;
     }
 
-    private static double sanitizeHeading(double h) {
+    public static double sanitizeHeading(double h) {
         double heading = h % 360;
         if (heading < 0) {
             heading += 360;
@@ -199,6 +204,16 @@ public class EnhancedMecanumDrive {
         stop();
 
         drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    public void setLogFile(DataFile file) {
+        if (file == null) {
+            if (logFile != null) logFile.close();
+            logFile = null;
+        } else {
+            logFile = file;
+            logFile.write("time,heading,targetHeading");
+        }
     }
 
 }

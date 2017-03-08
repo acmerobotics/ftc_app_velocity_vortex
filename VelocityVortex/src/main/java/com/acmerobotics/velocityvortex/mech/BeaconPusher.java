@@ -28,7 +28,7 @@ public class BeaconPusher {
     public static final int TIMEOUT = 250;
 
     public static final DifferentialControlLoopCoefficients PID_COEFFICIENTS = new DifferentialControlLoopCoefficients(0.5, 0, 0);
-    public static final int PUSH_MS = 200;
+    public static final int PUSH_MS = 300;
 
     private VoltageSensor voltageSensor;
     private DataFile logFile;
@@ -147,16 +147,14 @@ public class BeaconPusher {
 
         if (isSensorActive()) {
             ElapsedTime timer = new ElapsedTime();
-            boolean aboveThreshold = false;
             while (opMode == null || opMode.opModeIsActive()) {
                 update();
                 if (getSpeed() < THRESHOLD) {
-                    if (aboveThreshold && timer.milliseconds() > PUSH_MS) {
+                    if (timer.milliseconds() > PUSH_MS) {
                         stop();
                         return;
                     }
                 } else {
-                    aboveThreshold = true;
                     timer.reset();
                 }
                 Thread.yield();
