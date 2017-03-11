@@ -20,8 +20,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class BeaconPusher {
 
-    public static final double MIN_POSITION = 0;
-    public static final double MAX_POSITION = 5;
+    public static final double MIN_POSITION = 0.25;
+    public static final double MAX_POSITION = MIN_POSITION + 5;
 
     public static final double THRESHOLD = 0.001;
     public static final int INTERVAL = 100;
@@ -35,8 +35,8 @@ public class BeaconPusher {
     private AverageDifferentiator speedMeasurer;
     private DcMotorSimple servo;
     private DistanceSensor sensor;
-    private double initialPosition, targetPosition;
     private PIDController controller;
+    private double targetPosition;
 
     public BeaconPusher(HardwareMap hardwareMap, DistanceSensor distanceSensor) {
         servo = hardwareMap.crservo.get("pusher");
@@ -47,7 +47,6 @@ public class BeaconPusher {
 
         speedMeasurer = new AverageDifferentiator(INTERVAL, TIMEOUT);
         if (sensor != null) {
-            reset();
             controller = new PIDController(PID_COEFFICIENTS);
         }
     }
@@ -69,10 +68,6 @@ public class BeaconPusher {
         return sensor != null && getRawPosition() > 0;
     }
 
-    public void reset() {
-        initialPosition = getRawPosition();
-    }
-
     public void setTargetPosition(double pos) {
         targetPosition = pos;
     }
@@ -82,7 +77,7 @@ public class BeaconPusher {
     }
 
     public double getCurrentPosition() {
-        return getRawPosition() - initialPosition;
+        return getRawPosition();
     }
 
     private double getPositionError() {

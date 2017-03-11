@@ -20,15 +20,14 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 @Autonomous(name = "Block Auto", group="Autonomous")
 public class BlockAuto extends Auto {
 
-    private FixedLauncher launcher;
-
-    private EnhancedMecanumDrive drive;
-    private FieldNavigator nav;
-    private WallFollower wallFollower;
-
     private BNO055IMU imu;
+    protected EnhancedMecanumDrive drive;
 
-    private double halfWidth;
+    protected FieldNavigator nav;
+
+    protected double halfWidth;
+
+    private WallFollower wallFollower;
 
     @Override
     public void initOpMode() {
@@ -46,8 +45,6 @@ public class BlockAuto extends Auto {
 
         DistanceSensor distanceSensor = new MaxSonarEZ1UltrasonicSensor(hardwareMap.analogInput.get("maxSonar"));
         wallFollower = new WallFollower(drive, distanceSensor, properties);
-
-        launcher = new FixedLauncher(hardwareMap);
     }
 
     @Override

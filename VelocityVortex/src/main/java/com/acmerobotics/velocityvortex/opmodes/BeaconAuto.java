@@ -92,7 +92,7 @@ public class BeaconAuto extends Auto {
 
         beaconFollower.moveToDistance(BeaconFollower.BEACON_DISTANCE, BeaconFollower.BEACON_SPREAD / 2.0, this);
 
-        targetFirstLastBeacon = beaconFollower.pushBeacons(1, allianceModifier, targetColor, this);
+        targetFirstLastBeacon = beaconFollower.pushBeacons(2, allianceModifier, targetColor, this);
         double x = WALL_DISTANCE + halfWidth;
         double y = 4.5 * TILE_SIZE;
         if (targetFirstLastBeacon) {
@@ -121,7 +121,7 @@ public class BeaconAuto extends Auto {
 
         Auto.fireBalls(launcher, numBalls, this);
 
-        nav.moveTo(WALL_DISTANCE + halfWidth, 2.15 * TILE_SIZE, allianceColor == AllianceColor.BLUE ? 0 : 180, this);
+        nav.moveTo(WALL_DISTANCE + halfWidth, 2.25 * TILE_SIZE, allianceColor == AllianceColor.BLUE ? 0 : 180, this);
     }
 
     private void centerPark() {

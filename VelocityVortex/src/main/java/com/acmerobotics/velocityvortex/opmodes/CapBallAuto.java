@@ -11,11 +11,11 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 public class CapBallAuto extends Auto {
 
     private BNO055IMU imu;
-    private EnhancedMecanumDrive drive;
+    protected EnhancedMecanumDrive drive;
 
-    private FieldNavigator nav;
+    protected FieldNavigator nav;
 
-    private double halfWidth;
+    protected double halfWidth;
 
     @Override
     public void initOpMode() {

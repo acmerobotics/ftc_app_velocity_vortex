@@ -4,6 +4,7 @@ import android.graphics.Path;
 
 import com.acmerobotics.library.configuration.OpModeConfiguration;
 import com.acmerobotics.library.configuration.RobotProperties;
+import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
@@ -16,7 +17,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
  * Created by ACME Robotics on 2/18/2017.
  */
 
-@Disabled
 @Autonomous(name="Encoder Drive Test", group="Test")
 public class EncoderDriveTest extends LinearOpMode {
     @Override
@@ -32,8 +32,10 @@ public class EncoderDriveTest extends LinearOpMode {
         MecanumDrive basicDrive = new MecanumDrive(hardwareMap, properties);
         EnhancedMecanumDrive drive = new EnhancedMecanumDrive(basicDrive, imu, properties);
 
+        drive.setLogFile(new DataFile("EncoderDriveTest_" + System.currentTimeMillis() + ".csv"));
+
         waitForStart();
 
-        drive.move(8 * 12, 1, this);
+        drive.move(4 * 12, 1, this);
     }
 }
