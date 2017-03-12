@@ -28,7 +28,7 @@ public class BeaconPusher {
     public static final int TIMEOUT = 250;
 
     public static final DifferentialControlLoopCoefficients PID_COEFFICIENTS = new DifferentialControlLoopCoefficients(0.5, 0, 0);
-    public static final int PUSH_MS = 300;
+    public static final int PUSH_MS = 400;
 
     private VoltageSensor voltageSensor;
     private DataFile logFile;

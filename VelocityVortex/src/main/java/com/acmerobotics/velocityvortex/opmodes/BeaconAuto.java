@@ -119,7 +119,7 @@ public class BeaconAuto extends Auto {
     }
 
     public void moveAndFire() {
-        nav.moveTo(2.5 * TILE_SIZE, TILE_SIZE + halfWidth, this);
+        nav.moveTo(2.5 * TILE_SIZE, TILE_SIZE + halfWidth - 6, this);
 
         Auto.fireBalls(launcher, numBalls, this);
 

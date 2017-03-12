@@ -2,9 +2,11 @@ package com.acmerobotics.velocityvortex.opmodes;
 
 import com.acmerobotics.library.configuration.OpModeConfiguration;
 import com.acmerobotics.library.configuration.RobotProperties;
+import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
 import com.acmerobotics.velocityvortex.mech.FixedLauncher;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
 
 import static com.acmerobotics.library.configuration.OpModeConfiguration.AllianceColor;
@@ -67,6 +69,8 @@ public abstract class Auto extends LinearOpMode {
         }
 
         launcher = new FixedLauncher(hardwareMap);
+//        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        launcher.setLogFile(new DataFile(getFileName("AutoLauncher")));
 
         basicDrive = new MecanumDrive(hardwareMap, properties);
 
@@ -108,10 +112,12 @@ public abstract class Auto extends LinearOpMode {
 
         launcher.setPower(0.9);
 
-        while (opMode.opModeIsActive() && launcher.getLeftSpeed() < 2.5) {
+        while (opMode.opModeIsActive() && launcher.getLeftSpeed() < 2.125) {
             launcher.update();
             Thread.yield();
         }
+
+        opMode.sleep(500);
 
         for (int i = 1; i <= balls; i++) {
             launcher.triggerUp();

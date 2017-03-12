@@ -56,6 +56,11 @@ public class FixedLauncher {
         reset();
     }
 
+    public void setMode(DcMotor.RunMode mode) {
+        left.setMode(mode);
+        right.setMode(mode);
+    }
+
     public void delay(int ms) {
         long startTime = System.currentTimeMillis();
         while ((System.currentTimeMillis() - startTime) < ms) {
@@ -155,6 +160,10 @@ public class FixedLauncher {
         double leftSpeed = leftSpeedMeasurer.update(getLeftPosition());
         double rightSpeed = rightSpeedMeasurer.update(getRightPosition());
 
+        if (logFile != null) {
+            logFile.write(String.format("%d,%f,%f,%f,%f,%f", now, leftPower, rightPower, leftSpeed, rightSpeed, voltageSensor.getVoltage()));
+        }
+
         if (ramping) {
             if (now >= stopTime) {
                 ramping = false;
@@ -170,10 +179,6 @@ public class FixedLauncher {
                 }
                 lastTime = now;
             }
-        }
-
-        if (logFile != null) {
-            logFile.write(String.format("%d,%f,%f,%f,%f,%f", now, leftPower, rightPower, leftSpeed, rightSpeed, voltageSensor.getVoltage()));
         }
     }
 

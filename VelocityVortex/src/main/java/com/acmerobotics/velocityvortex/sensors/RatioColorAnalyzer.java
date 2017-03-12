@@ -21,7 +21,7 @@ public class RatioColorAnalyzer implements ColorAnalyzer {
     public double getRatio() {
         double red = red();
         double blue = blue();
-        return (blue + 1) / (red + 1);
+        return (blue + 0.5) / (red + 0.5);
     }
 
     @Override

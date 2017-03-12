@@ -7,6 +7,7 @@ import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.mech.BeaconPusher;
 import com.acmerobotics.velocityvortex.opmodes.Auto;
 import com.acmerobotics.velocityvortex.sensors.ColorAnalyzer;
+import com.acmerobotics.velocityvortex.sensors.RatioColorAnalyzer;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 
@@ -43,9 +44,7 @@ public class BeaconFollower extends WallFollower {
             ColorAnalyzer.BeaconColor color = colorAnalyzer.getBeaconColor();
 
             if (logFile != null) {
-                double blue = colorAnalyzer.blue();
-                double red = colorAnalyzer.red();
-                double blueRedRatio = (blue + 1) / (red + 1);
+                double blueRedRatio = (colorAnalyzer instanceof RatioColorAnalyzer) ? ((RatioColorAnalyzer) colorAnalyzer).getRatio() : Double.POSITIVE_INFINITY;
                 logFile.write(String.format("%d,%s,%d,%d,%f,%f,%f,%f", System.currentTimeMillis(), color, colorAnalyzer.red(), colorAnalyzer.blue(), blueRedRatio, getDistance(), beaconPusher.getCurrentPosition(), drive.getHeading()));
             }
 
