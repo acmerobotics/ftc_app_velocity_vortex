@@ -18,11 +18,15 @@ public class RatioColorAnalyzer implements ColorAnalyzer {
         this.redThreshold = redThreshold;
     }
 
-    @Override
-    public ColorAnalyzer.BeaconColor getBeaconColor() {
+    public double getRatio() {
         double red = red();
         double blue = blue();
-        double blueRedRatio = blue / red;
+        return (blue + 1) / (red + 1);
+    }
+
+    @Override
+    public ColorAnalyzer.BeaconColor getBeaconColor() {
+        double blueRedRatio = getRatio();
         if (blueRedRatio >= blueThreshold) {
             return BeaconColor.BLUE;
         } else if (blueRedRatio <= redThreshold) {

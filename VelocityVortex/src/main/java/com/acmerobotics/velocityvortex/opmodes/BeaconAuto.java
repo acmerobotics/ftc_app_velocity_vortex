@@ -10,6 +10,7 @@ import com.acmerobotics.velocityvortex.mech.FixedLauncher;
 import com.acmerobotics.velocityvortex.sensors.ColorAnalyzer;
 import com.acmerobotics.velocityvortex.sensors.LinearPot;
 import com.acmerobotics.velocityvortex.sensors.MaxSonarEZ1UltrasonicSensor;
+import com.acmerobotics.velocityvortex.sensors.RatioColorAnalyzer;
 import com.acmerobotics.velocityvortex.sensors.ThresholdColorAnalyzer;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
@@ -64,7 +65,7 @@ public class BeaconAuto extends Auto {
         drive.setLogFile(new DataFile(getFileName("EnhancedMecanumDrive")));
 
         nav = new FieldNavigator(drive, allianceColor);
-        nav.setLocation(3 * TILE_SIZE - halfWidth, halfWidth);
+        nav.setLocation(2.5 * TILE_SIZE, halfWidth);
 
         DistanceSensor distanceSensor = new MaxSonarEZ1UltrasonicSensor(hardwareMap.analogInput.get("maxSonar"));
 
@@ -75,7 +76,8 @@ public class BeaconAuto extends Auto {
         colorSensor.setI2cAddress(I2cAddr.create8bit(0x3e));
         colorSensor.enableLed(false);
 
-        colorAnalyzer = new ThresholdColorAnalyzer(colorSensor, Auto.BLUE_THRESHOLD, Auto.RED_THRESHOLD);
+//        colorAnalyzer = new ThresholdColorAnalyzer(colorSensor, Auto.BLUE_THRESHOLD, Auto.RED_THRESHOLD);
+        colorAnalyzer = new RatioColorAnalyzer(colorSensor, Auto.BLUE_RATIO_THRESHOLD, Auto.RED_RATIO_THRESHOLD);
 
         beaconPusher = new BeaconPusher(hardwareMap, new LinearPot(hardwareMap.analogInput.get("lp"), 200, DistanceUnit.MM));
         beaconPusher.setLogFile(new DataFile(getFileName("BeaconPusher")));
@@ -117,7 +119,7 @@ public class BeaconAuto extends Auto {
     }
 
     public void moveAndFire() {
-        nav.moveTo(3 * TILE_SIZE - halfWidth, TILE_SIZE + halfWidth, this);
+        nav.moveTo(2.5 * TILE_SIZE, TILE_SIZE + halfWidth, this);
 
         Auto.fireBalls(launcher, numBalls, this);
 

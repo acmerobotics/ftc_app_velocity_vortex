@@ -62,7 +62,7 @@ public class FieldNavigator {
         drive.setTargetHeading(targetHeading);
         drive.turnSync(0, opMode);
 
-        drive.move(r, Auto.MOVEMENT_SPEED, opMode);
+        drive.getDrive().move(r, Auto.MOVEMENT_SPEED, opMode);
 
         if (Math.abs(finalHeading) != Double.POSITIVE_INFINITY) {
             finalHeading = sanitizeHeading(finalHeading);

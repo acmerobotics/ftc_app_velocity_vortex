@@ -21,7 +21,10 @@ public abstract class Auto extends LinearOpMode {
     public static final int RED_LED_CHANNEL = 1;
 
     public static final int RED_THRESHOLD = 4;
-    public static final int BLUE_THRESHOLD = 6;
+    public static final int BLUE_THRESHOLD = 4;
+
+    public static final double BLUE_RATIO_THRESHOLD = 1.2;
+    public static final double RED_RATIO_THRESHOLD = 0.45;
 
     public static final double MOVEMENT_SPEED = 1;
 
@@ -103,7 +106,7 @@ public abstract class Auto extends LinearOpMode {
     public static void fireBalls(FixedLauncher launcher, int balls, LinearOpMode opMode) {
         if (balls == 0) return;
 
-        launcher.setPower(1);
+        launcher.setPower(0.9);
 
         while (opMode.opModeIsActive() && launcher.getLeftSpeed() < 2.5) {
             launcher.update();

@@ -49,6 +49,6 @@ public class CapBallAuto extends Auto {
     }
 
     public void pushAndPark() {
-        nav.moveTo(2.5 * TILE_SIZE, 2.5 * TILE_SIZE, this);
+        nav.moveTo(3 * TILE_SIZE, 2 * TILE_SIZE + 3.5, this);
     }
 }

@@ -230,7 +230,7 @@ public class MainTeleOp extends OpMode {
                         launcher.setPower(0);
                         launcherRunning = false;
                     } else {
-                        launcher.setPower(1);
+                        launcher.setPower(0.9);
                     }
                 }
                 launcher.update();

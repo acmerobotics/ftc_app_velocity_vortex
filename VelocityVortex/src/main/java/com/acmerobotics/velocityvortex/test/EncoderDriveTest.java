@@ -36,6 +36,8 @@ public class EncoderDriveTest extends LinearOpMode {
 
         waitForStart();
 
+        drive.turnSync(45, this);
+
         drive.move(4 * 12, 1, this);
     }
 }
