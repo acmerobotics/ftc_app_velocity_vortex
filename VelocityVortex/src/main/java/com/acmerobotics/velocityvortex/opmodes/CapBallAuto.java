@@ -35,7 +35,7 @@ public class CapBallAuto extends Auto {
     @Override
     public void runOpMode() throws InterruptedException {
         super.runOpMode();
-
+        
         moveAndFire();
 
         if (parkDest == OpModeConfiguration.ParkDest.CENTER) pushAndPark();

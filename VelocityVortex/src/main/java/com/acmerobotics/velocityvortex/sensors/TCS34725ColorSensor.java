@@ -153,12 +153,12 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
             return false;
         }
 
-        setIntegrationTime(integrationTime);
-        setGain(gain);
+        write8(Registers.TCS34725_ATIME, integrationTime.byteVal);
+        write8(Registers.TCS34725_CONTROL, gain.byteVal);
 
         enable();
 
-        deviceClient.setReadWindow(READ_WINDOW);
+//        deviceClient.setReadWindow(READ_WINDOW);
 
         return true;
     }
@@ -179,9 +179,17 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
         integrationTime = time;
     }
 
+    public IntegrationTime getIntegrationTime() {
+        return integrationTime;
+    }
+
     public void setGain(Gain gain) {
         if (isInitialized) write8(Registers.TCS34725_CONTROL, gain.byteVal);
         this.gain = gain;
+    }
+
+    public Gain getGain() {
+        return gain;
     }
 
     @Override
