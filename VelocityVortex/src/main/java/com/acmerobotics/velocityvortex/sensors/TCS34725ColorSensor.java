@@ -1,5 +1,7 @@
 package com.acmerobotics.velocityvortex.sensors;
 
+import android.util.Log;
+
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.DigitalChannelController;
@@ -92,7 +94,7 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
         }
     }
 
-    private static final I2cDeviceSynch.ReadWindow READ_WINDOW = new I2cDeviceSynch.ReadWindow(Registers.TCS34725_CDATAL, 8, I2cDeviceSynch.ReadMode.REPEAT);
+    private static final I2cDeviceSynch.ReadWindow READ_WINDOW = new I2cDeviceSynch.ReadWindow(Registers.TCS34725_CDATAL | TCS34725_COMMAND_BIT, 8, I2cDeviceSynch.ReadMode.REPEAT);
 
     private IntegrationTime integrationTime;
     private Gain gain;
@@ -110,6 +112,9 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
         i2cAddr = addr;
         gain = Gain.GAIN_1X;
         integrationTime = IntegrationTime.INTEGRATION_TIME_700MS;
+
+        deviceClient.setLoggingTag("TCS34725");
+        deviceClient.setLogging(true);
     }
 
     public void write8(int reg, int data) {
@@ -158,7 +163,7 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
 
         enable();
 
-//        deviceClient.setReadWindow(READ_WINDOW);
+        deviceClient.setReadWindow(READ_WINDOW);
 
         return true;
     }
@@ -217,16 +222,6 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
         return 0;
     }
 
-    public int[] getColors() {
-        byte[] data = read(Registers.TCS34725_CDATAL, 8);
-        return new int[]{
-                make16(data[0], data[1]),
-                make16(data[2], data[3]),
-                make16(data[4], data[5]),
-                make16(data[6], data[7])
-        };
-    }
-
     @Override
     public void enableLed(boolean enable) {
         if (ledChannel != null) ledChannel.setState(enable);
@@ -269,6 +264,8 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
 
     @Override
     public void close() {
-
+        if (this.deviceClientIsOwned) {
+            this.deviceClient.close();
+        }
     }
 }
