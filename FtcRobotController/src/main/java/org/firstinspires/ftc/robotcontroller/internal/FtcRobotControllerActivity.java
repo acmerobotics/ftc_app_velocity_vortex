@@ -57,6 +57,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.acmerobotics.library.configuration.OpModeConfigurationActivity;
+import com.acmerobotics.library.network.RobotDebugServer;
 import com.google.blocks.ftcrobotcontroller.BlocksActivity;
 import com.google.blocks.ftcrobotcontroller.ProgrammingModeActivity;
 import com.google.blocks.ftcrobotcontroller.ProgrammingModeControllerImpl;
@@ -99,6 +100,8 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class FtcRobotControllerActivity extends Activity {
+
+  private RobotDebugServer debugServer;
 
   public static final String TAG = "RCActivity";
 
@@ -257,6 +260,11 @@ public class FtcRobotControllerActivity extends Activity {
     callback.networkConnectionUpdate(WifiDirectAssistant.Event.DISCONNECTED);
     readNetworkType(NETWORK_TYPE_FILENAME);
     bindToService();
+
+    // TODO
+    // MY CHANGES! Please delete
+    debugServer = new RobotDebugServer(8888);
+    debugServer.listen();
   }
 
   protected UpdateUI createUpdateUI() {
@@ -326,6 +334,10 @@ public class FtcRobotControllerActivity extends Activity {
     unbindFromService();
     wifiLock.release();
     RobotLog.cancelWriteLogcatToDisk();
+
+    // TODO
+    // MORE CHANGES!
+    debugServer.close();
   }
 
   protected void bindToService() {
