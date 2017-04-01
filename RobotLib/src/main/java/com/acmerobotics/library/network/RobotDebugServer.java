@@ -2,7 +2,6 @@ package com.acmerobotics.library.network;
 
 import android.util.Log;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -37,7 +36,7 @@ public class RobotDebugServer {
                     Socket s = sock.accept();
                     Log.i("RobotDebugServer", "Accepted connection from " + s.getInetAddress().getCanonicalHostName());
                     synchronized (clientListLock) {
-                        clients.add(new RobotDebugClient(s));
+                        clients.add(new RobotDebugConnection(s));
                     }
                     Log.i("RobotDebugServer", clients.size() + " clients currently open");
                 } catch (SocketTimeoutException ste) {
@@ -85,7 +84,7 @@ public class RobotDebugServer {
 
     private int port;
     private ServerSocket sock;
-    private List<RobotDebugClient> clients;
+    private List<RobotDebugConnection> clients;
     private Lock clientListLock;
     private ConnectionThread connThread;
     private CleanupThread cleanupThread;
@@ -93,7 +92,7 @@ public class RobotDebugServer {
     public RobotDebugServer(int port) {
         this.port = port;
         this.clientListLock = new ReentrantLock();
-        this.clients = new ArrayList<RobotDebugClient>();
+        this.clients = new ArrayList<RobotDebugConnection>();
         try {
             this.sock = new ServerSocket(port);
             this.sock.setSoTimeout(100);
@@ -138,7 +137,7 @@ public class RobotDebugServer {
             Log.e("RobotDebugServer", e.getMessage());
         }
         synchronized (clientListLock) {
-            for (RobotDebugClient client : clients) {
+            for (RobotDebugConnection client : clients) {
                 client.close();
             }
         }
@@ -146,7 +145,7 @@ public class RobotDebugServer {
 
     public synchronized void send(JSONObject json) {
         synchronized (clientListLock) {
-            for (RobotDebugClient client : clients) {
+            for (RobotDebugConnection client : clients) {
                 client.send(json);
             }
         }

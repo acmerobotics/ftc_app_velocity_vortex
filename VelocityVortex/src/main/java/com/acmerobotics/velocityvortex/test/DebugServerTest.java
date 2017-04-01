@@ -20,17 +20,25 @@ public class DebugServerTest extends LinearOpMode {
 
         waitForStart();
 
-        while (opModeIsActive()) {
-            if (gamepad1.a) {
-                JSONObject object = new JSONObject();
-                try {
-                    object.put("time", System.currentTimeMillis());
-                    object.put("button", "a");
-                } catch (JSONException e) {
+        long lastTime = System.currentTimeMillis();
 
+        int i = 0;
+
+        while (opModeIsActive()) {
+            JSONObject object = new JSONObject();
+            try {
+                long time = System.currentTimeMillis();
+                object.put("time", time);
+                object.put("loop", time - lastTime);
+                lastTime = time;
+                if (gamepad1.a) {
+                    object.put("button", "a");
                 }
-                server.send(object);
+            } catch (JSONException e) {
+
             }
+            if (i % 100 == 0) server.send(object);
+            i++;
         }
     }
 }

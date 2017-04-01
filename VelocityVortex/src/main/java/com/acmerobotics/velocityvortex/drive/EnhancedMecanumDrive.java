@@ -27,8 +27,14 @@ public class EnhancedMecanumDrive {
     public EnhancedMecanumDrive(MecanumDrive drive, BNO055IMU imu, RobotProperties properties) {
         this.drive = drive;
         this.imu = imu;
+
         controller = new PIDController(properties.getTurnParameters());
+        controller.setInputBounds(0, 360);
+        controller.setOutputBounds(-MAX_TURN_SPEED, MAX_TURN_SPEED);
+        controller.setMaxSum(1);
+
         velocity = new Vector2D(0, 0);
+
         resetHeading();
     }
 
@@ -79,13 +85,12 @@ public class EnhancedMecanumDrive {
      * @return the angular velocity
      */
     public double update() {
-        double error = getHeadingError();
-        double feedback = controller.update(error);
-        drive.setVelocity(velocity, Range.clip(feedback, -MAX_TURN_SPEED, MAX_TURN_SPEED));
+        double output = controller.update(getHeading(), targetHeading);
+        drive.setVelocity(velocity, output);
         if (logFile != null) {
             logFile.write(String.format("%d,%f,%f", System.currentTimeMillis(), getHeading(), targetHeading));
         }
-        return feedback;
+        return output;
     }
 
     /**
@@ -168,11 +173,7 @@ public class EnhancedMecanumDrive {
      * @return the heading error
      */
     public double getHeadingError() {
-        double error = getHeading() - targetHeading;
-        while (Math.abs(error) > 180) {
-            error -= Math.signum(error) * 360;
-        }
-        return error;
+        return controller.getError(getHeading(), targetHeading);
     }
 
     public static double sanitizeHeading(double h) {

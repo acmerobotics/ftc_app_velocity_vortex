@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  * @author Ryan
  */
 
-public class RobotDebugClient {
+public class RobotDebugConnection {
 
     public class ReadThread extends Thread {
         @Override
@@ -28,13 +28,13 @@ public class RobotDebugClient {
                     String json = inputStream.readLine();
                     if (json == null) continue;
                     JSONObject obj = new JSONObject(json);
-                    Log.i("RobotDebugClient", "Read JSON object with " + obj.length() + " size");
+                    Log.i("RobotDebugConnection", "Read JSON object with " + obj.length() + " size");
                 } catch (IOException e) {
-                    Log.e("RobotDebugClient", "Failed to read line: " + e.getMessage());
+                    Log.e("RobotDebugConnection", "Failed to read line: " + e.getMessage());
                     running = false;
                     break;
                 } catch (JSONException e) {
-                    Log.e("RobotDebugClient", "Failed to parse packet data: " + e.getMessage());
+                    Log.e("RobotDebugConnection", "Failed to parse packet data: " + e.getMessage());
                 }
             }
         }
@@ -50,11 +50,11 @@ public class RobotDebugClient {
                     String jsonString = obj.toString() + "\n";
                     outputStream.write(jsonString.getBytes());
                     outputStream.flush();
-                    Log.i("RobotDebugClient", "Wrote object to output");
+                    Log.i("RobotDebugConnection", "Wrote object to output");
                 } catch (InterruptedException e) {
-                    Log.e("RobotDebugClient", "Deque poll failed: " + e.getMessage());
+                    Log.e("RobotDebugConnection", "Deque poll failed: " + e.getMessage());
                 } catch (IOException e) {
-                    Log.e("RobotDebugClient", "Packet write failed: " + e.getMessage());
+                    Log.e("RobotDebugConnection", "Packet write failed: " + e.getMessage());
                     running = false;
                     break;
                 }
@@ -70,7 +70,7 @@ public class RobotDebugClient {
     private BufferedReader inputStream;
     private BlockingQueue<JSONObject> writeQueue;
 
-    public RobotDebugClient(Socket socket) {
+    public RobotDebugConnection(Socket socket) {
         this.sock = socket;
         this.running = true;
         this.writeQueue = new ArrayBlockingQueue<>(30);
@@ -79,7 +79,7 @@ public class RobotDebugClient {
             outputStream = sock.getOutputStream();
             inputStream = new BufferedReader(new InputStreamReader(sock.getInputStream()));
         } catch (IOException e) {
-            Log.e("RobotDebugClient", e.getMessage());
+            Log.e("RobotDebugConnection", e.getMessage());
         }
 
         this.readThread = new ReadThread();
@@ -95,21 +95,21 @@ public class RobotDebugClient {
             try {
                 readThread.join();
             } catch (InterruptedException e) {
-                Log.e("RobotDebugClient", e.getMessage());
+                Log.e("RobotDebugConnection", e.getMessage());
             }
         }
         if (writeThread != null) {
             try {
                 writeThread.join();
             } catch (InterruptedException e) {
-                Log.e("RobotDebugClient", e.getMessage());
+                Log.e("RobotDebugConnection", e.getMessage());
             }
         }
         if (sock != null) {
             try {
                 sock.close();
             } catch (IOException e) {
-                Log.e("RobotDebugClient", e.getMessage());
+                Log.e("RobotDebugConnection", e.getMessage());
             }
         }
     }
