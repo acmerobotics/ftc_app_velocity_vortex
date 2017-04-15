@@ -1,12 +1,10 @@
 package com.acmerobotics.velocityvortex.drive;
 
 import com.acmerobotics.library.configuration.RobotProperties;
-import com.acmerobotics.library.configuration.WheelType;
 import com.acmerobotics.library.file.DataFile;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.util.Range;
 
 /**
  * Orientation-preserving drive interface based on an existing mecanum drive
@@ -19,7 +17,7 @@ public class EnhancedMecanumDrive {
     private PIDController controller;
     private MecanumDrive drive;
     private BNO055IMU imu;
-    private Vector2D velocity;
+    private Vector2d velocity;
     private double targetHeading;
     private double initialHeading;
     private DataFile logFile;
@@ -33,7 +31,7 @@ public class EnhancedMecanumDrive {
         controller.setOutputBounds(-MAX_TURN_SPEED, MAX_TURN_SPEED);
         controller.setMaxSum(1);
 
-        velocity = new Vector2D(0, 0);
+        velocity = new Vector2d(0, 0);
 
         resetHeading();
     }
@@ -75,7 +73,7 @@ public class EnhancedMecanumDrive {
      *
      * @param velocity the translational velocity
      */
-    public void setVelocity(Vector2D velocity) {
+    public void setVelocity(Vector2d velocity) {
         this.velocity = velocity;
     }
 
@@ -97,12 +95,12 @@ public class EnhancedMecanumDrive {
      * Stop the motors.
      */
     public void stop() {
-        velocity = new Vector2D(0, 0);
+        velocity = new Vector2d(0, 0);
         drive.stop();
     }
 
     /**
-     * Turns the robot. Like {@link #setVelocity(Vector2D)}}, this method does not actually update
+     * Turns the robot. Like {@link #setVelocity(Vector2d)}}, this method does not actually update
      * the underlying motors, so please use {@link #update()} or {@link #turnSync(double, double, LinearOpMode)}.
      *
      * @param turnAngle the turn angle (right is positive, left is negative)
@@ -191,7 +189,7 @@ public class EnhancedMecanumDrive {
 
         drive.setRelativePosition(inches);
 
-        setVelocity(new Vector2D(0, speed));
+        setVelocity(new Vector2d(0, speed));
 
         boolean done = false;
         while (!done && (opMode == null || opMode.opModeIsActive())) {

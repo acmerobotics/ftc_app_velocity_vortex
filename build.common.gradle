@@ -92,12 +92,20 @@ android {
         jni.srcDirs = []
         jniLibs.srcDir rootProject.file('libs')
     }
+
+    repositories {
+        maven { url 'http://repo1.maven.org/maven2' }
+    }
 }
 
 repositories {
     flatDir {
         dirs rootProject.file('libs')
     }
+}
+
+dependencies {
+    compile 'junit:junit:4.12'
 }
 
 apply from: 'build.release.gradle'

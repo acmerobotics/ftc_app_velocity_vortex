@@ -1,7 +1,6 @@
 package com.acmerobotics.velocityvortex.drive;
 
 import com.acmerobotics.library.configuration.RobotProperties;
-import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.sensors.ExponentialSmoother;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -79,11 +78,11 @@ public class WallFollower {
         double distanceError = getDistanceError();
         if (Math.abs(distanceError) > distanceSpread) {
             double lateralSpeed = controller.update(distanceError);
-            drive.setVelocity(new Vector2D(lateralSpeed, Math.abs(distanceError) > 2 ? 0 : forwardSpeed));
+            drive.setVelocity(new Vector2d(lateralSpeed, Math.abs(distanceError) > 2 ? 0 : forwardSpeed));
             drive.update();
             return false;
         } else {
-            drive.setVelocity(new Vector2D(0, forwardSpeed));
+            drive.setVelocity(new Vector2d(0, forwardSpeed));
             drive.update();
             return true;
         }

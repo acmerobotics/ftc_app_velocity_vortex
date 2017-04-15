@@ -3,7 +3,7 @@ package com.acmerobotics.velocityvortex.test;
 import com.acmerobotics.library.configuration.OpModeConfiguration;
 import com.acmerobotics.library.configuration.RobotProperties;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
-import com.acmerobotics.velocityvortex.drive.Vector2D;
+import com.acmerobotics.velocityvortex.drive.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -34,6 +34,6 @@ public class MecanumTest extends OpMode {
         else if (gamepad1.dpad_right) x = 1;
         double omega = -gamepad1.right_stick_x;
         telemetry.addData("omega", omega);
-        mecanumDrive.setVelocity(new Vector2D(x, y), omega);
+        mecanumDrive.setVelocity(new Vector2d(x, y), omega);
     }
 }

@@ -6,7 +6,7 @@ import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.drive.BeaconFollower;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
-import com.acmerobotics.velocityvortex.drive.Vector2D;
+import com.acmerobotics.velocityvortex.drive.Vector2d;
 import com.acmerobotics.velocityvortex.drive.WallFollower;
 import com.acmerobotics.velocityvortex.mech.BeaconPusher;
 import com.acmerobotics.velocityvortex.mech.Collector;
@@ -170,7 +170,7 @@ public class MainTeleOp extends OpMode {
                 telemetry.addData("theta", theta);
                 telemetry.addData("omega", omega);
 
-                basicDrive.setVelocity(new Vector2D(radius * Math.cos(theta), radius * Math.sin(theta)), omega);
+                basicDrive.setVelocity(new Vector2d(radius * Math.cos(theta), radius * Math.sin(theta)), omega);
 //                basicDrive.logPowers(telemetry);
 
                 if (stickyGamepad1.y) {

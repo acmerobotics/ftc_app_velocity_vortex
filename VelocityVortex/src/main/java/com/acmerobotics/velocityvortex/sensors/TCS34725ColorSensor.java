@@ -219,7 +219,7 @@ public class TCS34725ColorSensor extends I2cDeviceSynchDevice<I2cDeviceSynch> im
 
     @Override
     public int argb() {
-        return 0;
+        throw new UnsupportedOperationException("This method is not supported");
     }
 
     @Override

@@ -4,7 +4,7 @@ import com.acmerobotics.library.configuration.OpModeConfiguration;
 import com.acmerobotics.library.configuration.RobotProperties;
 import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
-import com.acmerobotics.velocityvortex.drive.Vector2D;
+import com.acmerobotics.velocityvortex.drive.Vector2d;
 import com.acmerobotics.velocityvortex.opmodes.StickyGamepad;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
@@ -79,7 +79,7 @@ public class IMUTest extends OpMode {
         double x = -gamepad1.left_stick_x;
         double y = -gamepad1.left_stick_y;
         double omega = -gamepad1.right_stick_x;
-        mecanumDrive.setVelocity(new Vector2D(x, y), omega);
+        mecanumDrive.setVelocity(new Vector2d(x, y), omega);
 
         Orientation o = imu.getAngularOrientation();
         Acceleration a = imu.getLinearAcceleration();

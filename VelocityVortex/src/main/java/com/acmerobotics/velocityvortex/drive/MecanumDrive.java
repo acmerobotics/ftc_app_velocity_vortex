@@ -27,8 +27,8 @@ public class MecanumDrive {
     private DcMotor[] motors;
     private WheelType[] wheelTypes;
     private double smallestRPM;
-    private Vector2D[] rollerDirs;
-    private Vector2D[] rotDirs;
+    private Vector2d[] rollerDirs;
+    private Vector2d[] rotDirs;
     private double[] offsets;
     private DcMotor.RunMode runMode;
 
@@ -51,15 +51,15 @@ public class MecanumDrive {
 
         setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        rollerDirs = new Vector2D[4];
-        rollerDirs[0] = new Vector2D(-1, 1).normalize();
-        rollerDirs[1] = new Vector2D(1, 1).normalize();
+        rollerDirs = new Vector2d[4];
+        rollerDirs[0] = new Vector2d(-1, 1).normalize();
+        rollerDirs[1] = new Vector2d(1, 1).normalize();
         rollerDirs[2] = rollerDirs[1];
         rollerDirs[3] = rollerDirs[0];
 
-        rotDirs = new Vector2D[4];
-        rotDirs[0] = new Vector2D(0, -1);
-        rotDirs[1] = new Vector2D(0, 1);
+        rotDirs = new Vector2d[4];
+        rotDirs[0] = new Vector2d(0, -1);
+        rotDirs[1] = new Vector2d(0, 1);
         rotDirs[2] = rotDirs[0];
         rotDirs[3] = rotDirs[1];
 
@@ -78,9 +78,9 @@ public class MecanumDrive {
      * Sets the velocity of the mecanum drive system.
      *
      * @param v translational velocity
-     * @see #setVelocity(Vector2D, double)
+     * @see #setVelocity(Vector2d, double)
      */
-    public void setVelocity(Vector2D v) {
+    public void setVelocity(Vector2d v) {
         setVelocity(v, 0);
     }
 
@@ -92,7 +92,7 @@ public class MecanumDrive {
      * @param v            translational velocity
      * @param angularSpeed angular speed
      */
-    public void setVelocity(Vector2D v, double angularSpeed) {
+    public void setVelocity(Vector2d v, double angularSpeed) {
         angularSpeed = Range.clip(angularSpeed, -1, 1);
         double speed;
         if (v.norm() > 1) {
@@ -106,8 +106,8 @@ public class MecanumDrive {
         }
 
         for (int i = 0; i < 4; i++) {
-            Vector2D angularVelocity = rotDirs[i].copy().multiply(angularSpeed);
-            Vector2D transVelocity = v.copy().multiply(Math.min(1 - angularSpeed, speed));
+            Vector2d angularVelocity = rotDirs[i].copy().multiply(angularSpeed);
+            Vector2d transVelocity = v.copy().multiply(Math.min(1 - angularSpeed, speed));
             transVelocity.add(angularVelocity);
             double wheelSpeed = transVelocity.dot(rollerDirs[i]);
             double adjustedSpeed = getAdjustedSpeed(wheelSpeed, wheelTypes[i]);
@@ -198,7 +198,7 @@ public class MecanumDrive {
 
         setRelativePosition(inches);
 
-        setVelocity(new Vector2D(0, speed));
+        setVelocity(new Vector2d(0, speed));
 
         boolean done = false;
         while (!done && (opMode == null || opMode.opModeIsActive())) {

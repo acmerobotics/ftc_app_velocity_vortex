@@ -4,14 +4,13 @@ import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.drive.BeaconFollower;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.FieldNavigator;
-import com.acmerobotics.velocityvortex.drive.Vector2D;
+import com.acmerobotics.velocityvortex.drive.Vector2d;
 import com.acmerobotics.velocityvortex.mech.BeaconPusher;
 import com.acmerobotics.velocityvortex.mech.FixedLauncher;
 import com.acmerobotics.velocityvortex.sensors.ColorAnalyzer;
 import com.acmerobotics.velocityvortex.sensors.LinearPot;
 import com.acmerobotics.velocityvortex.sensors.MaxSonarEZ1UltrasonicSensor;
 import com.acmerobotics.velocityvortex.sensors.RatioColorAnalyzer;
-import com.acmerobotics.velocityvortex.sensors.ThresholdColorAnalyzer;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -141,7 +140,7 @@ public class BeaconAuto extends Auto {
             drive.turnSync(180, this);
         }
 
-        drive.setVelocity(new Vector2D(0, -1));
+        drive.setVelocity(new Vector2d(0, -1));
 
         while (opModeIsActive() && Math.abs(imu.getAngularOrientation().thirdAngle) < RAMP_PARK_ELEVATION) {
             drive.update();

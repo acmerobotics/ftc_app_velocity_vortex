@@ -3,20 +3,31 @@ package com.acmerobotics.velocityvortex.drive;
 import com.qualcomm.robotcore.util.DifferentialControlLoopCoefficients;
 import com.qualcomm.robotcore.util.Range;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * This class implements a regular PID controller.
  */
 public class PIDController {
 
-    private boolean outputBounded, inputBounded;
+    private boolean outputBounded, inputBounded, shouldReset;
     private double minOutput, maxOutput, minInput, maxInput, maxSum;
 
     private DifferentialControlLoopCoefficients coeff;
 
     private double sum, lastError, lastTime, deriv;
 
+    public PIDController() {
+        this(0, 0, 0);
+    }
+
+    public PIDController(double kP, double kI, double kD) {
+        this(new DifferentialControlLoopCoefficients(kP, kI, kD));
+    }
+
     public PIDController(DifferentialControlLoopCoefficients coefficients) {
         coeff = coefficients;
+        reset();
     }
 
     public double getError(double actual, double setpoint) {
@@ -30,8 +41,8 @@ public class PIDController {
         return error;
     }
 
-    public double update(double actual, double setpoint) {
-        return update(getError(actual, setpoint));
+    public double update(double error) {
+        return update(error, System.nanoTime() / Math.pow(10, 0));
     }
 
     /**
@@ -41,13 +52,15 @@ public class PIDController {
      * @param error calculated error
      * @return the calculated correction (update)
      */
-    public double update(double error) {
+    public double update(double error, double time) {
         // do the PID update
-        double time = System.nanoTime() / Math.pow(10, 9);
         double update = 0;
-        if (lastTime == 0) {
+        // add p error unconditionally
+        update += coeff.p * error;
+        if (shouldReset) {
             // special handling for first iteration
             sum = 0;
+            shouldReset = false;
         } else {
             double dt = time - lastTime;
             // sum computed using trapezoidal rule
@@ -59,7 +72,7 @@ public class PIDController {
             }
 
             deriv = (error - lastError) / dt;
-            update = coeff.p * error + coeff.i * sum + coeff.d * deriv;
+            update += coeff.i * sum + coeff.d * deriv;
         }
 
         lastError = error;
@@ -130,7 +143,7 @@ public class PIDController {
     }
 
     public void reset() {
-        lastTime = 0;
+        shouldReset = true;
     }
 
     public double getErrorSum() {
