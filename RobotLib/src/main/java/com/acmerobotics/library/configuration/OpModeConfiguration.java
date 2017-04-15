@@ -1,8 +1,10 @@
 package com.acmerobotics.library.configuration;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.qualcomm.ftccommon.configuration.RobotConfigFileManager;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.DifferentialControlLoopCoefficients;
 
@@ -79,7 +81,6 @@ public class OpModeConfiguration {
     private static final String PREF_PARK_DEST = "park_dest";
     private static final String PREF_DELAY = "delay";
     private static final String PREF_NUM_BALLS = "num_balls";
-    private static final String PREF_ROBOT_TYPE = "robot_type";
     private static final String PREF_MATCH_TYPE = "match_type";
     private static final String PREF_MATCH_NUMBER = "match_number";
     private static final String PREF_LAST_HEADING = "last_heading";
@@ -106,7 +107,8 @@ public class OpModeConfiguration {
 
     public enum RobotType {
         COMPETITION(0, COMP_BOT),
-        SOFTWARE(1, SOFTWARE_BOT);
+        SOFTWARE(1, SOFTWARE_BOT),
+        UNKNOWN(2, null);
         private int index;
         private RobotProperties props;
         RobotType(int i, RobotProperties p) {
@@ -171,8 +173,10 @@ public class OpModeConfiguration {
 
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
+    private Context context;
 
     public OpModeConfiguration(Context context) {
+        this.context = context;
         preferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         editor = preferences.edit();
     }
@@ -213,11 +217,14 @@ public class OpModeConfiguration {
     }
 
     public RobotType getRobotType() {
-        return RobotType.fromIndex(preferences.getInt(PREF_ROBOT_TYPE, 0));
-    }
-
-    public void setRobotType(RobotType type) {
-        editor.putInt(PREF_ROBOT_TYPE, type.getIndex());
+        String activeConfigName = getActiveConfigName();
+        if (activeConfigName.equals("software")) {
+            return RobotType.SOFTWARE;
+        } else if (activeConfigName.equals("competition")) {
+            return RobotType.COMPETITION;
+        } else {
+            return RobotType.UNKNOWN;
+        }
     }
 
     public MatchType getMatchType() {
@@ -242,6 +249,11 @@ public class OpModeConfiguration {
 
     public void setLastHeading(double heading) {
         editor.putFloat(PREF_LAST_HEADING, (float) heading);
+    }
+
+    public String getActiveConfigName() {
+        RobotConfigFileManager manager = new RobotConfigFileManager((Activity) context);
+        return manager.getActiveConfig().getName();
     }
 
     public boolean commit() {

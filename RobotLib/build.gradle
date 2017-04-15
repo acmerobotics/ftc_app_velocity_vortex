@@ -34,8 +34,7 @@ dependencies {
 
     compile(name: 'RobotCore-release', ext: 'aar')
     compile(name: 'Hardware-release', ext: 'aar')
-//    this solves the issue of multiple option intents conflicting with the RC
-//    compile (name: 'FtcCommon-release', ext: 'aar')
+    compile (name: 'FtcCommon-release', ext: 'aar')
     compile(name: 'ModernRobotics-release', ext: 'aar')
     compile(name: 'Analytics-release', ext: 'aar')
     compile(name: 'WirelessP2p-release', ext: 'aar')

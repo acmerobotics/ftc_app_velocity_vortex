@@ -2,8 +2,6 @@ package com.acmerobotics.velocityvortex.drive;
 
 import org.junit.Test;
 
-import dalvik.annotation.TestTarget;
-
 import static org.junit.Assert.*;
 
 /**

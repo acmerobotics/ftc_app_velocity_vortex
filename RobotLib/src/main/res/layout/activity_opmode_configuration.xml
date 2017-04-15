@@ -202,30 +202,4 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <TextView
-            android:text="@string/robot_type_text"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="@dimen/pref_item_margin"
-            android:gravity="center_vertical"
-            android:textSize="@dimen/pref_text_size"
-            android:id="@+id/robot_type_text_view"
-            android:layout_weight="1" />
-
-        <Spinner
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/robot_type_spinner"
-            android:layout_margin="@dimen/pref_item_margin"
-            android:gravity="center_vertical"
-            android:layout_weight="1"
-            android:entries="@array/robot_types" />
-
-    </LinearLayout>
-
 </LinearLayout>
