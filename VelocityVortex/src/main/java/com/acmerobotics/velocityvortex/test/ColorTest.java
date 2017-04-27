@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
  * Created by ACME Robotics on 3/11/2017.
  */
 
-@TeleOp(name="Color Test")
+@TeleOp(name="Color Test",group="Test")
 public class ColorTest extends OpMode {
 
     private ThresholdColorAnalyzer analyzer;

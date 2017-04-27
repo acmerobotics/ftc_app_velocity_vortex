@@ -27,10 +27,23 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-@TeleOp(name = "TeleOp")
+@TeleOp(name = "TeleOp",group="TeleOp")
 public class MainTeleOp extends OpMode {
 
-    public static final int FLASH_MS = 250;
+    public enum Mode {
+        FULL,
+        DEMO
+    }
+
+    private enum State {
+        DRIVER,
+        BEACON_FORWARD,
+        BEACON_LATERAL,
+        BEACON_ALIGN,
+        BEACON_PUSH
+    }
+
+    public static final int FLASH_MS = 150;
 
     private MecanumDrive basicDrive;
 
@@ -64,12 +77,14 @@ public class MainTeleOp extends OpMode {
 
     private double launcherSpeed;
 
-    private enum State {
-        DRIVER,
-        BEACON_FORWARD,
-        BEACON_LATERAL,
-        BEACON_ALIGN,
-        BEACON_PUSH
+    private Mode mode;
+
+    public MainTeleOp() {
+        this(Mode.FULL);
+    }
+
+    public MainTeleOp(Mode mode) {
+        this.mode = mode;
     }
 
     @Override
@@ -198,7 +213,7 @@ public class MainTeleOp extends OpMode {
                     }
 
                     //beacons
-                    if (drive != null) {
+                    if (mode == Mode.FULL && drive != null) {
                         if (stickyGamepad1.x) {
                             sideModifier = 1;
                             state = State.BEACON_FORWARD;
@@ -307,6 +322,7 @@ public class MainTeleOp extends OpMode {
 
         }
 
+        telemetry.addData("mode", mode);
         telemetry.addData("pusher", beaconPusher.getCurrentPosition());
         telemetry.addData("heading", drive.getHeading());
         telemetry.addData("color", colorAnalyzer.getBeaconColor());
