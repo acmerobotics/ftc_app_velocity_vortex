@@ -12,12 +12,14 @@ import static junit.framework.Assert.*;
 
 public class LinearPathTest {
 
-    private LinearPath.Segment simpleSeg = new LinearPath.Segment(new Vector2d(0, 0), new Vector2d(2, 2));
+    private LinearPath.Segment simpleSeg = new LinearPath.Segment(
+            new LinearPath.Waypoint(new Vector2d(0, 0)),
+            new LinearPath.Waypoint(new Vector2d(2, 2)));
     private LinearPath simplePath = new LinearPath(Arrays.asList(
-            new Vector2d(0, 0),
-            new Vector2d(2, 2),
-            new Vector2d(3, 1),
-            new Vector2d(4, 2)
+            new LinearPath.Waypoint(new Vector2d(0, 0)),
+            new LinearPath.Waypoint(new Vector2d(2, 2)),
+            new LinearPath.Waypoint(new Vector2d(3, 1)),
+            new LinearPath.Waypoint(new Vector2d(4, 2))
     ));
 
     @Test

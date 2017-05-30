@@ -14,13 +14,13 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class FieldNavigator {
 
-    private EnhancedMecanumDrive drive;
+    private HolonomicDrive drive;
 
     private OpModeConfiguration.AllianceColor allianceColor;
     private double x, y;
 
-    public FieldNavigator(EnhancedMecanumDrive drive, OpModeConfiguration.AllianceColor color) {
-        Log.i("FieldNavigator", "init " + color);
+    public FieldNavigator(HolonomicDrive drive, OpModeConfiguration.AllianceColor color) {
+//        Log.i("FieldNavigator", "init " + color);
 
         allianceColor = color;
         this.drive = drive;
@@ -57,12 +57,13 @@ public class FieldNavigator {
             r = -r;
         }
 
-        Log.i("FieldNavigator", String.format("heading:\t%f,%f,%f,%f\t\tradius:\t%f", currentHeading, targetHeading, finalHeading, headingDiff, r));
+//        System.out.format("s=%f,e=%f,d=%f\n", currentHeading, targetHeading, r);
+//        Log.i("FieldNavigator", String.format("heading:\t%f,%f,%f,%f\t\tradius:\t%f", currentHeading, targetHeading, finalHeading, headingDiff, r));
 
         drive.setTargetHeading(targetHeading);
         drive.turnSync(0, opMode);
 
-        drive.getDrive().move(r, Auto.MOVEMENT_SPEED, opMode);
+        drive.move(r, Auto.MOVEMENT_SPEED, opMode);
 
         if (Math.abs(finalHeading) != Double.POSITIVE_INFINITY) {
             finalHeading = sanitizeHeading(finalHeading);

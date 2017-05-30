@@ -17,12 +17,36 @@ public class LinearPath {
         public double distance;
     }
 
+    public static class Waypoint {
+        public final Vector2d point;
+        public final double heading;
+
+        public Waypoint(Vector2d point, double heading) {
+            this.point = point;
+            this.heading = heading;
+        }
+
+        public Waypoint(Vector2d point) {
+            this(point, Double.NaN);
+        }
+
+        public Waypoint(double x, double y) {
+            this(new Vector2d(x, y));
+        }
+
+        public Waypoint(double x, double y, double heading) {
+            this(new Vector2d(x, y), heading);
+        }
+    }
+
     public static class Segment {
         public final Vector2d start, end, seg;
+        public final double finalHeading;
 
-        public Segment(Vector2d start, Vector2d end) {
-            this.start = start;
-            this.end = end;
+        public Segment(Waypoint start, Waypoint end) {
+            this.start = start.point;
+            this.end = end.point;
+            this.finalHeading = end.heading;
             this.seg = this.start.negated().add(this.end);
         }
 
@@ -92,7 +116,7 @@ public class LinearPath {
     private List<Segment> segments;
     private double length;
 
-    public LinearPath(List<Vector2d> waypoints) {
+    public LinearPath(List<Waypoint> waypoints) {
         segments = new ArrayList<>();
         for (int i = 0; i < waypoints.size() - 1; i++) {
             Segment s = new Segment(waypoints.get(i), waypoints.get(i+1));

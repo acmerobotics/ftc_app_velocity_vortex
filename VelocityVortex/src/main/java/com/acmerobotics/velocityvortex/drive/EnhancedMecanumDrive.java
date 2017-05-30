@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 /**
  * Orientation-preserving drive interface based on an existing mecanum drive
  */
-public class EnhancedMecanumDrive {
+public class EnhancedMecanumDrive implements HolonomicDrive {
 
     public static final double MAX_TURN_SPEED = 0.75;
     public static final double DEFAULT_TURN_ERROR = 1;

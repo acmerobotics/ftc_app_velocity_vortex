@@ -4,6 +4,8 @@ import com.acmerobotics.library.file.DataFile;
 import com.acmerobotics.velocityvortex.drive.BeaconFollower;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.FieldNavigator;
+import com.acmerobotics.velocityvortex.drive.LinearPath;
+import com.acmerobotics.velocityvortex.drive.LinearPathExecutor;
 import com.acmerobotics.velocityvortex.drive.Vector2d;
 import com.acmerobotics.velocityvortex.mech.BeaconPusher;
 import com.acmerobotics.velocityvortex.mech.FixedLauncher;
@@ -20,6 +22,8 @@ import com.qualcomm.robotcore.hardware.I2cAddr;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+import java.util.Arrays;
+
 import static com.acmerobotics.library.configuration.OpModeConfiguration.AllianceColor;
 import static com.acmerobotics.velocityvortex.sensors.ColorAnalyzer.BeaconColor;
 
@@ -34,7 +38,7 @@ public class BeaconAuto extends Auto {
     private FixedLauncher launcher;
 
     private EnhancedMecanumDrive drive;
-    private FieldNavigator nav;
+    private LinearPathExecutor executor;
     private BNO055IMU imu;
 
     private BeaconFollower beaconFollower;
@@ -63,8 +67,12 @@ public class BeaconAuto extends Auto {
         drive.setInitialHeading(180);
         drive.setLogFile(new DataFile(getFileName("EnhancedMecanumDrive")));
 
-        nav = new FieldNavigator(drive, allianceColor);
-        nav.setLocation(2.5 * TILE_SIZE, halfWidth);
+        LinearPath firstPath = new LinearPath(Arrays.asList(
+                new LinearPath.Waypoint(2.5 * TILE_SIZE, halfWidth),
+                new LinearPath.Waypoint(2.5 * TILE_SIZE, TILE_SIZE + halfWidth - 6),
+                new LinearPath.Waypoint(WALL_DISTANCE + halfWidth, 2.25 * TILE_SIZE, allianceColor == AllianceColor.BLUE ? 0 : 180)
+        ));
+        executor = new LinearPathExecutor(drive, firstPath, allianceColor == AllianceColor.BLUE);
 
         DistanceSensor distanceSensor = new MaxSonarEZ1UltrasonicSensor(hardwareMap.analogInput.get("maxSonar"));
 
@@ -94,14 +102,6 @@ public class BeaconAuto extends Auto {
         beaconFollower.moveToDistance(BeaconFollower.BEACON_DISTANCE, BeaconFollower.BEACON_SPREAD / 2.0, this);
 
         targetFirstLastBeacon = beaconFollower.pushBeacons(2, allianceModifier, targetColor, this);
-        double x = WALL_DISTANCE + halfWidth;
-        double y = 4.5 * TILE_SIZE;
-        if (targetFirstLastBeacon) {
-            y -= BEACON_BUTTON_GAP / 2;
-        } else {
-            y += BEACON_BUTTON_GAP / 2;
-        }
-        nav.setLocation(x, y);
 
         beaconPusher.getServo().setPower(-1);
 
@@ -118,11 +118,11 @@ public class BeaconAuto extends Auto {
     }
 
     public void moveAndFire() {
-        nav.moveTo(2.5 * TILE_SIZE, TILE_SIZE + halfWidth - 6, this);
+        executor.execute(this);
 
         Auto.fireBalls(launcher, numBalls, this);
 
-        nav.moveTo(WALL_DISTANCE + halfWidth, 2.25 * TILE_SIZE, allianceColor == AllianceColor.BLUE ? 0 : 180, this);
+        executor.executeAll(this);
     }
 
     private void centerPark() {
@@ -130,7 +130,20 @@ public class BeaconAuto extends Auto {
             drive.turnSync(90, this);
         }
 
-        nav.moveTo(2.5 * TILE_SIZE, 2.5 * TILE_SIZE, this);
+        double x = WALL_DISTANCE + halfWidth;
+        double y = 4.5 * TILE_SIZE;
+        if (targetFirstLastBeacon) {
+            y -= BEACON_BUTTON_GAP / 2;
+        } else {
+            y += BEACON_BUTTON_GAP / 2;
+        }
+
+        LinearPath secondPath = new LinearPath(Arrays.asList(
+                new LinearPath.Waypoint(x, y),
+                new LinearPath.Waypoint(2.5 * TILE_SIZE, 2.5 * TILE_SIZE)
+        ));
+        executor.setPath(secondPath);
+        executor.executeAll(this);
     }
 
     private void cornerPark() {
